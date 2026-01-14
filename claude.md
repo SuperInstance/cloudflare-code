@@ -508,6 +508,7 @@ Each round (1 week) follows this structure:
 - Review against acceptance criteria
 - Collect lessons learned
 - Plan next round
+- **COMMIT TO REPO**: `git add . && git commit -m "Round N: [title]" && git push`
 
 #### 5.1.2 Iteration Principles
 
@@ -2006,6 +2007,7 @@ Use this template for each round:
 - Day 1: Planning
 - Day 2-4: Implementation
 - Day 5: Review & merge
+- **COMMIT TO REPO AFTER ROUND**: `git add . && git commit -m "Round N: [title]" && git push`
 
 ## Success Metrics
 - Metric 1: [Target]
