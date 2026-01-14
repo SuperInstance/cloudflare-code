@@ -1,0 +1,59 @@
+{
+  "name": "@claudeflare/cdn",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Advanced CDN integration for ClaudeFlare with Cloudflare support",
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "esbuild src/index.ts --bundle --format=esm --outfile=dist/index.mjs --minify --tree-shaking=true",
+    "build:analyze": "esbuild src/index.ts --bundle --format=esm --metafile=dist/meta.json --outfile=dist/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest",
+    "test:unit": "vitest tests/unit",
+    "test:integration": "vitest tests/integration",
+    "test:e2e": "vitest tests/e2e",
+    "test:coverage": "vitest --coverage",
+    "clean": "rm -rf dist .wrangler"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "zod": "^3.22.0",
+    "p-limit": "^5.0.0",
+    "p-queue": "^8.0.0",
+    "quick-lru": "^7.0.0",
+    "nanoid": "^5.0.0",
+    "etag": "^1.8.1",
+    "fresh": "^0.5.2",
+    "mime-types": "^2.1.35",
+    "axios": "^1.6.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/etag": "^1.8.3",
+    "@types/fresh": "^0.5.2",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "^20.10.0",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.22.0",
+    "@vitest/coverage-v8": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "cdn",
+    "cloudflare",
+    "cache",
+    "edge",
+    "optimization",
+    "performance"
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "name": "@claudeflare/edge-functions",
+  "version": "1.0.0",
+  "description": "Advanced edge functions framework for ClaudeFlare distributed AI coding platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:unit": "vitest tests/unit",
+    "test:integration": "vitest tests/integration",
+    "test:e2e": "vitest tests/e2e",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "edge-functions",
+    "cloudflare-workers",
+    "serverless",
+    "edge-computing",
+    "claudeflare"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "itty-router": "^4.0.20"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.22.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./runtime": {
+      "import": "./dist/runtime/runtime.js",
+      "types": "./dist/runtime/runtime.d.ts"
+    },
+    "./deployment": {
+      "import": "./dist/deployment/manager.js",
+      "types": "./dist/deployment/manager.d.ts"
+    },
+    "./orchestration": {
+      "import": "./dist/orchestration/engine.js",
+      "types": "./dist/orchestration/engine.d.ts"
+    },
+    "./cache": {
+      "import": "./dist/cache/layer.js",
+      "types": "./dist/cache/layer.d.ts"
+    }
+  }
+}
