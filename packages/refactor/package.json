@@ -1,0 +1,53 @@
+{
+  "name": "@claudeflare/refactor",
+  "version": "0.1.0",
+  "description": "Automated refactoring and code transformation engine for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "refactoring",
+    "code-transformation",
+    "ast",
+    "code-modernization",
+    "migration"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/parser": "^7.23.0",
+    "@babel/traverse": "^7.23.0",
+    "@babel/types": "^7.23.0",
+    "@babel/generator": "^7.23.0",
+    "prettier": "^3.0.0",
+    "source-map": "^0.7.4",
+    "chalk": "^5.3.0",
+    "glob": "^10.3.0",
+    "fast-glob": "^3.3.0",
+    "semver": "^7.5.0",
+    "axios": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7.20.0",
+    "@types/babel__generator": "^7.6.0",
+    "@types/node": "^20.0.0",
+    "@types/jest": "^29.5.0",
+    "@types/semver": "^7.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

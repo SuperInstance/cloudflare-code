@@ -41,6 +41,21 @@ export * from './saga';
 // Event Governance
 export * from './governance';
 
+// Message Router
+export * from './router';
+
+// Event Filter
+export * from './filter';
+
+// Event Transformer
+export * from './transformer';
+
+// Event Aggregator
+export * from './aggregation';
+
+// Dead Letter Handler
+export * from './deadletter';
+
 // Re-exports for convenience
 export {
   // Event Bus
@@ -85,4 +100,21 @@ export {
   SchemaRegistryDurableObject,
   SchemaRegistryClient,
   SchemaRegistryFactory,
+
+  // Message Router
+  MessageRouter,
+  MessageRouterDurableObject,
+
+  // Event Filter
+  EventFilter,
+
+  // Event Transformer
+  EventTransformer,
+
+  // Event Aggregator
+  EventAggregator,
+
+  // Dead Letter Handler
+  DeadLetterHandler,
+  DeadLetterQueue,
 } from './bus';

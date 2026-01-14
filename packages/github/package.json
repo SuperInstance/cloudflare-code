@@ -1,0 +1,111 @@
+{
+  "name": "@claudeflare/github",
+  "version": "1.0.0",
+  "description": "GitHub Integration and Automation for ClaudeFlare distributed AI coding platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    },
+    "./webhooks": {
+      "types": "./dist/webhooks/index.d.ts",
+      "import": "./dist/webhooks/index.js"
+    },
+    "./pr": {
+      "types": "./dist/pr/index.d.ts",
+      "import": "./dist/pr/index.js"
+    },
+    "./issues": {
+      "types": "./dist/issues/index.d.ts",
+      "import": "./dist/issues/index.js"
+    },
+    "./repo": {
+      "types": "./dist/repo/index.d.ts",
+      "import": "./dist/repo/index.js"
+    },
+    "./cicd": {
+      "types": "./dist/cicd/index.d.ts",
+      "import": "./dist/cicd/index.js"
+    },
+    "./security": {
+      "types": "./dist/security/index.d.ts",
+      "import": "./dist/security/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "github",
+    "api",
+    "webhooks",
+    "automation",
+    "cicd",
+    "pr",
+    "issues",
+    "claudeflare",
+    "github-app",
+    "github-actions"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^20.0.0",
+    "@octokit/graphql": "^7.0.0",
+    "@octokit/webhooks": "^12.0.0",
+    "@octokit/auth-token": "^4.0.0",
+    "@octokit/auth-oauth-user": "^4.0.0",
+    "@octokit/auth-app": "^6.0.0",
+    "@octokit/request": "^8.0.0",
+    "@octokit/request-error": "^5.0.0",
+    "@octokit/plugin-retry": "^6.0.0",
+    "@octokit/plugin-throttling": "^8.0.0",
+    "octokit": "^3.1.0",
+    "zod": "^3.22.4",
+    "crypto": "^1.0.1",
+    "p-limit": "^5.0.0",
+    "p-queue": "^8.0.0",
+    "async-mutex": "^0.4.0",
+    "ioredis": "^5.3.2",
+    "lru-cache": "^10.0.0",
+    "pino": "^8.16.0",
+    "fastify": "^4.24.0",
+    "@fastify/type-provider-zod": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0"
+  },
+  "peerDependencies": {
+    "@claudeflare/shared": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

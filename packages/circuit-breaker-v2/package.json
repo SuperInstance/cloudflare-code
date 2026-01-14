@@ -1,0 +1,56 @@
+{
+  "name": "@claudeflare/circuit-breaker-v2",
+  "version": "2.0.0",
+  "description": "Advanced circuit breaker system with fault tolerance, fallback mechanisms, and predictive failure detection for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:e2e": "jest tests/e2e",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "circuit-breaker",
+    "fault-tolerance",
+    "resilience",
+    "fallback",
+    "microservices",
+    "distributed-systems"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/claudeflare/circuit-breaker-v2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/claudeflare/circuit-breaker-v2/issues"
+  },
+  "homepage": "https://github.com/claudeflare/circuit-breaker-v2#readme"
+}

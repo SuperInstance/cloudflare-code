@@ -1,36 +1,108 @@
 {
   "name": "@claudeflare/finetuning",
   "version": "1.0.0",
-  "description": "Fine-tuning and custom model management system for ClaudeFlare",
+  "description": "Advanced fine-tuning and model training pipeline for ClaudeFlare distributed AI platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./dataset": {
+      "types": "./dist/dataset/index.d.ts",
+      "import": "./dist/dataset/index.js"
+    },
+    "./training": {
+      "types": "./dist/training/index.d.ts",
+      "import": "./dist/training/index.js"
+    },
+    "./hyperparameter": {
+      "types": "./dist/hyperparameter/index.d.ts",
+      "import": "./dist/hyperparameter/index.js"
+    },
+    "./evaluation": {
+      "types": "./dist/evaluation/index.d.ts",
+      "import": "./dist/evaluation/index.js"
+    },
+    "./models": {
+      "types": "./dist/models/index.d.ts",
+      "import": "./dist/models/index.js"
+    },
+    "./lora": {
+      "types": "./dist/lora/index.d.ts",
+      "import": "./dist/lora/index.js"
+    },
+    "./pipeline": {
+      "types": "./dist/pipeline/index.d.ts",
+      "import": "./dist/pipeline/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "lint": "eslint src",
-    "typecheck": "tsc --noEmit"
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "fine-tuning",
     "machine-learning",
+    "llm",
+    "lora",
+    "qlora",
+    "distributed-training",
+    "hyperparameter-optimization",
+    "model-evaluation",
     "cloudflare",
-    "workers"
+    "workers",
+    "durable-objects",
+    "claudeflare"
   ],
-  "author": "ClaudeFlare",
+  "author": "ClaudeFlare Team",
   "license": "MIT",
   "dependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",
     "itty-router": "^4.0.20",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
     "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.3.3",
     "vitest": "^1.0.4",
-    "eslint": "^8.55.0",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0"
+    "@vitest/coverage-v8": "^1.0.4"
+  },
+  "peerDependencies": {
+    "openai": "^4.0.0",
+    "@anthropic-ai/sdk": "^0.10.0"
+  },
+  "peerDependenciesMeta": {
+    "openai": {
+      "optional": true
+    },
+    "@anthropic-ai/sdk": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

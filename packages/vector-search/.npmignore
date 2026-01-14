@@ -1,0 +1,26 @@
+# Source files (we publish compiled JS)
+src/
+tests/
+examples/
+
+# Development files
+*.test.ts
+*.spec.ts
+tsconfig.json
+jest.config.js
+.eslintrc.js
+.prettierrc
+
+# Documentation (keep README.md)
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# IDE
+.vscode/
+.idea/

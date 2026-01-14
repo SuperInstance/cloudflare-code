@@ -1,0 +1,47 @@
+{
+  "name": "@claudeflare/notifications",
+  "version": "1.0.0",
+  "description": "Multi-channel notification system for ClaudeFlare - Alert routing, templates, delivery tracking, and escalation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "test:watch": "vitest --watch"
+  },
+  "keywords": [
+    "notifications",
+    "alerts",
+    "email",
+    "sms",
+    "push",
+    "slack",
+    "discord",
+    "webhook",
+    "escalation",
+    "rate-limiting",
+    "templates",
+    "cloudflare",
+    "durable-objects"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "zod": "^3.22.4",
+    "itty-router": "^4.0.20"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "@vitest/coverage-v8": "^1.1.0"
+  }
+}

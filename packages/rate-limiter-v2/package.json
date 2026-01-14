@@ -1,0 +1,98 @@
+{
+  "name": "@claudeflare/rate-limiter-v2",
+  "version": "2.0.0",
+  "description": "Advanced distributed rate limiting for ClaudeFlare with multi-algorithm support and adaptive throttling",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:performance": "node tests/performance/benchmark.js",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "keywords": [
+    "rate-limiting",
+    "rate-limiter",
+    "distributed",
+    "throttling",
+    "token-bucket",
+    "leaky-bucket",
+    "sliding-window",
+    "cloudflare",
+    "durable-objects",
+    "adaptive",
+    "hierarchical"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/claudeflare/claudeflare.git",
+    "directory": "packages/rate-limiter-v2"
+  },
+  "bugs": {
+    "url": "https://github.com/claudeflare/claudeflare/issues"
+  },
+  "homepage": "https://docs.claudeflare.ai/packages/rate-limiter-v2",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "ioredis": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "@vitest/coverage-v8": "^1.1.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./distributed": {
+      "types": "./dist/distributed/index.d.ts",
+      "import": "./dist/distributed/index.js"
+    },
+    "./algorithms": {
+      "types": "./dist/algorithms/index.d.ts",
+      "import": "./dist/algorithms/index.js"
+    },
+    "./hierarchy": {
+      "types": "./dist/hierarchy/index.d.ts",
+      "import": "./dist/hierarchy/index.js"
+    },
+    "./adaptive": {
+      "types": "./dist/adaptive/index.d.ts",
+      "import": "./dist/adaptive/index.js"
+    },
+    "./storage": {
+      "types": "./dist/storage/index.d.ts",
+      "import": "./dist/storage/index.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js"
+    }
+  }
+}

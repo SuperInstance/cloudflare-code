@@ -1,0 +1,67 @@
+{
+  "name": "@claudeflare/api-gateway-v2",
+  "version": "2.0.0",
+  "description": "Next-generation API Gateway with GraphQL federation, subscriptions, and advanced composition",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:unit": "vitest tests/unit",
+    "test:integration": "vitest tests/integration",
+    "test:e2e": "vitest tests/e2e",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "api-gateway",
+    "graphql",
+    "federation",
+    "subscriptions",
+    "composition",
+    "orchestration"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@apollo/federation": "^0.38.1",
+    "@apollo/gateway": "^2.5.4",
+    "@apollo/subgraph": "^2.5.4",
+    "graphql": "^16.8.1",
+    "graphql-ws": "^5.14.3",
+    "ws": "^8.16.0",
+    "itty-router": "^4.0.20",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.1",
+    "@vitest/coverage-v8": "^1.2.1"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./graphql": "./dist/graphql/index.js",
+    "./composition": "./dist/composition/index.js",
+    "./aggregation": "./dist/aggregation/index.js",
+    "./orchestration": "./dist/orchestration/index.js"
+  }
+}

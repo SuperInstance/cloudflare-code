@@ -1,0 +1,85 @@
+{
+  "name": "@claudeflare/dependency-analyzer",
+  "version": "0.1.0",
+  "description": "Comprehensive dependency analysis and management for ClaudeFlare distributed AI coding platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "dep-analyzer": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "claudeflare",
+    "dependency",
+    "analysis",
+    "circular",
+    "unused",
+    "security",
+    "license",
+    "optimization",
+    "graph"
+  ],
+  "dependencies": {
+    "@typescript-eslint/typescript-estree": "^6.13.0",
+    "@babel/parser": "^7.23.0",
+    "@babel/traverse": "^7.23.0",
+    "@babel/types": "^7.23.0",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "ora": "^8.0.1",
+    "cli-progress": "^3.12.0",
+    "semver": "^7.5.4",
+    "table": "^6.8.1",
+    "graphviz": "^0.0.9",
+    "neo4j-driver": "^5.15.0",
+    "node-fetch": "^3.3.2",
+    "spdx-license-list": "^6.6.0",
+    "ssri": "^10.0.5",
+    "glob": "^10.3.10",
+    "micromatch": "^4.0.5",
+    "fast-glob": "^3.3.2",
+    "acorn": "^8.11.2",
+    "acorn-walk": "^8.3.0",
+    "ts-graphviz": "^2.0.0",
+    "vis-network": "^9.1.6",
+    "zod": "^3.22.4",
+    "cosmiconfig": "^9.0.0",
+    "lodash": "^4.17.21",
+    "date-fns": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/inquirer": "^9.0.7",
+    "@types/cli-progress": "^3.11.5",
+    "@types/table": "^6.3.5",
+    "@types/semver": "^7.5.6",
+    "@types/lodash": "^4.14.202",
+    "@types/babel__traverse": "^7.20.5",
+    "@types/acorn": "^6.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

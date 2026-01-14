@@ -1,14 +1,22 @@
-# ClaudeFlare Fine-tuning System
+# @claudeflare/finetuning
 
-Enterprise-grade fine-tuning and custom model management system built on Cloudflare Workers.
+Advanced fine-tuning and model training pipeline for the ClaudeFlare distributed AI coding platform.
 
 ## Features
 
+### 🎯 Complete Fine-tuning Pipeline
+- **Dataset Management**: Ingestion, validation, cleaning, augmentation, versioning, and splitting
+- **Training Orchestration**: Job management, resource allocation, monitoring, checkpointing, early stopping
+- **Hyperparameter Optimization**: Grid search, random search, Bayesian optimization, experiment tracking
+- **Model Evaluation**: Benchmark suite, A/B testing, error analysis, leaderboard tracking
+- **LoRA/QLoRA Training**: Efficient fine-tuning with memory optimization and adapter fusion
+- **Pipeline Automation**: CI/CD integration, scheduling, triggers, templates, notifications
+- **Distributed Training**: Multi-GPU coordination with fault tolerance
+- **GPU Provider Integration**: AWS, GCP, Azure, Lambda Labs
+
+### Core Capabilities
 - **Model Registry**: Version and manage fine-tuned models with comprehensive metadata
-- **Training Pipeline**: Orchestrate complete fine-tuning workflows with Durable Objects
-- **Dataset Management**: Upload, validate, preprocess, and store training datasets in R2
 - **Training Jobs**: Submit, monitor, and manage training jobs with real-time progress tracking
-- **Model Evaluation**: Comprehensive metrics including BLEU, ROUGE, perplexity, and accuracy
 - **Monitoring & Alerts**: Real-time monitoring with configurable alerts and webhooks
 - **A/B Testing**: Compare models and evaluate performance improvements
 - **Multi-Provider Support**: OpenAI, Anthropic, Cohere, and custom endpoints
