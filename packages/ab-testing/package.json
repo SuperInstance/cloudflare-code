@@ -1,0 +1,35 @@
+{
+  "name": "@claudeflare/ab-testing",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Advanced A/B testing platform with statistical analysis and multi-armed bandit optimization",
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "esbuild src/index.ts --bundle --format=esm --outfile=dist/index.mjs --minify --tree-shaking=true",
+    "build:analyze": "esbuild src/index.ts --bundle --format=esm --metafile=dist/meta.json --outfile=dist/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "clean": "rm -rf dist .wrangler"
+  },
+  "dependencies": {
+    "zod": "^3.22.0",
+    "fast-check": "^3.15.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/node": "^20.10.0",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.22.0",
+    "@vitest/coverage-v8": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

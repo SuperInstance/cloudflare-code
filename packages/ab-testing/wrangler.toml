@@ -1,0 +1,29 @@
+name = "claudeflare-ab-testing"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "claudeflare-ab-testing-prod"
+
+[[env.production.durable_objects.bindings]]
+name = "EXPERIMENT_DURABLE_OBJECT"
+class_name = "ExperimentDurableObject"
+
+[[env.production.durable_objects.bindings]]
+name = "ALLOCATION_DURABLE_OBJECT"
+class_name = "AllocationDurableObject"
+
+[env.staging]
+name = "claudeflare-ab-testing-staging"
+
+[[env.staging.durable_objects.bindings]]
+name = "EXPERIMENT_DURABLE_OBJECT"
+class_name = "ExperimentDurableObject"
+
+[[env.staging.durable_objects.bindings]]
+name = "ALLOCATION_DURABLE_OBJECT"
+class_name = "AllocationDurableObject"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["ExperimentDurableObject", "AllocationDurableObject"]

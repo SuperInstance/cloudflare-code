@@ -1,0 +1,59 @@
+{
+  "name": "@claudeflare/feature-flags",
+  "version": "1.0.0",
+  "description": "Advanced feature flags system for ClaudeFlare with A/B testing, canary deployments, and real-time updates",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "vitest run tests/e2e",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "dev": "ts-node examples/dev-server.ts"
+  },
+  "keywords": [
+    "feature-flags",
+    "ab-testing",
+    "canary-deployment",
+    "rollout",
+    "remote-config"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "itty-router": "^4.0.20",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0",
+    "@vitest/coverage-v8": "^1.1.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./flags": "./dist/flags/index.js",
+    "./rollout": "./dist/rollout/index.js",
+    "./abtesting": "./dist/abtesting/index.js",
+    "./targeting": "./dist/targeting/index.js",
+    "./analytics": "./dist/analytics/index.js"
+  }
+}

@@ -1,0 +1,16 @@
+name = "@claudeflare/webhooks"
+main = "dist/index.js"
+compatibility_date = "2024-01-01"
+
+[[rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.staging]
+vars = { ENVIRONMENT = "staging" }
+
+[env.development]
+vars = { ENVIRONMENT = "development" }

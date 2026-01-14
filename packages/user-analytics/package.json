@@ -1,0 +1,108 @@
+{
+  "name": "@claudeflare/user-analytics",
+  "version": "0.1.0",
+  "description": "Advanced user analytics platform for ClaudeFlare - Event tracking, segmentation, funnel analysis, cohort analysis, retention, and behavioral analytics",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:unit": "vitest tests/unit",
+    "test:integration": "vitest tests/integration",
+    "test:e2e": "vitest tests/e2e",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write src",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "wrangler d1 execute DB --local --file=migrations/0001_init.sql",
+    "db:migrate:prod": "wrangler d1 execute DB --file=migrations/0001_init.sql"
+  },
+  "keywords": [
+    "analytics",
+    "user-analytics",
+    "event-tracking",
+    "segmentation",
+    "funnel-analysis",
+    "cohort-analysis",
+    "retention",
+    "behavioral-analytics",
+    "real-time",
+    "gdpr",
+    "privacy",
+    "cloudflare",
+    "d1",
+    "workers"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "wrangler": "^3.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./events": {
+      "import": "./dist/events/index.js",
+      "types": "./dist/events/index.d.ts"
+    },
+    "./segmentation": {
+      "import": "./dist/segmentation/index.js",
+      "types": "./dist/segmentation/index.d.ts"
+    },
+    "./funnel": {
+      "import": "./dist/funnel/index.js",
+      "types": "./dist/funnel/index.d.ts"
+    },
+    "./retention": {
+      "import": "./dist/retention/index.js",
+      "types": "./dist/retention/index.d.ts"
+    },
+    "./behavior": {
+      "import": "./dist/behavior/index.js",
+      "types": "./dist/behavior/index.d.ts"
+    },
+    "./cohort": {
+      "import": "./dist/cohort/index.js",
+      "types": "./dist/cohort/index.d.ts"
+    },
+    "./realtime": {
+      "import": "./dist/realtime/index.js",
+      "types": "./dist/realtime/index.d.ts"
+    },
+    "./privacy": {
+      "import": "./dist/privacy/index.js",
+      "types": "./dist/privacy/index.d.ts"
+    },
+    "./storage": {
+      "import": "./dist/storage/index.js",
+      "types": "./dist/storage/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "migrations",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

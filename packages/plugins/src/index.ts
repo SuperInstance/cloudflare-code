@@ -32,6 +32,18 @@ export * from './api';
 // Utilities
 export * from './utils';
 
+// Marketplace
+export * from './marketplace';
+
+// Permissions
+export * from './permissions';
+
+// Versioning
+export * from './versioning';
+
+// Enhanced Sandbox
+export * from './sandbox/enhanced-sandbox';
+
 // Examples
 export * from './examples';
 
@@ -94,6 +106,35 @@ export {
 } from './utils';
 
 export { api } from './api';
+
+export {
+  PluginMarketplace,
+} from './marketplace';
+
+export {
+  PermissionManager,
+  PermissionDeniedError,
+  parsePermissionString,
+  createPermissionString,
+  isDangerousPermission,
+  getPermissionDescription,
+} from './permissions';
+
+export {
+  VersionManager,
+  parseSemVer,
+  formatSemVer,
+  compareSemVer,
+  satisfiesSemVer,
+  incrementSemVer,
+} from './versioning';
+
+export {
+  WorkerSandbox,
+  DurableObjectSandbox,
+  createWorkerSandbox,
+  createDurableObjectSandbox,
+} from './sandbox/enhanced-sandbox';
 
 /**
  * Create a plugin system instance

@@ -23,7 +23,7 @@
       "types": "./dist/loader/index.d.ts",
       "import": "./dist/loader/index.js"
     },
-    "/registry": {
+    "./registry": {
       "types": "./dist/registry/index.d.ts",
       "import": "./dist/registry/index.js"
     },
@@ -38,6 +38,18 @@
     "./api": {
       "types": "./dist/api/index.d.ts",
       "import": "./dist/api/index.js"
+    },
+    "./marketplace": {
+      "types": "./dist/marketplace/index.d.ts",
+      "import": "./dist/marketplace/index.js"
+    },
+    "./permissions": {
+      "types": "./dist/permissions/index.d.ts",
+      "import": "./dist/permissions/index.js"
+    },
+    "./versioning": {
+      "types": "./dist/versioning/index.d.ts",
+      "import": "./dist/versioning/index.js"
     }
   },
   "files": [

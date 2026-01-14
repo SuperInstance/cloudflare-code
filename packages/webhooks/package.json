@@ -1,0 +1,51 @@
+{
+  "name": "@claudeflare/webhooks",
+  "version": "1.0.0",
+  "description": "Advanced webhook delivery system for ClaudeFlare distributed AI platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "webhooks",
+    "events",
+    "notifications",
+    "cloudflare",
+    "durable-objects",
+    "distributed"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "itty-router": "^4.0.20",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "@vitest/coverage-v8": "^1.1.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0",
+    "wrangler": "^3.22.0"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
