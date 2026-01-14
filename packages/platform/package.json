@@ -1,28 +1,52 @@
 {
   "name": "@claudeflare/platform",
-  "version": "0.1.0",
-  "description": "Unified platform integration layer for ClaudeFlare - Service composition, orchestration, and dependency injection",
+  "version": "1.0.0",
+  "description": "Final Platform Polish and Production Readiness for ClaudeFlare - Platform initialization, configuration, health monitoring, graceful shutdown, and performance optimization",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "bin": {
+    "platform": "dist/cli/platform.js"
+  },
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:bootstrap": "vitest run tests/bootstrap.test.ts",
+    "test:config": "vitest run tests/config.test.ts",
+    "test:health": "vitest run tests/health.test.ts",
+    "test:shutdown": "vitest run tests/shutdown.test.ts",
+    "test:readiness": "vitest run tests/readiness.test.ts",
+    "test:all": "vitest run tests/*.test.ts",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "platform": "tsx src/cli/platform.ts",
+    "platform:init": "tsx src/cli/platform.ts init",
+    "platform:status": "tsx src/cli/platform.ts status",
+    "platform:validate": "tsx src/cli/platform.ts validate",
+    "platform:doctor": "tsx src/cli/platform.ts doctor",
+    "docs:generate": "tsx src/docs/generator.ts"
   },
   "keywords": [
     "platform",
-    "integration",
+    "bootstrap",
+    "initialization",
+    "configuration",
+    "health-monitoring",
+    "graceful-shutdown",
+    "performance-optimization",
+    "readiness-checks",
+    "production-readiness",
     "dependency-injection",
     "service-registry",
     "orchestration",
     "cloudflare",
     "workers",
-    "durable-objects"
+    "durable-objects",
+    "cli"
   ],
   "author": "ClaudeFlare Team",
   "license": "MIT",
@@ -37,9 +61,19 @@
     "@typescript-eslint/parser": "^6.13.0",
     "eslint": "^8.54.0",
     "typescript": "^5.3.0",
-    "vitest": "^1.0.0"
+    "vitest": "^1.0.0",
+    "tsx": "^4.7.0"
   },
   "peerDependencies": {
     "@cloudflare/workers-types": "^4.20231218.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

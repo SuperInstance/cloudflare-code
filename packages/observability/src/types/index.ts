@@ -1,606 +1,608 @@
 /**
- * Core types and interfaces for the observability system
+ * Core type definitions for the observability package
  */
 
-import { Span, SpanContext, SpanKind, SpanStatusCode, Attributes } from '@opentelemetry/api';
+// ============================================================================
+// Tracing Types
+// ============================================================================
 
-/**
- * Trace information with context propagation
- */
-export interface TraceInfo {
-  traceId: string;
-  spanId: string;
-  parentSpanId?: string;
-  sampled: boolean;
-  baggage?: Record<string, string>;
-}
-
-/**
- * Span metadata for extended tracking
- */
-export interface SpanMetadata {
-  name: string;
-  kind: SpanKind;
-  startTime: number;
-  endTime?: number;
-  duration?: number;
-  status: SpanStatusCode;
-  statusMessage?: string;
-  attributes: Attributes;
-  events: SpanEvent[];
-  links: SpanLink[];
-  resource: Resource;
-}
-
-/**
- * Span event with timestamp
- */
-export interface SpanEvent {
-  name: string;
-  timestamp: number;
-  attributes: Attributes;
-}
-
-/**
- * Span link to other spans
- */
-export interface SpanLink {
-  context: SpanContext;
-  attributes: Attributes;
-}
-
-/**
- * Resource information
- */
-export interface Resource {
+export interface TraceOptions {
   serviceName: string;
   serviceVersion?: string;
-  deploymentEnvironment?: string;
-  hostName?: string;
-  attributes: Attributes;
+  environment?: string;
+  samplingRate?: number;
+  exporter?: TraceExporter;
+  attributes?: Record<string, string | number | boolean>;
 }
 
-/**
- * Trace tree structure for visualization
- */
-export interface TraceTreeNode {
-  span: SpanMetadata;
-  children: TraceTreeNode[];
-  depth: number;
+export type TraceExporter = 'jaeger' | 'zipkin' | 'honeycomb' | 'otlp' | 'console';
+
+export interface SpanOptions {
+  name: string;
+  kind?: SpanKind;
+  attributes?: Record<string, string | number | boolean | string[]>;
+  links?: SpanLink[];
+  startTime?: number;
+  parentSpan?: SpanContext;
 }
 
-/**
- * Service map node
- */
-export interface ServiceMapNode {
-  serviceName: string;
-  type: 'service' | 'database' | 'cache' | 'external' | 'queue';
-  endpointCount: number;
-  errorRate: number;
-  avgLatency: number;
-  p95Latency: number;
-  p99Latency: number;
-  requestRate: number;
+export type SpanKind = 'internal' | 'server' | 'client' | 'producer' | 'consumer';
+
+export interface SpanContext {
+  traceId: string;
+  spanId: string;
+  traceFlags?: number;
 }
 
-/**
- * Service map edge
- */
-export interface ServiceMapEdge {
-  from: string;
-  to: string;
-  requestCount: number;
-  errorCount: number;
-  avgLatency: number;
+export interface SpanLink {
+  context: SpanContext;
+  attributes?: Record<string, string | number | boolean>;
 }
 
-/**
- * Complete service map
- */
-export interface ServiceMap {
-  nodes: ServiceMapNode[];
-  edges: ServiceMapEdge[];
+export interface SamplingStrategy {
+  shouldSample(context: SamplingContext): boolean;
+}
+
+export interface SamplingContext {
+  traceId: string;
+  spanName: string;
+  spanKind?: SpanKind;
+  attributes?: Record<string, string | number | boolean>;
+}
+
+export interface TraceExportResult {
+  exportedSpans: number;
+  failedSpans: number;
+  duration: number;
+}
+
+// ============================================================================
+// Metrics Types
+// ============================================================================
+
+export interface MetricOptions {
+  name: string;
+  description?: string;
+  unit?: string;
+  labels?: Record<string, string>;
+  enabled?: boolean;
+}
+
+export interface CounterOptions extends MetricOptions {
+  initialValue?: number;
+}
+
+export interface GaugeOptions extends MetricOptions {
+  initialValue?: number;
+}
+
+export interface HistogramOptions extends MetricOptions {
+  buckets?: number[];
+  min?: number;
+  max?: number;
+}
+
+export interface MetricData {
+  name: string;
+  type: MetricType;
+  value: number;
+  labels: Record<string, string>;
   timestamp: number;
 }
 
-/**
- * Log levels
- */
-export enum LogLevel {
-  TRACE = 'trace',
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error',
-  FATAL = 'fatal',
+export type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary';
+
+export interface AggregationWindow {
+  duration: number;
+  alignTo?: number;
 }
 
-/**
- * Structured log entry
- */
+export interface PercentileValues {
+  p50: number;
+  p90: number;
+  p95: number;
+  p99: number;
+}
+
+export interface MetricExportOptions {
+  format: 'prometheus' | 'cloudflare' | 'json';
+  includeTimestamp?: boolean;
+  aggregationWindow?: AggregationWindow;
+}
+
+// ============================================================================
+// Logging Types
+// ============================================================================
+
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+
+export interface LoggerOptions {
+  level?: LogLevel;
+  format?: LogFormat;
+  output?: LogOutput;
+  correlation?: LogCorrelationOptions;
+  redaction?: LogRedactionOptions;
+  sampling?: LogSamplingOptions;
+}
+
+export type LogFormat = 'json' | 'text' | 'pretty';
+
+export type LogOutput = 'console' | 'file' | 'stream' | 'remote';
+
 export interface LogEntry {
   level: LogLevel;
   message: string;
   timestamp: number;
-  context?: string;
+  context?: LogContext;
+  error?: ErrorInfo;
   traceId?: string;
   spanId?: string;
-  userId?: string;
-  requestId?: string;
-  attributes: Attributes;
-  error?: ErrorInfo;
-  stackTrace?: string;
+  metadata?: Record<string, unknown>;
 }
 
-/**
- * Error information
- */
+export interface LogContext {
+  userId?: string;
+  requestId?: string;
+  sessionId?: string;
+  [key: string]: unknown;
+}
+
 export interface ErrorInfo {
   name: string;
   message: string;
   stack?: string;
   code?: string;
-  type?: string;
+  metadata?: Record<string, unknown>;
 }
 
-/**
- * Log aggregation result
- */
-export interface LogAggregation {
-  countByLevel: Record<LogLevel, number>;
-  topErrors: Array<{ error: string; count: number }>;
-  logsByTrace: Record<string, LogEntry[]>;
-  timeSeriesData: TimeSeriesPoint[];
-  errorRate: number;
-  avgLevel: number;
+export interface LogCorrelationOptions {
+  enableTraceCorrelation: boolean;
+  traceIdField?: string;
+  spanIdField?: string;
 }
 
-/**
- * Time series data point
- */
-export interface TimeSeriesPoint {
-  timestamp: number;
-  value: number;
-  level?: LogLevel;
+export interface LogRedactionOptions {
+  enabled: boolean;
+  patterns?: RedactionPattern[];
+  fields?: string[];
 }
 
-/**
- * Log filter criteria
- */
-export interface LogFilter {
-  levels?: LogLevel[];
-  startTime?: number;
-  endTime?: number;
-  traceId?: string;
-  userId?: string;
-  requestId?: string;
-  searchQuery?: string;
+export interface RedactionPattern {
+  pattern: RegExp;
+  replacement: string;
+}
+
+export interface LogSamplingOptions {
+  enabled: boolean;
+  rate?: number;
   minLevel?: LogLevel;
-  attributes?: Attributes;
 }
 
-/**
- * Profile sample
- */
-export interface ProfileSample {
-  timestamp: number;
-  stacks: string[][];
-  weights: number[];
-  duration: number;
-}
+// ============================================================================
+// Alerting Types
+// ============================================================================
 
-/**
- * Flame graph frame
- */
-export interface FlameGraphFrame {
-  name: string;
-  value: number;
-  children: FlameGraphFrame[];
-  depth: number;
-}
-
-/**
- * CPU profile data
- */
-export interface CPUProfile {
-  pid: number;
-  tid: number;
-  startTime: number;
-  endTime: number;
-  samples: ProfileSample[];
-  frames: FrameInfo[];
-}
-
-/**
- * Frame information
- */
-export interface FrameInfo {
-  name: string;
-  filename: string;
-  functionName: string;
-  lineNumber: number;
-  columnNumber: number;
-}
-
-/**
- * Hot path analysis result
- */
-export interface HotPath {
-  path: string[];
-  totalTime: number;
-  selfTime: number;
-  percentage: number;
-  callCount: number;
-}
-
-/**
- * Bottleneck detection result
- */
-export interface Bottleneck {
-  location: string;
-  type: 'cpu' | 'memory' | 'io' | 'network';
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  impact: number;
-  suggestion: string;
-}
-
-/**
- * Heap snapshot
- */
-export interface HeapSnapshot {
+export interface AlertRule {
   id: string;
-  timestamp: number;
-  totalSize: number;
-  nodes: HeapNode[];
-  edges: HeapEdge[];
-  strings: string[];
-}
-
-/**
- * Heap node
- */
-export interface HeapNode {
-  id: number;
-  type: string;
   name: string;
-  selfSize: number;
-  retainedSize: number;
-  edgeCount: number;
-  children: number[];
-}
-
-/**
- * Heap edge
- */
-export interface HeapEdge {
-  from: number;
-  to: number;
-  type: string;
-  name?: string;
-}
-
-/**
- * Memory leak detection result
- */
-export interface MemoryLeak {
-  type: string;
-  size: number;
-  count: number;
-  retentionPath: string[];
-  severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
+  condition: AlertCondition;
+  actions: AlertAction[];
+  enabled: boolean;
+  severity: AlertSeverity;
+  cooldown?: number;
+  labels?: Record<string, string>;
 }
 
-/**
- * Memory timeline data point
- */
-export interface MemoryTimelinePoint {
+export interface AlertCondition {
+  type: AlertConditionType;
+  metric?: string;
+  threshold?: number;
+  operator?: AlertOperator;
+  duration?: number;
+  aggregation?: AlertAggregation;
+}
+
+export type AlertConditionType = 
+  | 'threshold' 
+  | 'anomaly' 
+  | 'rate' 
+  | 'pattern' 
+  | 'composite';
+
+export type AlertOperator = 
+  | 'gt' 
+  | 'gte' 
+  | 'lt' 
+  | 'lte' 
+  | 'eq' 
+  | 'neq';
+
+export type AlertAggregation = 
+  | 'avg' 
+  | 'sum' 
+  | 'min' 
+  | 'max' 
+  | 'count' 
+  | 'percentile';
+
+export type AlertSeverity = 'info' | 'warning' | 'critical' | 'fatal';
+
+export interface AlertAction {
+  type: AlertActionType;
+  config: NotificationConfig;
+}
+
+export type AlertActionType = 
+  | 'email' 
+  | 'slack' 
+  | 'pagerduty' 
+  | 'webhook' 
+  | 'sns';
+
+export interface NotificationConfig {
+  recipients?: string[];
+  webhookUrl?: string;
+  template?: string;
+  customPayload?: Record<string, unknown>;
+}
+
+export interface Alert {
+  id: string;
+  ruleId: string;
+  ruleName: string;
+  severity: AlertSeverity;
+  message: string;
+  value: number;
   timestamp: number;
+  resolvedAt?: number;
+  metadata: Record<string, unknown>;
+  status: AlertStatus;
+}
+
+export type AlertStatus = 'firing' | 'resolved' | 'acknowledged' | 'suppressed';
+
+export interface AlertEscalationPolicy {
+  levels: EscalationLevel[];
+  repeatInterval?: number;
+  maxEscalations?: number;
+}
+
+export interface EscalationLevel {
+  delay: number;
+  actions: AlertAction[];
+}
+
+export interface OnCallRotation {
+  id: string;
+  name: string;
+  schedule: RotationSchedule;
+  members: string[];
+  timezone: string;
+}
+
+export interface RotationSchedule {
+  type: 'daily' | 'weekly' | 'custom';
+  rotationPeriod: number;
+  startDate: number;
+}
+
+// ============================================================================
+// Dashboard Types
+// ============================================================================
+
+export interface Dashboard {
+  id: string;
+  name: string;
+  description?: string;
+  widgets: Widget[];
+  layout: DashboardLayout;
+  refreshInterval?: number;
+  timeRange: TimeRange;
+  variables?: DashboardVariable[];
+  permissions: DashboardPermissions;
+  version: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Widget {
+  id: string;
+  type: WidgetType;
+  title: string;
+  position: WidgetPosition;
+  size: WidgetSize;
+  config: WidgetConfig;
+  queries: WidgetQuery[];
+  refreshInterval?: number;
+}
+
+export type WidgetType = 
+  | 'timeseries' 
+  | 'gauge' 
+  | 'stat' 
+  | 'table' 
+  | 'heatmap' 
+  | 'log-viewer'
+  | 'trace-viewer';
+
+export interface WidgetPosition {
+  x: number;
+  y: number;
+}
+
+export interface WidgetSize {
+  width: number;
+  height: number;
+}
+
+export interface WidgetConfig {
+  showLegend?: boolean;
+  colorScheme?: string;
+  axisLabels?: boolean;
+  gridLines?: boolean;
+  thresholds?: WidgetThreshold[];
+  customOptions?: Record<string, unknown>;
+}
+
+export interface WidgetThreshold {
+  value: number;
+  color: string;
+  label?: string;
+}
+
+export interface WidgetQuery {
+  id: string;
+  query: string;
+  dataSource: string;
+  legendFormat?: string;
+}
+
+export interface DashboardLayout {
+  columns: number;
+  rows?: number;
+  autoArrange?: boolean;
+}
+
+export interface TimeRange {
+  start: string | number;
+  end: string | number;
+  preset?: TimeRangePreset;
+}
+
+export type TimeRangePreset = 
+  | 'last-5m' 
+  | 'last-15m' 
+  | 'last-1h' 
+  | 'last-6h' 
+  | 'last-24h' 
+  | 'last-7d' 
+  | 'custom';
+
+export interface DashboardVariable {
+  name: string;
+  type: VariableType;
+  query: string;
+  defaultValue?: string;
+  multi?: boolean;
+  options?: VariableOption[];
+}
+
+export type VariableType = 'query' | 'custom' | 'constant';
+
+export interface VariableOption {
+  value: string;
+  label: string;
+}
+
+export interface DashboardPermissions {
+  read: string[];
+  write: string[];
+  public?: boolean;
+}
+
+// ============================================================================
+// Performance Monitoring Types
+// ============================================================================
+
+export interface PerformanceMetrics {
+  latency: LatencyMetrics;
+  throughput: ThroughputMetrics;
+  errorRate: ErrorRateMetrics;
+  resources: ResourceMetrics;
+  dependencies: DependencyMetrics[];
+}
+
+export interface LatencyMetrics {
+  p50: number;
+  p90: number;
+  p95: number;
+  p99: number;
+  avg: number;
+  max: number;
+}
+
+export interface ThroughputMetrics {
+  requestsPerSecond: number;
+  requestsPerMinute: number;
+  peakRps: number;
+}
+
+export interface ErrorRateMetrics {
+  total: number;
+  rate: number;
+  byType: Record<string, number>;
+}
+
+export interface ResourceMetrics {
+  cpu: ResourceUsage;
+  memory: ResourceUsage;
+  disk: ResourceUsage;
+  network: NetworkUsage;
+}
+
+export interface ResourceUsage {
   used: number;
   total: number;
-  heapUsed: number;
-  heapTotal: number;
-  external: number;
+  percentage: number;
 }
 
-/**
- * Retained size analysis
- */
-export interface RetainedSizeAnalysis {
-  objectId: number;
-  retainedSize: number;
-  retainingPaths: RetainingPath[];
+export interface NetworkUsage {
+  inboundBytes: number;
+  outboundBytes: number;
+  connections: number;
 }
 
-/**
- * Retaining path
- */
-export interface RetainingPath {
-  path: Array<{ nodeId: number; edge: string }>;
-  size: number;
+export interface DependencyMetrics {
+  name: string;
+  type: DependencyType;
+  health: DependencyHealth;
+  latency: LatencyMetrics;
+  errorRate: number;
+  requestCount: number;
 }
 
-/**
- * HTTP request inspection data
- */
-export interface RequestInspection {
-  id: string;
-  timestamp: number;
-  method: string;
-  url: string;
-  headers: Record<string, string>;
-  query: Record<string, string>;
-  cookies: Record<string, string>;
-  body?: any;
-  traceId?: string;
-  spanId?: string;
+export type DependencyType = 'http' | 'grpc' | 'database' | 'cache' | 'queue' | 'external';
+
+export type DependencyHealth = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+
+export interface SLI {
+  name: string;
+  description: string;
+  type: SLIType;
+  target: number;
+  window: SLIWindow;
+  calculation: SLICalculation;
 }
 
-/**
- * HTTP response inspection data
- */
-export interface ResponseInspection {
-  id: string;
-  requestId: string;
-  timestamp: number;
-  status: number;
-  statusText: string;
-  headers: Record<string, string>;
-  body?: any;
-  timing: TimingInfo;
-  traceId?: string;
-  spanId?: string;
-}
+export type SLIType = 'availability' | 'latency' | 'error-rate' | 'throughput' | 'saturation';
 
-/**
- * Timing information
- */
-export interface TimingInfo {
-  startTime: number;
-  endTime: number;
+export interface SLIWindow {
   duration: number;
-  dnsLookup?: number;
-  tcpConnection?: number;
-  tlsHandshake?: number;
-  ttfb?: number;
-  download?: number;
+  rolling: boolean;
 }
 
-/**
- * Request/response pair
- */
-export interface RequestResponsePair {
-  request: RequestInspection;
-  response: ResponseInspection;
-  traceId?: string;
-  spanId?: string;
+export interface SLICalculation {
+  metric: string;
+  query: string;
+  aggregation: string;
 }
 
-/**
- * Inspection filter
- */
-export interface InspectionFilter {
-  startTime?: number;
-  endTime?: number;
-  method?: string;
-  url?: string;
-  minStatus?: number;
-  maxStatus?: number;
-  traceId?: string;
-  hasError?: boolean;
-}
-
-/**
- * Debug session
- */
-export interface DebugSession {
+export interface SLO {
   id: string;
   name: string;
-  startTime: number;
-  endTime?: number;
-  status: 'active' | 'paused' | 'completed';
-  traceId?: string;
-  breakpointIds: string[];
-  watchExpressions: string[];
+  sli: SLI;
+  objective: number;
+  errorBudget: ErrorBudget;
+  timeSlots: SLOTimeSlot[];
 }
 
-/**
- * Breakpoint
- */
-export interface Breakpoint {
-  id: string;
-  sessionId: string;
-  file: string;
-  line: number;
-  column?: number;
-  condition?: string;
-  hitCount: number;
-  enabled: boolean;
+export interface ErrorBudget {
+  initial: number;
+  remaining: number;
+  burnRate: number;
+  estimatedExhaustion?: number;
 }
 
-/**
- * Variable inspection
- */
-export interface VariableInspection {
+export interface SLOTimeSlot {
   name: string;
-  value: any;
-  type: string;
-  properties?: VariableInspection[];
-  scope: 'local' | 'closure' | 'global' | 'catch';
-  readonly?: boolean;
+  start: string;
+  duration: number;
+  objective: number;
 }
 
-/**
- * Watch expression result
- */
-export interface WatchExpression {
-  id: string;
-  sessionId: string;
-  expression: string;
-  value: any;
-  type: string;
-  error?: string;
-}
+// ============================================================================
+// Health Check Types
+// ============================================================================
 
-/**
- * Step action for debugging
- */
-export enum StepAction {
-  CONTINUE = 'continue',
-  STEP_OVER = 'stepOver',
-  STEP_IN = 'stepIn',
-  STEP_OUT = 'stepOut',
-  PAUSE = 'pause',
-}
-
-/**
- * Debug recording frame
- */
-export interface DebugFrame {
+export interface HealthCheckResult {
+  status: HealthStatus;
+  checks: Record<string, HealthCheck>;
   timestamp: number;
-  action: StepAction;
-  file: string;
-  line: number;
-  callStack: CallStackFrame[];
-  variables: VariableInspection[];
-  watchResults: WatchExpression[];
+  version?: string;
 }
 
-/**
- * Call stack frame
- */
-export interface CallStackFrame {
-  functionName: string;
-  fileId: string;
-  lineNumber: number;
-  columnNumber: number;
-  scriptId?: string;
+export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
+
+export interface HealthCheck {
+  name: string;
+  status: HealthCheckStatus;
+  message?: string;
+  duration?: number;
+  metadata?: Record<string, unknown>;
+  dependencies?: string[];
 }
 
-/**
- * Debug recording
- */
-export interface DebugRecording {
-  sessionId: string;
-  frames: DebugFrame[];
-  metadata: {
-    startTime: number;
-    endTime: number;
-    totalFrames: number;
-    recordingDuration: number;
-  };
-}
+export type HealthCheckStatus = 'pass' | 'fail' | 'warn';
 
-/**
- * Replay state
- */
-export interface ReplayState {
-  currentFrame: number;
-  isPlaying: boolean;
-  playbackSpeed: number;
-  filters: ReplayFilter;
-}
-
-/**
- * Replay filter
- */
-export interface ReplayFilter {
-  startTime?: number;
-  endTime?: number;
-  files?: string[];
-  functions?: string[];
-  variables?: string[];
-}
-
-/**
- * Export format for traces
- */
-export interface ExportedTrace {
-  format: 'json' | 'protobuf' | 'jaeger';
-  data: string | Uint8Array;
-  timestamp: number;
-}
-
-/**
- * Export format for logs
- */
-export interface ExportedLogs {
-  format: 'json' | 'csv' | 'ndjson';
-  entries: LogEntry[];
-  timestamp: number;
-}
-
-/**
- * Export format for profiles
- */
-export interface ExportedProfile {
-  format: 'json' | 'pprof' | 'chrome';
-  data: CPUProfile | string;
-  timestamp: number;
-}
-
-/**
- * Observability configuration
- */
-export interface ObservabilityConfig {
+export interface HealthCheckConfig {
+  type: HealthCheckType;
   enabled: boolean;
-  serviceName: string;
-  serviceVersion: string;
-  environment: string;
+  interval?: number;
+  timeout?: number;
+  threshold?: number;
+  config: Record<string, unknown>;
+}
 
-  // Tracing config
-  tracing: {
-    enabled: boolean;
-    sampleRate: number;
-    exporter: 'otlp' | 'jaeger' | 'zipkin' | 'console';
-    exporterEndpoint?: string;
-    propagateHeaders: string[];
-    batchSize: number;
-    batchTimeout: number;
-  };
+export type HealthCheckType = 
+  | 'liveness' 
+  | 'readiness' 
+  | 'startup' 
+  | 'custom';
 
-  // Logging config
-  logging: {
-    enabled: boolean;
-    level: LogLevel;
-    format: 'json' | 'pretty';
-    exporter: 'console' | 'otlp' | 'custom';
-    exporterEndpoint?: string;
-    correlationEnabled: boolean;
-  };
+export interface ProbeOptions {
+  endpoint: string;
+  interval: number;
+  timeout: number;
+  failureThreshold: number;
+  successThreshold: number;
+  initialDelay?: number;
+}
 
-  // Profiling config
-  profiling: {
-    enabled: boolean;
-    interval: number;
-    duration: number;
-    maxSamples: number;
-    exporter: 'otlp' | 'custom';
-  };
+export interface HealthIndicator {
+  name: string;
+  check: () => Promise<HealthCheckValue>;
+  dependencies?: string[];
+}
 
-  // Memory config
-  memory: {
-    enabled: boolean;
-    samplingInterval: number;
-    heapSnapshotInterval: number;
-    leakDetectionThreshold: number;
-  };
+export interface HealthCheckValue {
+  healthy: boolean;
+  message?: string;
+  data?: Record<string, unknown>;
+}
 
-  // Inspection config
-  inspection: {
-    enabled: boolean;
-    recordHeaders: boolean;
-    recordBody: boolean;
-    maxBodySize: number;
-    maskSensitiveHeaders: string[];
-  };
+// ============================================================================
+// Common Types
+// ============================================================================
 
-  // Recording config
-  recording: {
+export interface ObservableConfig {
+  tracing?: TraceOptions;
+  metrics?: {
     enabled: boolean;
-    maxSessionDuration: number;
-    maxFramesPerSession: number;
-    autoRecordOnError: boolean;
+    exportInterval?: number;
   };
+  logging?: LoggerOptions;
+  alerting?: {
+    enabled: boolean;
+    rules: AlertRule[];
+  };
+  healthChecks?: {
+    enabled: boolean;
+    endpoint?: string;
+  };
+}
+
+export interface ExportResult {
+  success: boolean;
+  exported: number;
+  failed: number;
+  duration: number;
+  errors?: Error[];
+}
+
+export interface TelemetryData {
+  traceId?: string;
+  metrics: MetricData[];
+  logs: LogEntry[];
+  metadata: Record<string, unknown>;
 }

@@ -1,0 +1,70 @@
+{
+  "name": "@claudeflare/devops",
+  "version": "1.0.0",
+  "description": "Advanced DevOps and GitOps automation for ClaudeFlare distributed AI coding platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "vitest run tests/e2e",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "devops",
+    "gitops",
+    "iac",
+    "deployment",
+    "automation",
+    "cloudflare",
+    "workers"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "octokit": "^3.1.2",
+    "simple-git": "^3.20.0",
+    "yaml": "^2.3.4",
+    "joi": "^17.11.0",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "p-limit": "^5.0.0",
+    "p-retry": "^6.2.0",
+    "semver": "^7.5.4",
+    "json-schema-to-typescript": "^13.1.1",
+    "handlebars": "^4.7.8",
+    "chokidar": "^3.5.3",
+    "glob": "^10.3.10",
+    "minimatch": "^9.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vitest/coverage-v8": "^1.0.4",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4",
+    "nock": "^13.4.0",
+    "mock-fs": "^5.2.0"
+  },
+  "peerDependencies": {
+    "@claudeflare/sdk-ts": "^1.0.0",
+    "@claudeflare/edge": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

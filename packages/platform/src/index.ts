@@ -37,6 +37,24 @@ export * from './lifecycle';
 // Utilities
 export * from './utils';
 
+// Health monitoring
+export * from './health/monitor';
+
+// Shutdown handling
+export * from './shutdown/handler';
+
+// Performance optimization
+export * from './performance/optimizer';
+
+// Readiness checking
+export * from './readiness/checker';
+
+// CLI
+export * from './cli/platform';
+
+// Documentation
+export * from './docs/generator';
+
 /**
  * Platform version
  */

@@ -70,7 +70,7 @@ export const DEFAULT_SECRET_PATTERNS: SecretPattern[] = [
     pattern: /xox[pbar]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}/g,
     description: 'Slack API Token',
     severity: 'critical',
-    examples: ['xoxb-123456789012-1234567890123-AbCdEfGhIjKlMnOpQrStUvWx']
+    examples: ['xoxb-EXAMPLE-ONLY-XXXXXXXXXXXXX-XXXXXXXXXXXXX']
   },
   {
     name: 'Slack Webhook',
@@ -83,7 +83,7 @@ export const DEFAULT_SECRET_PATTERNS: SecretPattern[] = [
     pattern: /sk_live_[0-9a-zA-Z]{24,}/g,
     description: 'Stripe Live API Key',
     severity: 'critical',
-    examples: ['sk_live_1234567890abcdefghijklmnopqrstuv']
+    examples: ['sk_live_EXAMPLE_KEY_ONLY_DO_NOT_USE']
   },
   {
     name: 'Stripe Publishable Key',
@@ -157,7 +157,7 @@ export const DEFAULT_SECRET_PATTERNS: SecretPattern[] = [
     pattern: /SK[0-9a-f]{32}/g,
     description: 'Twilio API Key',
     severity: 'high',
-    examples: ['SK1234567890abcdef1234567890abcdef']
+    examples: ['SK_EXAMPLE_TWILIO_KEY_FAKE']
   },
   {
     name: 'SendGrid API Key',

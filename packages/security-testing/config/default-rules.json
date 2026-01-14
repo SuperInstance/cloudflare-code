@@ -1,0 +1,121 @@
+{
+  "version": "1.0.0",
+  "rules": [
+    {
+      "id": "no-eval",
+      "name": "No Eval Usage",
+      "description": "Detects usage of eval() which can lead to code injection",
+      "category": "security",
+      "severity": "high",
+      "enabled": true,
+      "languages": ["javascript", "typescript"],
+      "patterns": [
+        {
+          "type": "ast",
+          "pattern": "eval-usage",
+          "confidence": 95
+        },
+        {
+          "type": "regex",
+          "pattern": "eval\\s*\\(",
+          "confidence": 80
+        }
+      ]
+    },
+    {
+      "id": "no-innerhtml",
+      "name": "No Direct innerHTML Assignment",
+      "description": "Detects direct innerHTML assignment which can lead to XSS",
+      "category": "security",
+      "severity": "high",
+      "enabled": true,
+      "languages": ["javascript", "typescript"],
+      "patterns": [
+        {
+          "type": "ast",
+          "pattern": "dangerous-html",
+          "confidence": 85
+        }
+      ]
+    },
+    {
+      "id": "no-sql-concat",
+      "name": "No SQL String Concatenation",
+      "description": "Detects SQL query construction with string concatenation",
+      "category": "security",
+      "severity": "critical",
+      "enabled": true,
+      "languages": ["javascript", "typescript", "python"],
+      "patterns": [
+        {
+          "type": "ast",
+          "pattern": "sql-query-concat",
+          "confidence": 75
+        }
+      ]
+    },
+    {
+      "id": "no-hardcoded-secrets",
+      "name": "No Hardcoded Secrets",
+      "description": "Detects hardcoded secrets and credentials",
+      "category": "security",
+      "severity": "high",
+      "enabled": true,
+      "languages": ["javascript", "typescript", "python", "go"],
+      "patterns": [
+        {
+          "type": "ast",
+          "pattern": "hardcoded-secrets",
+          "confidence": 70
+        },
+        {
+          "type": "regex",
+          "pattern": "password\\s*=\\s*['\"][^'\"]{8,}['\"]",
+          "confidence": 70
+        }
+      ]
+    },
+    {
+      "id": "no-weak-encryption",
+      "name": "No Weak Encryption",
+      "description": "Detects use of weak encryption algorithms",
+      "category": "security",
+      "severity": "medium",
+      "enabled": true,
+      "languages": ["javascript", "typescript", "python"],
+      "patterns": [
+        {
+          "type": "regex",
+          "pattern": "(DES|RC4|MD5|SHA1)",
+          "confidence": 90
+        }
+      ]
+    },
+    {
+      "id": "require-mfa",
+      "name": "Require Multi-Factor Authentication",
+      "description": "Ensures MFA is required for authentication",
+      "category": "security",
+      "severity": "high",
+      "enabled": true,
+      "languages": ["javascript", "typescript"],
+      "patterns": []
+    },
+    {
+      "id": "no-console-log",
+      "name": "No Console Log in Production",
+      "description": "Detects console.log statements that should be removed",
+      "category": "code-quality",
+      "severity": "low",
+      "enabled": true,
+      "languages": ["javascript", "typescript"],
+      "patterns": [
+        {
+          "type": "regex",
+          "pattern": "console\\.(log|debug|info)\\(",
+          "confidence": 70
+        }
+      ]
+    }
+  ]
+}

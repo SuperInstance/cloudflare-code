@@ -15,8 +15,13 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "claudeflare",
@@ -54,9 +59,11 @@
     "@types/http-proxy-middleware": "^1.0.0",
     "@types/table": "^6.3.5",
     "@types/semver": "^7.5.6",
+    "@vitest/coverage-v8": "^1.0.0",
     "typescript": "^5.3.3",
     "vitest": "^1.0.0",
-    "esbuild": "^0.19.0"
+    "esbuild": "^0.19.0",
+    "temp": "^0.9.4"
   },
   "engines": {
     "node": ">=18.0.0"
