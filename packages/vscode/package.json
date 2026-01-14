@@ -1,0 +1,477 @@
+{
+  "name": "@claudeflare/vscode",
+  "version": "0.1.0",
+  "description": "VS Code extension for ClaudeFlare - Distributed AI coding platform",
+  "publisher": "ClaudeFlare",
+  "private": true,
+  "main": "./dist/extension.js",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "copilot",
+    "code-completion",
+    "chat",
+    "code-review",
+    "refactoring",
+    "cloudflare",
+    "multi-agent"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:claudeflare.openChat",
+    "onCommand:claudeflare.explainCode",
+    "onCommand:claudeflare.generateCode",
+    "onCommand:claudeflare.refactor",
+    "onLanguage:typescript",
+    "onLanguage:javascript",
+    "onLanguage:python",
+    "onLanguage:go",
+    "onLanguage:rust",
+    "onLanguage:java"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeflare.openChat",
+        "title": "Open ClaudeFlare Chat",
+        "category": "ClaudeFlare",
+        "icon": "$(comment-discussion)"
+      },
+      {
+        "command": "claudeflare.explainCode",
+        "title": "Explain Code",
+        "category": "ClaudeFlare",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "claudeflare.generateCode",
+        "title": "Generate Code",
+        "category": "ClaudeFlare",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "claudeflare.refactor",
+        "title": "Refactor Code",
+        "category": "ClaudeFlare",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "claudeflare.optimizeCode",
+        "title": "Optimize Code",
+        "category": "ClaudeFlare",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "claudeflare.fixCode",
+        "title": "Fix Code Issues",
+        "category": "ClaudeFlare",
+        "icon": "$(bug)"
+      },
+      {
+        "command": "claudeflare.addTests",
+        "title": "Generate Tests",
+        "category": "ClaudeFlare",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "claudeflare.addDocumentation",
+        "title": "Generate Documentation",
+        "category": "ClaudeFlare",
+        "icon": "$(book)"
+      },
+      {
+        "command": "claudeflare.reviewPR",
+        "title": "Review Pull Request",
+        "category": "ClaudeFlare",
+        "icon": "$(git-pull-request)"
+      },
+      {
+        "command": "claudeflare.debugIssue",
+        "title": "Debug Issue",
+        "category": "ClaudeFlare",
+        "icon": "$(debug)"
+      },
+      {
+        "command": "claudeflare.chatInline",
+        "title": "Chat with ClaudeFlare (Inline)",
+        "category": "ClaudeFlare"
+      },
+      {
+        "command": "claudeflare.clearHistory",
+        "title": "Clear Chat History",
+        "category": "ClaudeFlare"
+      },
+      {
+        "command": "claudeflare.configure",
+        "title": "Configure ClaudeFlare",
+        "category": "ClaudeFlare",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "claudeflare.authenticate",
+        "title": "Authenticate ClaudeFlare",
+        "category": "ClaudeFlare"
+      },
+      {
+        "command": "claudeflare.multiAgentOrchestrate",
+        "title": "Multi-Agent Orchestration",
+        "category": "ClaudeFlare",
+        "icon": "$(hub)"
+      },
+      {
+        "command": "claudeflare.contextAnalyze",
+        "title": "Analyze Project Context",
+        "category": "ClaudeFlare"
+      },
+      {
+        "command": "claudeflare.acceptSuggestion",
+        "title": "Accept Suggestion",
+        "category": "ClaudeFlare"
+      },
+      {
+        "command": "claudeflare.dismissSuggestion",
+        "title": "Dismiss Suggestion",
+        "category": "ClaudeFlare"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "claudeflare-sidebar",
+          "title": "ClaudeFlare",
+          "icon": "resources/icons/claude-flare.svg"
+        }
+      ]
+    },
+    "views": {
+      "claudeflare-sidebar": [
+        {
+          "type": "webview",
+          "id": "claudeflare.chatView",
+          "name": "Chat",
+          "contextualTitle": "ClaudeFlare Chat"
+        },
+        {
+          "id": "claudeflare.agentsView",
+          "name": "Agents"
+        },
+        {
+          "id": "claudeflare.contextView",
+          "name": "Project Context"
+        },
+        {
+          "id": "claudeflare.historyView",
+          "name": "History"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "ClaudeFlare",
+      "properties": {
+        "claudeflare.apiEndpoint": {
+          "type": "string",
+          "default": "https://api.claudeflare.dev",
+          "description": "ClaudeFlare API endpoint"
+        },
+        "claudeflare.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "ClaudeFlare API key",
+          "secret": true
+        },
+        "claudeflare.model": {
+          "type": "string",
+          "default": "claude-opus-4-5",
+          "description": "Default AI model to use",
+          "enum": ["claude-opus-4-5", "claude-sonnet-4-5", "claude-haiku-4-5"]
+        },
+        "claudeflare.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Temperature for AI responses"
+        },
+        "claudeflare.maxTokens": {
+          "type": "number",
+          "default": 4096,
+          "minimum": 1,
+          "maximum": 8192,
+          "description": "Maximum tokens in response"
+        },
+        "claudeflare.enableCompletion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable inline code completion"
+        },
+        "claudeflare.enableInlineChat": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable inline chat"
+        },
+        "claudeflare.enableCodeActions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AI-powered code actions"
+        },
+        "claudeflare.completionDebounce": {
+          "type": "number",
+          "default": 150,
+          "minimum": 50,
+          "maximum": 500,
+          "description": "Debounce delay for completions (ms)"
+        },
+        "claudeflare.contextWindow": {
+          "type": "number",
+          "default": 200000,
+          "minimum": 10000,
+          "maximum": 200000,
+          "description": "Context window size"
+        },
+        "claudeflare.projectContextDepth": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Project context depth (directory levels)"
+        },
+        "claudeflare.enableMultiAgent": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable multi-agent orchestration"
+        },
+        "claudeflare.enableTelemetry": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable anonymous telemetry"
+        },
+        "claudeflare.autoReview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically review on commit"
+        },
+        "claudeflare.theme": {
+          "type": "string",
+          "default": "auto",
+          "enum": ["auto", "light", "dark"],
+          "description": "Chat theme"
+        },
+        "claudeflare.streamResponses": {
+          "type": "boolean",
+          "default": true,
+          "description": "Stream AI responses"
+        },
+        "claudeflare.showInlineAnnotations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline annotations for suggestions"
+        },
+        "claudeflare.excludePatterns": {
+          "type": "array",
+          "default": ["**/node_modules/**", "**/dist/**", "**/.git/**", "**/coverage/**"],
+          "description": "Glob patterns to exclude from context"
+        },
+        "claudeflare.agentTimeout": {
+          "type": "number",
+          "default": 30000,
+          "minimum": 5000,
+          "maximum": 120000,
+          "description": "Agent timeout (ms)"
+        }
+      }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "claudeflare.explainCode",
+          "when": "editorHasSelection",
+          "group": "claudeflare@1"
+        },
+        {
+          "command": "claudeflare.generateCode",
+          "group": "claudeflare@2"
+        },
+        {
+          "command": "claudeflare.refactor",
+          "when": "editorHasSelection",
+          "group": "claudeflare@3"
+        },
+        {
+          "command": "claudeflare.optimizeCode",
+          "when": "editorHasSelection",
+          "group": "claudeflare@4"
+        },
+        {
+          "command": "claudeflare.fixCode",
+          "group": "claudeflare@5"
+        },
+        {
+          "command": "claudeflare.addTests",
+          "when": "editorHasSelection",
+          "group": "claudeflare@6"
+        },
+        {
+          "command": "claudeflare.addDocumentation",
+          "when": "editorHasSelection",
+          "group": "claudeflare@7"
+        },
+        {
+          "command": "claudeflare.chatInline",
+          "when": "editorHasSelection",
+          "group": "claudeflare@8"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "claudeflare.openChat",
+          "when": "view == claudeflare.chatView",
+          "group": "navigation"
+        },
+        {
+          "command": "claudeflare.clearHistory",
+          "when": "view == claudeflare.historyView",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "claudeflare.explainCode",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "claudeflare.refactor",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "claudeflare.optimizeCode",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "claudeflare.addTests",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "claudeflare.addDocumentation",
+          "when": "editorHasSelection"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "claudeflare.openChat",
+        "key": "ctrl+shift+/",
+        "mac": "cmd+shift+/"
+      },
+      {
+        "command": "claudeflare.explainCode",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "claudeflare.generateCode",
+        "key": "ctrl+shift+g",
+        "mac": "cmd+shift+g"
+      },
+      {
+        "command": "claudeflare.refactor",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "claudeflare.chatInline",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "claudeflare.acceptSuggestion",
+        "key": "tab",
+        "when": "claudeflare.suggestionVisible"
+      },
+      {
+        "command": "claudeflare.dismissSuggestion",
+        "key": "escape",
+        "when": "claudeflare.suggestionVisible"
+      }
+    ],
+    "icons": {
+      "claude-flare-icon": {
+        "description": "ClaudeFlare Icon",
+        "default": {
+          "fontPath": "resources/icons/claude-flare.woff",
+          "fontCharacter": "\\E001"
+        }
+      }
+    },
+    "codeActions": [
+      {
+        "languages": ["typescript", "javascript", "python", "go", "rust", "java"],
+        "actions": [
+          {
+            "kind": "claudeflare.explain",
+            "title": "Explain with ClaudeFlare",
+            "description": "Get AI explanation for the selected code"
+          },
+          {
+            "kind": "claudeflare.refactor",
+            "title": "Refactor with ClaudeFlare",
+            "description": "Refactor code using AI"
+          },
+          {
+            "kind": "claudeflare.optimize",
+            "title": "Optimize with ClaudeFlare",
+            "description": "Optimize code performance"
+          },
+          {
+            "kind": "claudeflare.fix",
+            "title": "Fix with ClaudeFlare",
+            "description": "Fix code issues"
+          },
+          {
+            "kind": "claudeflare.test",
+            "title": "Generate Tests with ClaudeFlare",
+            "description": "Generate unit tests"
+          },
+          {
+            "kind": "claudeflare.document",
+            "title": "Document with ClaudeFlare",
+            "description": "Generate documentation"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "test": "node ./dist/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@claudeflare/shared": "workspace:*",
+    "axios": "^1.6.2",
+    "eventsource-parser": "^1.1.1",
+    "uuid": "^9.0.1"
+  }
+}

@@ -1,0 +1,58 @@
+# Cloudflare Workers Configuration for ClaudeFlare Edge API
+name = "claudeflare-edge"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+node_compat = true
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "."
+
+# Environment variables
+[vars]
+ENVIRONMENT = "development"
+API_VERSION = "v1"
+
+# KV Namespaces - WARM Tier (Embeddings, cache, user preferences)
+# Uncomment and configure when ready
+# [[kv_namespaces]]
+# binding = "KV_CACHE"
+# id = "your-kv-namespace-id-here"
+# preview_id = "your-preview-kv-namespace-id-here"
+
+# Durable Objects - HOT Tier (Session storage)
+# Uncomment and configure when ready
+# [[durable_objects.bindings]]
+# name = "SESSION_DO"
+# class_name = "SessionDO"
+
+# R2 Buckets - COLD Tier (Archives, logs, history)
+# Uncomment and configure when ready
+# [[r2_buckets]]
+# binding = "R2_STORAGE"
+# bucket_name = "claudeflare-storage"
+
+# D1 Databases (to be created)
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "claudeflare-db"
+
+# Queue Consumers (to be configured)
+# [[queues.producers]]
+# binding = "QUEUE_PRODUCER"
+# queue = "claudeflare-queue"
+
+# Cron Triggers - Session Cleanup
+# [triggers]
+# crons = ["0 * * * *"]  # Every hour - cleanup inactive sessions
+
+# Routes configuration
+# [routes]
+# Custom domain routes (to be configured)
+# pattern = "https://api.claudeflare.com/*"
+# zone_name = "claudeflare.com"
+
+# Limits
+[limits]
+cpu_ms = 50

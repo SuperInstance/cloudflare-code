@@ -1,0 +1,33 @@
+name = "claudeflare-loadbalancer"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "claudeflare-loadbalancer-prod"
+routes = [
+  { pattern = "lb.claudeflare.com/*", zone_name = "claudeflare.com" }
+]
+
+[env.staging]
+name = "claudeflare-loadbalancer-staging"
+routes = [
+  { pattern = "lb-staging.claudeflare.com/*", zone_name = "claudeflare.com" }
+]
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "claudeflare-loadbalancer-prod"
+database_id = "your-database-id"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "claudeflare-loadbalancer-staging"
+database_id = "your-staging-database-id"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+LOG_LEVEL = "info"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+LOG_LEVEL = "debug"

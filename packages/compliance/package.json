@@ -1,0 +1,92 @@
+{
+  "name": "@claudeflare/compliance",
+  "version": "1.0.0",
+  "description": "Comprehensive compliance automation system for SOC 2, ISO 27001, GDPR, HIPAA, and PCI DSS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./policies": {
+      "types": "./dist/policies/index.d.ts",
+      "import": "./dist/policies/index.js"
+    },
+    "./scanning": {
+      "types": "./dist/scanning/index.d.ts",
+      "import": "./dist/scanning/index.js"
+    },
+    "./reporting": {
+      "types": "./dist/reporting/index.d.ts",
+      "import": "./dist/reporting/index.js"
+    },
+    "./evidence": {
+      "types": "./dist/evidence/index.d.ts",
+      "import": "./dist/evidence/index.js"
+    },
+    "./risk": {
+      "types": "./dist/risk/index.d.ts",
+      "import": "./dist/risk/index.js"
+    },
+    "./remediation": {
+      "types": "./dist/remediation/index.d.ts",
+      "import": "./dist/remediation/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist",
+    "scan:compliance": "node dist/scanning/index.js",
+    "generate:report": "node dist/reporting/generator.js",
+    "assess:risk": "node dist/risk/assessor.js",
+    "collect:evidence": "node dist/evidence/collector.js"
+  },
+  "keywords": [
+    "compliance",
+    "soc2",
+    "iso27001",
+    "gdpr",
+    "hipaa",
+    "pci-dss",
+    "policy-as-code",
+    "audit",
+    "risk-assessment",
+    "claudeflare"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "zod": "^3.22.4",
+    "date-fns": "^3.0.0",
+    "jsonpath": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0"
+  },
+  "peerDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

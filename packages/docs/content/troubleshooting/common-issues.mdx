@@ -1,0 +1,665 @@
+---
+title: Common Issues
+description: Solutions to frequently encountered problems
+---
+
+# Common Issues and Solutions
+
+This guide covers common issues you may encounter when using ClaudeFlare and their solutions.
+
+## Table of Contents
+
+- [Authentication Issues](#authentication-issues)
+- [Rate Limiting](#rate-limiting)
+- [Provider Errors](#provider-errors)
+- [Performance Issues](#performance-issues)
+- [Deployment Issues](#deployment-issues)
+- [Durable Objects Issues](#durable-objects-issues)
+- [Webhook Issues](#webhook-issues)
+- [SDK Issues](#sdk-issues)
+
+## Authentication Issues
+
+### Invalid API Key
+
+**Symptom:**
+```json
+{
+  "error": {
+    "code": "INVALID_API_KEY",
+    "message": "The provided API key is invalid"
+  }
+}
+```
+
+**Solutions:**
+
+1. **Verify API Key**
+   ```bash
+   # Check your API key
+   echo $CLOUDFLARE_API_KEY
+
+   # Regenerate if needed
+   wrangler secret put CLOUDFLARE_API_KEY
+   ```
+
+2. **Check Key Format**
+   ```bash
+   # Should be like: abc123xyz789def456
+   # No extra spaces or newlines
+   ```
+
+3. **Verify Environment**
+   ```bash
+   # Check correct environment
+   echo $NODE_ENV  # Should be 'production' or 'development'
+   ```
+
+### Missing Permissions
+
+**Symptom:**
+```json
+{
+  "error": {
+    "code": "INSUFFICIENT_PERMISSIONS",
+    "message": "API key doesn't have required permissions"
+  }
+}
+```
+
+**Solutions:**
+
+1. **Check API Key Scope**
+   ```bash
+   # Verify key has required scopes
+   wrangler secret list | grep CLOUDFLARE_API_TOKEN
+   ```
+
+2. **Update Token Permissions**
+   - Go to Cloudflare Dashboard
+   - Navigate to API Tokens
+   - Edit token permissions
+   - Add required scopes
+
+### Session Expiration
+
+**Symptom:**
+Frequent re-authentication required
+
+**Solutions:**
+
+1. **Implement Token Refresh**
+   ```typescript
+   async function refreshSession() {
+     const response = await fetch('/api/refresh', {
+       method: 'POST',
+       credentials: 'include'
+     });
+
+     if (!response.ok) {
+       // Redirect to login
+       window.location.href = '/login';
+     }
+   }
+
+   // Auto-refresh before expiry
+   setInterval(refreshSession, 3000000); // 50 minutes
+   ```
+
+2. **Store Session Securely**
+   ```typescript
+   // Use httpOnly cookies
+   await session.set('token', token, {
+     httpOnly: true,
+     secure: true,
+     sameSite: 'strict',
+     maxAge: 3600
+   });
+   ```
+
+## Rate Limiting
+
+### Rate Limit Exceeded
+
+**Symptom:**
+```json
+{
+  "error": {
+    "code": "RATE_LIMITED",
+    "message": "Rate limit exceeded",
+    "retryAfter": 60
+  }
+}
+```
+
+**Solutions:**
+
+1. **Implement Backoff**
+   ```typescript
+   async function retryWithBackoff(fn, maxRetries = 3) {
+     for (let i = 0; i < maxRetries; i++) {
+       try {
+         return await fn();
+       } catch (error) {
+         if (error.code === 'RATE_LIMITED' && i < maxRetries - 1) {
+           const delay = Math.pow(2, i) * 1000;
+           await sleep(delay);
+           continue;
+         }
+         throw error;
+       }
+     }
+   }
+   ```
+
+2. **Use Request Queue**
+   ```typescript
+   class RequestQueue {
+     private queue: Array<() => Promise<any>> = [];
+     private delay = 1000; // 1 second between requests
+
+     async add<T>(fn: () => Promise<T>): Promise<T> {
+       return new Promise((resolve, reject) => {
+         this.queue.push(async () => {
+           try {
+             resolve(await fn());
+           } catch (error) {
+             reject(error);
+           }
+         });
+         this.process();
+       });
+     }
+   }
+   ```
+
+3. **Optimize Request Frequency**
+   ```typescript
+   // Batch requests
+   const results = await Promise.all([
+     client.chat.completions.create(request1),
+     client.chat.completions.create(request2),
+     client.chat.completions.create(request3)
+   ]);
+
+   // Use streaming for long responses
+   const stream = await client.chat.completions.stream({
+     ...request,
+     stream: true
+   });
+   ```
+
+### Quota Exceeded
+
+**Symptom:**
+```json
+{
+  "error": {
+    "code": "QUOTA_EXCEEDED",
+    "message": "Monthly quota exceeded"
+  }
+}
+```
+
+**Solutions:**
+
+1. **Check Usage**
+   ```bash
+   curl https://api.claudeflare.com/v1/usage \
+     -H "Authorization: Bearer YOUR_API_KEY"
+   ```
+
+2. **Optimize Usage**
+   ```typescript
+   // Cache responses
+   const cache = new Map();
+
+   async function cachedRequest(key, fn) {
+     if (cache.has(key)) {
+       return cache.get(key);
+     }
+
+     const result = await fn();
+     cache.set(key, result);
+     return result;
+   }
+   ```
+
+3. **Upgrade Plan**
+   - Contact sales@claudeflare.com
+   - Review pricing tiers
+   - Consider enterprise options
+
+## Provider Errors
+
+### Provider Unavailable
+
+**Symptom:**
+```json
+{
+  "error": {
+    "code": "PROVIDER_UNAVAILABLE",
+    "message": "All AI providers are currently unavailable"
+  }
+}
+```
+
+**Solutions:**
+
+1. **Check Provider Status**
+   ```bash
+   curl https://api.claudeflare.com/v1/providers/status
+   ```
+
+2. **Use Multiple Providers**
+   ```typescript
+   const providers = ['cloudflare', 'groq', 'cerebras'];
+
+   for (const provider of providers) {
+     try {
+       return await client.chat.completions.create({
+         ...request,
+         provider
+       });
+     } catch (error) {
+       console.warn(`${provider} failed, trying next`);
+     }
+   }
+   ```
+
+3. **Configure Fallback**
+   ```typescript
+   const client = new ClaudeFlare({
+     apiKey: 'your-key',
+     providers: {
+       primary: 'cloudflare',
+       fallback: ['groq', 'cerebras']
+     }
+   });
+   ```
+
+### Model Not Found
+
+**Symptom:**
+```json
+{
+  "error": {
+    "code": "MODEL_NOT_AVAILABLE",
+    "message": "Model 'gpt-4' not available"
+  }
+}
+```
+
+**Solutions:**
+
+1. **List Available Models**
+   ```bash
+   curl https://api.claudeflare.com/v1/models
+   ```
+
+2. **Use Auto Selection**
+   ```typescript
+   const result = await client.chat.completions.create({
+     ...request,
+     model: 'auto'  // Let system choose best model
+   });
+   ```
+
+3. **Specify Correct Model**
+   ```typescript
+   // Good
+   model: '@cf/meta/llama-3.1-8b-instruct'
+
+   // Bad
+   model: 'gpt-4'  // Not available
+   ```
+
+## Performance Issues
+
+### Slow Response Times
+
+**Symptom:** Requests taking >5 seconds
+
+**Solutions:**
+
+1. **Check Network**
+   ```bash
+   # Test connection
+   ping api.claudeflare.com
+
+   # Check latency
+   curl -w "@curl-format.txt" -o /dev/null -s https://api.claudeflare.com/health
+   ```
+
+2. **Use Edge Locations**
+   ```typescript
+   // Request from nearest edge
+   const client = new ClaudeFlare({
+     apiKey: 'your-key',
+     region: 'auto'  // Auto-select nearest region
+   });
+   ```
+
+3. **Optimize Request Size**
+   ```typescript
+   // Reduce context size
+   const result = await client.chat.completions.create({
+     messages: messages.slice(-10),  // Last 10 messages only
+     maxTokens: 500  // Limit response size
+   });
+   ```
+
+### High Memory Usage
+
+**Symptom:** Out of memory errors
+
+**Solutions:**
+
+1. **Monitor Memory**
+   ```typescript
+   setInterval(() => {
+     const usage = process.memoryUsage();
+     console.log('Memory usage:', usage.heapUsed / 1024 / 1024, 'MB');
+   }, 10000);
+   ```
+
+2. **Stream Responses**
+   ```typescript
+   const stream = await client.chat.completions.stream({
+     ...request,
+     stream: true
+   });
+
+   for await (const chunk of stream) {
+     // Process chunk immediately
+     processChunk(chunk);
+   }
+   ```
+
+3. **Clear Caches**
+   ```typescript
+   // Periodic cache cleanup
+   setInterval(() => {
+     cache.clear();
+     gc();  // Force garbage collection if available
+   }, 300000);  // Every 5 minutes
+   ```
+
+## Deployment Issues
+
+### Build Fails
+
+**Symptom:**
+```
+Error: Build failed with exit code 1
+```
+
+**Solutions:**
+
+1. **Check Dependencies**
+   ```bash
+   npm ci  # Clean install
+   npm audit fix  # Fix vulnerabilities
+   ```
+
+2. **Verify Build Configuration**
+   ```bash
+   # Check wrangler.toml
+   cat wrangler.toml
+
+   # Validate configuration
+   wrangler deploy --dry-run
+   ```
+
+3. **Check Bundle Size**
+   ```bash
+   # Analyze bundle
+   npm run analyze-bundle
+
+   # Should be < 3MB for Workers
+   ```
+
+### Deployment Stuck
+
+**Symptom:** Deployment hangs indefinitely
+
+**Solutions:**
+
+1. **Check Deployment Status**
+   ```bash
+   wrangler deployments list
+   ```
+
+2. **Cancel and Retry**
+   ```bash
+   # Cancel current deployment
+   wrangler deployments cancel <deployment-id>
+
+   # Retry deployment
+   wrangler deploy
+   ```
+
+3. **Check Cloudflare Status**
+   ```bash
+   # Visit status page
+   curl https://www.cloudflarestatus.com/api/v2/summary.json
+   ```
+
+## Durable Objects Issues
+
+### DO Not Responding
+
+**Symptom:** Timeout when accessing Durable Object
+
+**Solutions:**
+
+1. **Check DO Health**
+   ```typescript
+   const stub = env.SESSIONS.get(id);
+   const response = await stub.fetch(
+     new Request('https://session/health')
+   );
+
+   if (!response.ok) {
+     console.error('DO unhealthy');
+   }
+   ```
+
+2. **Implement Timeout**
+   ```typescript
+   async function withTimeout(promise, timeout = 5000) {
+     const timer = new Promise((_, reject) =>
+       setTimeout(() => reject(new Error('Timeout')), timeout)
+     );
+
+     return Promise.race([promise, timer]);
+   }
+   ```
+
+3. **Restart DO**
+   ```bash
+   # Delete DO instance
+   wrangler d1 execute claudeflare-db --command="
+     DELETE FROM do_instances WHERE id = 'your-do-id';
+   "
+   ```
+
+### State Not Persisting
+
+**Symptom:** DO state lost after restart
+
+**Solutions:**
+
+1. **Verify Storage**
+   ```typescript
+   // Ensure storage write completed
+   await this.state.storage.put('key', value);
+
+   // Verify read
+   const stored = await this.state.storage.get('key');
+   console.log('Stored:', stored);
+   ```
+
+2. **Use Transactions**
+   ```typescript
+   await this.state.storage.transaction(async txn => {
+     const current = await txn.get('counter');
+     await txn.put('counter', current + 1);
+   });
+   ```
+
+## Webhook Issues
+
+### Webhook Not Received
+
+**Symptom:** Webhooks not arriving at endpoint
+
+**Solutions:**
+
+1. **Verify Webhook Configuration**
+   ```bash
+   curl https://api.claudeflare.com/v1/webhooks \
+     -H "Authorization: Bearer YOUR_API_KEY"
+   ```
+
+2. **Test Endpoint**
+   ```bash
+   # Test webhook endpoint
+   curl -X POST https://your-app.com/webhook \
+     -d '{"test": true}'
+   ```
+
+3. **Check Signature**
+   ```typescript
+   function verifySignature(payload, signature, secret) {
+     const hmac = crypto.createHmac('sha256', secret);
+     hmac.update(payload);
+     const expected = hmac.digest('hex');
+     return crypto.timingSafeEqual(
+       Buffer.from(signature),
+       Buffer.from(expected)
+     );
+   }
+   ```
+
+### Signature Verification Failing
+
+**Symptom:** Webhook signature invalid
+
+**Solutions:**
+
+1. **Check Secret**
+   ```bash
+   # Verify webhook secret matches
+   echo $WEBHOOK_SECRET
+   ```
+
+2. **Verify Encoding**
+   ```typescript
+   // Ensure UTF-8 encoding
+   const payload = req.body.toString('utf8');
+   ```
+
+3. **Check Timestamp**
+   ```typescript
+   const timestamp = parseInt(signature.split('=')[1]);
+   const now = Math.floor(Date.now() / 1000);
+
+   if (now - timestamp > 300) {  // 5 minutes
+     throw new Error('Signature too old');
+   }
+   ```
+
+## SDK Issues
+
+### SDK Installation Fails
+
+**Symptom:** `npm install` fails
+
+**Solutions:**
+
+1. **Clear Cache**
+   ```bash
+   npm cache clean --force
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+2. **Check Node Version**
+   ```bash
+   node --version  # Should be 20+
+   npm --version   # Should be 10+
+   ```
+
+3. **Use Specific Registry**
+   ```bash
+   npm install --registry=https://registry.npmjs.org
+   ```
+
+### Type Errors
+
+**Symptom:** TypeScript compilation errors
+
+**Solutions:**
+
+1. **Update Types**
+   ```bash
+   npm install --save-dev @types/node
+   ```
+
+2. **Check tsconfig**
+   ```json
+   {
+     "compilerOptions": {
+       "strict": true,
+       "esModuleInterop": true,
+       "skipLibCheck": true
+     }
+   }
+   ```
+
+3. **Type Assertion**
+   ```typescript
+   const result = await client.chat.completions.create({
+     ...request
+   }) as ChatResponse;
+   ```
+
+## Getting Help
+
+If you can't resolve your issue:
+
+1. **Check Status Page**
+   ```bash
+   curl https://status.claudeflare.com
+   ```
+
+2. **Search Issues**
+   - GitHub Issues
+   - Stack Overflow
+   - Discord Community
+
+3. **Contact Support**
+   ```bash
+   # Include request ID from error response
+   curl https://api.claudeflare.com/v1/support \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -d '{
+       "issue": "Description of issue",
+       "requestId": "req_xyz123"
+     }'
+   ```
+
+4. **Enable Debug Mode**
+   ```typescript
+   const client = new ClaudeFlare({
+     apiKey: 'your-key',
+     debug: true  // Enables verbose logging
+   });
+   ```
+
+## Related Documentation
+
+- [Error Codes](/api-reference/error-codes) - Complete error reference
+- [Error Handling](/guides/error-handling) - Error handling best practices
+- [Monitoring](/guides/monitoring) - Monitoring and debugging

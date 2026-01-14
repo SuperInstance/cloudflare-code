@@ -1,0 +1,509 @@
+---
+title: Configuration
+description: Advanced configuration options for ClaudeFlare
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Configuration Guide
+
+Advanced configuration options for customizing ClaudeFlare to your needs.
+
+## Environment Variables
+
+### Required Variables
+
+```bash
+# Cloudflare Configuration
+CLOUDFLARE_ACCOUNT_ID=your_account_id
+CLOUDFLARE_API_TOKEN=your_api_token
+
+# At least one AI provider
+GROQ_API_KEY=your_groq_key
+# or
+CEREBRAS_API_KEY=your_cerebras_key
+# or
+OPENROUTER_API_KEY=your_openrouter_key
+```
+
+### Optional Variables
+
+#### AI Provider Configuration
+
+```bash
+# Model Selection
+DEFAULT_MODEL=llama-2-70b-chat
+TEMPERATURE=0.7
+MAX_TOKENS=2048
+TOP_P=0.9
+FREQUENCY_PENALTY=0
+PRESENCE_PENALTY=0
+
+# Routing Strategy
+ROUTING_STRATEGY=FREE_TIER_FIRST  # Options: FREE_TIER_FIRST, FASTEST, COST_OPTIMIZED
+ENABLE_CIRCUIT_BREAKER=true
+CIRCUIT_FAILURE_THRESHOLD=5
+CIRCUIT_TIMEOUT=60000
+
+# Retry Configuration
+MAX_RETRIES=3
+RETRY_DELAY=1000
+RETRY_BACKOFF_MULTIPLIER=2
+```
+
+#### Caching Configuration
+
+```bash
+# Semantic Cache
+ENABLE_SEMANTIC_CACHE=true
+SEMANTIC_CACHE_TTL=3600
+SEMANTIC_CACHE_THRESHOLD=0.95
+MIN_CACHE_LENGTH=100
+
+# Vector Index
+VECTOR_DIMENSIONS=1536
+HNSW_M=16
+HNSW_EF_CONSTRUCTION=200
+
+# KV Cache
+KV_CACHE_TTL=86400
+KV_CACHE_SOFT_TTL=3600
+```
+
+#### Rate Limiting
+
+```bash
+# Rate Limits
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_REQUESTS_PER_MINUTE=100
+RATE_LIMIT_BURST=20
+RATE_LIMIT_STORAGE=kv  # Options: kv, durable_object
+```
+
+#### Session Management
+
+```bash
+# Session Configuration
+SESSION_TTL=1800  # 30 minutes
+SESSION_MAX_MEMORY=128  # MB
+SESSION_CLEANUP_INTERVAL=300  # 5 minutes
+```
+
+#### Monitoring & Logging
+
+```bash
+# Monitoring
+ENABLE_METRICS=true
+METRICS_SAMPLE_RATE=1.0
+ENABLE_TRACING=true
+
+# Logging
+LOG_LEVEL=info  # Options: debug, info, warn, error
+LOG_FORMAT=json  # Options: json, text
+ENABLE_REQUEST_LOGGING=true
+```
+
+#### Security
+
+```bash
+# Security
+ENABLE_CORS=true
+CORS_ALLOWED_ORIGINS=*
+CORS_ALLOWED_METHODS=GET,POST,OPTIONS
+CORS_ALLOWED_HEADERS=*
+
+# API Keys (optional - for API authentication)
+API_KEY_HEADER=X-API-Key
+ENABLE_API_KEY_AUTH=false
+```
+
+## wrangler.toml Configuration
+
+### Basic Configuration
+
+```toml
+name = "claudeflare"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Account
+account_id = "your_account_id"
+
+# Workers Configuration
+workers_dev = true
+route = { pattern = "claudeflare.workers.dev", zone_name = "your-domain.com" }
+
+# Limits
+[limits]
+cpu_ms = 50
+```
+
+### Bindings Configuration
+
+```toml
+# KV Namespaces
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "your_kv_namespace_id"
+preview_id = "your_preview_kv_id"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "your_rate_limit_kv_id"
+
+# R2 Buckets
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "claudeflare-storage"
+
+# D1 Databases
+[[d1_databases]]
+binding = "DB"
+database_name = "claudeflare-db"
+database_id = "your_database_id"
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "SESSIONS"
+class_name = "SessionDO"
+script_name = "claudeflare"
+
+# Queues
+[[queues.producers]]
+binding = "TASK_QUEUE"
+queue = "claudeflare-tasks"
+
+[[queues.consumers]]
+queue = "claudeflare-tasks"
+max_batch_size = 10
+max_wait_time = 5
+```
+
+### Environment-Specific Configuration
+
+```toml
+# Production Environment
+[env.production]
+name = "claudeflare-production"
+route = { pattern = "api.claudeflare.com", zone_name = "claudeflare.com" }
+vars = { ENVIRONMENT = "production" }
+
+[env.production.build]
+command = "npm run build"
+watch_dirs = ["src"]
+
+# Staging Environment
+[env.staging]
+name = "claudeflare-staging"
+route = { pattern = "api-staging.claudeflare.com", zone_name = "claudeflare.com" }
+vars = { ENVIRONMENT = "staging" }
+
+# Development Environment
+[env.development]
+name = "claudeflare-dev"
+vars = { ENVIRONMENT = "development" }
+```
+
+## Routing Strategies
+
+ClaudeFlare supports multiple routing strategies for AI provider selection:
+
+### 1. Free Tier First (Default)
+
+Maximizes free tier usage:
+
+```javascript
+{
+  routingStrategy: 'FREE_TIER_FIRST',
+  providers: [
+    { name: 'cloudflare', priority: 10, freeQuota: 100000 },
+    { name: 'groq', priority: 8, freeQuota: 10000 },
+    { name: 'cerebras', priority: 7, freeQuota: 5000 },
+    { name: 'openrouter', priority: 5, freeQuota: 100 }
+  ]
+}
+```
+
+### 2. Fastest
+
+Prioritizes lowest latency:
+
+```javascript
+{
+  routingStrategy: 'FASTEST',
+  enableLatencyTracking: true,
+  latencyWindow: 60000
+}
+```
+
+### 3. Cost Optimized
+
+Minimizes API costs:
+
+```javascript
+{
+  routingStrategy: 'COST_OPTIMIZED',
+  costWeights: {
+    inputTokens: 0.0001,
+    outputTokens: 0.0002
+  }
+}
+```
+
+## Caching Strategy
+
+### Multi-Layer Cache Configuration
+
+```javascript
+const cacheConfig = {
+  layers: [
+    {
+      name: 'memory',
+      enabled: true,
+      maxSize: 100, // MB
+      ttl: 300 // 5 minutes
+    },
+    {
+      name: 'kv',
+      enabled: true,
+      ttl: 3600 // 1 hour
+    },
+    {
+      name: 'r2',
+      enabled: true,
+      ttl: 86400 // 24 hours
+    }
+  ],
+  semantic: {
+    enabled: true,
+    threshold: 0.95,
+    dimensions: 1536,
+    algorithm: 'hnsw'
+  }
+}
+```
+
+### Cache Invalidation Rules
+
+```javascript
+const invalidationRules = {
+  onWrite: true,
+  ttl: {
+    short: 300,      // 5 minutes for frequently changing data
+    medium: 3600,   // 1 hour for moderately changing data
+    long: 86400     // 24 hours for stable data
+  },
+  tags: {
+    invalidateByTag: true,
+    maxTagsPerKey: 10
+  }
+}
+```
+
+## Durable Objects Configuration
+
+### Session Durable Object
+
+```javascript
+const sessionConfig = {
+  maxSessions: 10000,
+  sessionTimeout: 1800, // 30 minutes
+  memoryLimit: 128, // 128MB per session
+  persistence: {
+    enabled: true,
+    storage: 'D1',
+    tableName: 'sessions'
+  },
+  cleanup: {
+    enabled: true,
+    interval: 300, // 5 minutes
+    batchSize: 100
+  }
+}
+```
+
+### Vector Index Durable Object
+
+```javascript
+const vectorConfig = {
+  algorithm: 'hnsw',
+  dimensions: 1536,
+  m: 16,
+  efConstruction: 200,
+  efSearch: 50,
+  maxVectors: 10000,
+  quantization: {
+    enabled: true,
+    bits: 8,
+    type: 'product'
+  }
+}
+```
+
+## Rate Limiting
+
+### Token Bucket Configuration
+
+```javascript
+const rateLimitConfig = {
+  strategy: 'token-bucket',
+  storage: 'durable-object',
+  rules: [
+    {
+      endpoint: '/v1/chat',
+      rate: 100, // requests per minute
+      burst: 20,
+      key: 'apiKey'
+    },
+    {
+      endpoint: '/v1/agents/*',
+      rate: 50,
+      burst: 10,
+      key: 'ip'
+    }
+  ]
+}
+```
+
+### Sliding Window Configuration
+
+```javascript
+const slidingWindowConfig = {
+  strategy: 'sliding-window',
+  window: 60000, // 1 minute
+  precision: 1000, // 1 second precision
+  storage: 'kv'
+}
+```
+
+## Monitoring Configuration
+
+### Metrics Collection
+
+```javascript
+const metricsConfig = {
+  enabled: true,
+  sampleRate: 1.0,
+  collectors: [
+    'request-count',
+    'request-latency',
+    'cache-hit-rate',
+    'provider-health',
+    'token-usage',
+    'error-rate'
+  ],
+  aggregation: {
+    interval: 60000, // 1 minute
+    retention: 7 // days
+  }
+}
+```
+
+### Alert Rules
+
+```javascript
+const alertConfig = {
+  rules: [
+    {
+      name: 'high-error-rate',
+      condition: 'error_rate > 0.05',
+      window: 300, // 5 minutes
+      actions: ['slack', 'email']
+    },
+    {
+      name: 'low-cache-hit-rate',
+      condition: 'cache_hit_rate < 0.8',
+      window: 600, // 10 minutes
+      actions: ['slack']
+    }
+  ]
+}
+```
+
+## Security Configuration
+
+### CORS Settings
+
+```javascript
+const corsConfig = {
+  enabled: true,
+  origins: ['https://your-domain.com'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  headers: ['Content-Type', 'Authorization'],
+  credentials: true,
+  maxAge: 86400
+}
+```
+
+### API Key Authentication
+
+```javascript
+const authConfig = {
+  enabled: true,
+  header: 'X-API-Key',
+  validation: {
+    minLength: 32,
+    format: 'alphanumeric'
+  },
+  storage: 'kv',
+  rateLimitPerKey: 1000 // requests per hour
+}
+```
+
+## Performance Tuning
+
+### Connection Pooling
+
+```javascript
+const connectionConfig = {
+  maxConnections: 100,
+  maxIdleConnections: 10,
+  idleTimeout: 30000,
+  keepAlive: true
+}
+```
+
+### Request Batching
+
+```javascript
+const batchConfig = {
+  enabled: true,
+  maxSize: 10,
+  maxWaitTime: 100, // milliseconds
+  endpoints: ['/v1/chat', '/v1/embeddings']
+}
+```
+
+<Callout type="tip">
+  **Performance Tip**: Use Cloudflare's Analytics Dashboard to monitor your Worker's performance and adjust configuration accordingly.
+</Callout>
+
+## Configuration Templates
+
+### Development Template
+
+```bash
+# .env.development
+ENVIRONMENT=development
+LOG_LEVEL=debug
+ENABLE_METRICS=true
+METRICS_SAMPLE_RATE=1.0
+RATE_LIMIT_ENABLED=false
+```
+
+### Production Template
+
+```bash
+# .env.production
+ENVIRONMENT=production
+LOG_LEVEL=info
+ENABLE_METRICS=true
+METRICS_SAMPLE_RATE=0.1
+RATE_LIMIT_ENABLED=true
+RATE_LIMIT_REQUESTS_PER_MINUTE=100
+ENABLE_CIRCUIT_BREAKER=true
+```
+
+<Callout type="success">
+  Ready to build? Check out [First Project](/docs/getting-started/first-project) to create your first AI-powered application.
+</Callout>

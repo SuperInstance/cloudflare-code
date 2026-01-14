@@ -1,0 +1,49 @@
+{
+  "name": "@claudeflare/versioning",
+  "version": "1.0.0",
+  "description": "API versioning and deprecation system for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "api-versioning",
+    "deprecation",
+    "semver",
+    "migration",
+    "compatibility"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "semver": "^7.6.0",
+    "ajv": "^8.12.0",
+    "json-schema-to-typescript": "^13.1.2",
+    "diff": "^5.2.0",
+    "lodash": "^4.17.21",
+    "date-fns": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/semver": "^7.5.8",
+    "@types/diff": "^5.2.1",
+    "@types/lodash": "^4.14.202",
+    "typescript": "^5.3.3",
+    "tsup": "^8.0.2",
+    "vitest": "^1.3.1",
+    "@vitest/coverage-v8": "^1.3.1"
+  },
+  "peerDependencies": {
+    "hono": "^3.12.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

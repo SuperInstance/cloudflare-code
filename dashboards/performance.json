@@ -1,0 +1,355 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "ClaudeFlare - Performance Metrics",
+    "tags": ["claudeflare", "performance", "latency"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "15s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Response Time Distribution",
+        "type": "heatmap",
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p99",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "calculate": false,
+          "cellGap": 2,
+          "cellRadius": 0,
+          "cellValues": {},
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-orange",
+            "mode": "spectrum",
+            "reverse": false,
+            "scale": "exponential",
+            "scheme": "Oranges",
+            "steps": 128
+          },
+          "exemplars": {
+            "color": "rgba(255,0,255,0.7)"
+          },
+          "filterValues": {
+            "le": 1e-9
+          },
+          "legend": {"showLegend": true},
+          "rowsFrame": {
+            "layout": "auto"
+          },
+          "tooltip": {
+            "show": true,
+            "yHistogram": false
+          },
+          "yAxis": {
+            "axisPlacement": "left",
+            "reverse": false,
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Latency Percentiles",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 10},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.90, sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p90",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p95",
+            "refId": "C"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p99",
+            "refId": "D"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Cold Start Frequency",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 10},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_cold_starts_total[5m])",
+            "legendFormat": "Cold Starts/s",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(claudeflare_warm_starts_total[5m])",
+            "legendFormat": "Warm Starts/s",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Provider Response Times",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_provider_latency_seconds_bucket{provider=\"anthropic\"}[5m])) by (le))",
+            "legendFormat": "Anthropic p95",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_provider_latency_seconds_bucket{provider=\"openai\"}[5m])) by (le))",
+            "legendFormat": "OpenAI p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_provider_latency_seconds_bucket{provider=\"groq\"}[5m])) by (le))",
+            "legendFormat": "Groq p95",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Cache Latency by Tier",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_cache_latency_seconds_bucket{tier=\"hot\"}[5m])) by (le))",
+            "legendFormat": "Hot Cache p95",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_cache_latency_seconds_bucket{tier=\"warm\"}[5m])) by (le))",
+            "legendFormat": "Warm Cache p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_cache_latency_seconds_bucket{tier=\"cold\"}[5m])) by (le))",
+            "legendFormat": "Cold Cache p95",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Database Query Times",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 26},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_kv_query_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "KV p95",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_r2_query_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "R2 p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_d1_query_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "D1 p95",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Throughput vs Latency",
+        "type": "xychart",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 26},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_requests_total[1m])",
+            "legendFormat": "Throughput",
+            "refId": "A",
+            "datasource": {"type": "prometheus", "uid": "prometheus"}
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_request_duration_seconds_bucket[1m])) by (le))",
+            "legendFormat": "Latency p95",
+            "refId": "B",
+            "datasource": {"type": "prometheus", "uid": "prometheus"}
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 8,
+        "title": "Performance Score",
+        "type": "gauge",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 34},
+        "targets": [
+          {
+            "expr": "(1 - (histogram_quantile(0.95, sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le)) / 2)) * 100",
+            "legendFormat": "Performance Score",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "red"},
+              {"value": 50, "color": "yellow"},
+              {"value": 80, "color": "green"}
+            ]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "CPU Time per Request",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 34},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_cpu_time_seconds_total[5m]) / rate(claudeflare_requests_total[5m])",
+            "legendFormat": "CPU/Request",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "decimals": 6
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Memory Efficiency",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 34},
+        "targets": [
+          {
+            "expr": "claudeflare_memory_bytes / claudeflare_requests_total",
+            "legendFormat": "Bytes/Request",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "decimals": 0
+          }
+        }
+      }
+    ]
+  }
+}

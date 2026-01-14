@@ -1,0 +1,422 @@
+name: Progressive Delivery
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: 'Deployment strategy'
+        required: true
+        type: choice
+        options:
+          - canary
+          - blue-green
+          - full
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      canary_percentage:
+        description: 'Initial canary percentage (for canary deployments)'
+        required: false
+        type: number
+        default: 10
+      auto_promote:
+        description: 'Auto-promote after successful canary'
+        required: false
+        type: boolean
+        default: true
+
+env:
+  NODE_VERSION: '20'
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+jobs:
+  # ============================================
+  # Pre-deployment Validation
+  # ============================================
+  pre-deploy-checks:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.checks.outputs.should_deploy }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run all checks
+        id: checks
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run test:unit
+          npm run test:integration
+          npm run build
+
+          echo "should_deploy=true" >> $GITHUB_OUTPUT
+
+      - name: Check deployment gates
+        run: |
+          node scripts/check-deployment-gates.js \
+            --environment ${{ inputs.environment || 'production' }} \
+            --commit ${{ github.sha }}
+
+  # ============================================
+  # Canary Deployment
+  # ============================================
+  canary-deploy:
+    name: Canary Deployment
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+    if: github.event.inputs.deployment_type == 'canary' || github.event.inputs.deployment_type == ''
+    environment:
+      name: ${{ inputs.environment || 'production' }}-canary
+      url: ${{ inputs.environment == 'staging' && 'https://canary.staging.claudeflare.workers.dev' || 'https://canary.claudeflare.workers.dev' }}
+    outputs:
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+      version: ${{ steps.deploy.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build canary deployment
+        run: npm run build
+        env:
+          NODE_ENV: ${{ inputs.environment || 'production' }}
+          DEPLOYMENT_TYPE: canary
+
+      - name: Deploy canary version
+        id: deploy
+        run: |
+          npx tsx scripts/progressive-delivery.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --strategy canary \
+            --initial-percentage ${{ inputs.canary_percentage || 10 }} \
+            --increment 10 \
+            --interval 5 \
+            --threshold 1 \
+            --max-duration 30
+
+          echo "deployment_id=deployment-${{ github.run_number }}" >> $GITHUB_OUTPUT
+          echo "version=${{ github.sha }}" >> $GITHUB_OUTPUT
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Upload deployment info
+        uses: actions/upload-artifact@v4
+        with:
+          name: canary-deployment-info
+          path: deployment-info.json
+          retention-days: 7
+
+  # ============================================
+  # Canary Incremental Traffic Increase
+  # ============================================
+  canary-traffic-increment:
+    name: Increase Canary Traffic
+    runs-on: ubuntu-latest
+    needs: canary-deploy
+    strategy:
+      matrix:
+        increment: [20, 40, 60, 80, 100]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Wait before increment
+        run: sleep 300
+
+      - name: Run health checks
+        run: |
+          npx tsx scripts/health-check.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --duration 60 \
+            --threshold 99
+
+      - name: Increase canary traffic
+        if: success()
+        run: |
+          npx tsx scripts/update-canary-traffic.ts \
+            --deployment-id ${{ needs.canary-deploy.outputs.deployment_id }} \
+            --percentage ${{ matrix.increment }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          npx tsx scripts/rollback-standalone.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --strategy immediate \
+            --reason "Health check failed at ${{ matrix.increment }}% traffic"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  # ============================================
+  # Blue-Green Deployment
+  # ============================================
+  blue-green-deploy:
+    name: Blue-Green Deployment
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+    if: github.event.inputs.deployment_type == 'blue-green'
+    environment:
+      name: ${{ inputs.environment || 'production' }}-green
+    outputs:
+      green_version: ${{ steps.deploy-green.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build green deployment
+        run: npm run build
+        env:
+          NODE_ENV: ${{ inputs.environment || 'production' }}
+          DEPLOYMENT_TYPE: green
+
+      - name: Deploy to green environment
+        id: deploy-green
+        run: |
+          npx tsx scripts/progressive-delivery.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --strategy blue-green \
+            --wait-approval \
+            --health-check-duration 5
+
+          echo "version=${{ github.sha }}" >> $GITHUB_OUTPUT
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Run smoke tests on green
+        run: |
+          npm run test:smoke -- \
+            --url https://green.${{ inputs.environment == 'staging' && 'staging.' || '' }}claudeflare.workers.dev
+
+      - name: Run integration tests on green
+        run: |
+          npm run test:integration -- \
+            --url https://green.${{ inputs.environment == 'staging' && 'staging.' || '' }}claudeflare.workers.dev
+
+      - name: Wait for manual approval
+        if: inputs.auto_promote != 'true'
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: devops-team,platform-team
+          minimum-approvals: 2
+          timeout-minutes: 30
+
+      - name: Switch traffic to green
+        run: |
+          npx tsx scripts/switch-traffic.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --from blue \
+            --to green
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Verify blue-green switch
+        run: |
+          npx tsx scripts/health-check.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --duration 120
+
+      - name: Cleanup blue environment
+        if: success()
+        run: |
+          npx tsx scripts/cleanup-deployment.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --color blue
+        continue-on-error: true
+
+  # ============================================
+  # Full Deployment (No Progressive Delivery)
+  # ============================================
+  full-deploy:
+    name: Full Deployment
+    runs-on: ubuntu-latest
+    needs: pre-deploy-checks
+    if: github.event.inputs.deployment_type == 'full'
+    environment:
+      name: ${{ inputs.environment || 'production' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build deployment
+        run: npm run build
+        env:
+          NODE_ENV: ${{ inputs.environment || 'production' }}
+
+      - name: Deploy to environment
+        run: |
+          npx tsx scripts/deploy.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --type full \
+            --output deployment-info.json
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Post-deployment health checks
+        run: |
+          npx tsx scripts/health-check.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --duration 300
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          npx tsx scripts/rollback.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --reason "Post-deployment health checks failed"
+
+  # ============================================
+  # Post-deployment Monitoring
+  # ============================================
+  post-deploy-monitoring:
+    name: Post-deployment Monitoring
+    runs-on: ubuntu-latest
+    needs: [canary-traffic-increment, blue-green-deploy, full-deploy]
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Monitor deployment health
+        run: |
+          npx tsx scripts/monitor-deployment.ts \
+            --environment ${{ inputs.environment || 'production' }} \
+            --duration 1800 \
+            --interval 30 \
+            --metrics error-rate,latency,throughput
+
+      - name: Check error rates
+        run: |
+          npx tsx scripts/check-metrics.ts \
+            --metric error-rate \
+            --threshold 1 \
+            --duration 300
+
+      - name: Generate deployment report
+        run: |
+          node scripts/generate-deployment-report.js \
+            --input deployment-info.json \
+            --output deployment-report.json \
+            --format json
+
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-report
+          path: deployment-report.json
+          retention-days: 90
+
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Deployment ${{ job.status }}
+            Environment: ${{ inputs.environment || 'production' }}
+            Type: ${{ inputs.deployment_type || 'canary' }}
+            Commit: ${{ github.sha }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true
+
+  # ============================================
+  # Progressive Delivery Analytics
+  # ============================================
+  progressive-delivery-analytics:
+    name: Progressive Delivery Analytics
+    runs-on: ubuntu-latest
+    needs: [canary-deploy, blue-green-deploy, full-deploy, post-deploy-monitoring]
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download deployment artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: deployment-artifacts/
+
+      - name: Generate analytics
+        run: |
+          node scripts/generate-progressive-delivery-analytics.js \
+            --input deployment-artifacts/ \
+            --output progressive-delivery-metrics.json
+
+      - name: Generate summary
+        run: |
+          echo "## Progressive Delivery Analytics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Deployment Type | ${{ inputs.deployment_type || 'canary' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ inputs.environment || 'production' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Canary Success Rate | $(cat progressive-delivery-metrics.json | jq -r '.canary_success_rate // "N/A"') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Blue-Green Switch Time | $(cat progressive-delivery-metrics.json | jq -r '.blue_green_switch_time // "N/A"') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Post-deployment Health | $(cat progressive-delivery-metrics.json | jq -r '.post_deploy_health // "N/A"') |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload analytics
+        uses: actions/upload-artifact@v4
+        with:
+          name: progressive-delivery-analytics
+          path: progressive-delivery-metrics.json
+          retention-days: 90

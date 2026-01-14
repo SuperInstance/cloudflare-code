@@ -1,0 +1,71 @@
+{
+  "name": "@claudeflare/db",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Database migration and schema management system for ClaudeFlare D1 databases",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./migrations": {
+      "types": "./dist/migrations/index.d.ts",
+      "import": "./dist/migrations/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "import": "./dist/schema/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist",
+    "migrate:create": "node dist/scripts/create-migration.js",
+    "migrate:up": "node dist/scripts/migrate.js up",
+    "migrate:down": "node dist/scripts/migrate.js down",
+    "migrate:status": "node dist/scripts/migrate.js status",
+    "seed": "node dist/scripts/seed.js",
+    "schema:diff": "node dist/scripts/schema-diff.js",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "database",
+    "migration",
+    "d1",
+    "cloudflare",
+    "sqlite",
+    "schema",
+    "claudeflare"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@claudeflare/shared": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

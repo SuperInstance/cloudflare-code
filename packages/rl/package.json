@@ -1,0 +1,105 @@
+{
+  "name": "@claudeflare/rl",
+  "version": "1.0.0",
+  "description": "Comprehensive reinforcement learning framework for ClaudeFlare with distributed training support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:benchmarks": "vitest --config vitest.bench.config.ts",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write src",
+    "typecheck": "tsc --noEmit",
+    "train": "node dist/training/cli.js",
+    "evaluate": "node dist/benchmarks/cli.js"
+  },
+  "keywords": [
+    "reinforcement-learning",
+    "rl",
+    "dqn",
+    "ppo",
+    "a3c",
+    "sac",
+    "machine-learning",
+    "distributed-training",
+    "gym",
+    "code-generation",
+    "cloudflare",
+    "workers"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "prettier": "^3.1.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./envs": {
+      "import": "./dist/envs/index.js",
+      "types": "./dist/envs/index.d.ts"
+    },
+    "./agents": {
+      "import": "./dist/agents/index.js",
+      "types": "./dist/agents/index.d.ts"
+    },
+    "./training": {
+      "import": "./dist/training/index.js",
+      "types": "./dist/training/index.d.ts"
+    },
+    "./reward": {
+      "import": "./dist/reward/index.js",
+      "types": "./dist/reward/index.d.ts"
+    },
+    "./curriculum": {
+      "import": "./dist/curriculum/index.js",
+      "types": "./dist/curriculum/index.d.ts"
+    },
+    "./benchmarks": {
+      "import": "./dist/benchmarks/index.js",
+      "types": "./dist/benchmarks/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./memory": {
+      "import": "./dist/memory/index.js",
+      "types": "./dist/memory/index.d.ts"
+    },
+    "./storage": {
+      "import": "./dist/storage/index.js",
+      "types": "./dist/storage/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

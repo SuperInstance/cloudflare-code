@@ -1,0 +1,384 @@
+{
+  "dashboard": {
+    "title": "ClaudeFlare Performance Dashboard",
+    "description": "Real-time performance monitoring for ClaudeFlare",
+    "tags": ["claudeflare", "performance", "cloudflare-workers"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_requests_total[1m])",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "reqps",
+            "label": "Requests"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Latency Distribution",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(claudeflare_request_duration_seconds_bucket[1m]))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(claudeflare_request_duration_seconds_bucket[1m]))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(claudeflare_request_duration_seconds_bucket[1m]))",
+            "legendFormat": "p99"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Latency"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_errors_total[1m]) / rate(claudeflare_requests_total[1m]) * 100",
+            "legendFormat": "Error Rate %"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "label": "Error Rate"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [5],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Error Rate",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 4,
+        "title": "Memory Usage",
+        "type": "graph",
+        "gridPos": {"x": 8, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "claudeflare_memory_bytes",
+            "legendFormat": "Heap Used"
+          },
+          {
+            "expr": "claudeflare_memory_limit_bytes",
+            "legendFormat": "Limit"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "bytes",
+            "label": "Memory"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "CPU Usage",
+        "type": "gauge",
+        "gridPos": {"x": 16, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "claudeflare_cpu_usage * 100",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Cold Start Time",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "claudeflare_cold_start_seconds",
+            "legendFormat": "Cold Start"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Time"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Throughput by Endpoint",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (endpoint) (rate(claudeflare_requests_total{endpoint=~\"/v1/.*\"}[1m]))",
+            "legendFormat": "{{endpoint}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "reqps",
+            "label": "Requests/sec"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "KV Operations",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_kv_reads_total[1m])",
+            "legendFormat": "Reads"
+          },
+          {
+            "expr": "rate(claudeflare_kv_writes_total[1m])",
+            "legendFormat": "Writes"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops",
+            "label": "Operations/sec"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "R2 Operations",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_r2_requests_total[1m])",
+            "legendFormat": "R2 Requests"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops",
+            "label": "Operations/sec"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Durable Object Requests",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 32, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_do_requests_total[1m])",
+            "legendFormat": "DO Requests"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops",
+            "label": "Requests/sec"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Event Loop Lag",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 32, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "claudeflare_event_loop_lag_seconds",
+            "legendFormat": "Event Loop Lag"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Lag"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.05],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Event Loop Lag",
+          "noDataState": "no_data"
+        }
+      },
+      {
+        "id": 12,
+        "title": "Active Connections",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 40, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "claudeflare_active_connections",
+            "legendFormat": "Connections"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1000, "color": "yellow"},
+                {"value": 5000, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "WebSocket Messages/sec",
+        "type": "stat",
+        "gridPos": {"x": 6, "y": 40, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_websocket_messages_total[1m])",
+            "legendFormat": "Messages"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Average Response Time",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 40, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "avg(claudeflare_request_duration_seconds)",
+            "legendFormat": "Avg"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 0.1, "color": "yellow"},
+                {"value": 0.5, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "Success Rate",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 40, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "(1 - rate(claudeflare_errors_total[5m]) / rate(claudeflare_requests_total[5m])) * 100",
+            "legendFormat": "Success %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "mappings": [
+              {
+                "type": "value",
+                "options": {
+                  "0": {"color": "red", "index": 0, "text": "Critical"},
+                  "50": {"color": "yellow", "index": 1, "text": "Warning"},
+                  "95": {"color": "green", "index": 2, "text": "Good"}
+                }
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

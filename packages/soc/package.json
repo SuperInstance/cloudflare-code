@@ -1,0 +1,74 @@
+{
+  "name": "@claudeflare/soc",
+  "version": "0.1.0",
+  "description": "Comprehensive Security Operations Center (SOC) for ClaudeFlare platform",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "soc",
+    "security",
+    "threat-detection",
+    "siem",
+    "incident-response",
+    "vulnerability-management",
+    "compliance",
+    "security-analytics"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.1"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./threat": {
+      "types": "./dist/threat/detectors.d.ts",
+      "import": "./dist/threat/detectors.js"
+    },
+    "./siem": {
+      "types": "./dist/siem/siem.d.ts",
+      "import": "./dist/siem/siem.js"
+    },
+    "./response": {
+      "types": "./dist/response/playbooks.d.ts",
+      "import": "./dist/response/playbooks.js"
+    },
+    "./vulnerability": {
+      "types": "./dist/vulnerability/scanner.d.ts",
+      "import": "./dist/vulnerability/scanner.js"
+    },
+    "./analytics": {
+      "types": "./dist/analytics/analytics.d.ts",
+      "import": "./dist/analytics/analytics.js"
+    },
+    "./compliance": {
+      "types": "./dist/compliance/compliance.d.ts",
+      "import": "./dist/compliance/compliance.js"
+    }
+  }
+}

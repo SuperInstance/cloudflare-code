@@ -1,0 +1,673 @@
+---
+title: Error Handling
+description: Best practices for handling errors and retries
+---
+
+# Error Handling
+
+Build robust applications with proper error handling, retry logic, and graceful degradation when using ClaudeFlare APIs.
+
+## Overview
+
+ClaudeFlare APIs can return errors for various reasons:
+
+- Rate limiting
+- Provider unavailability
+- Invalid requests
+- Network issues
+- Timeouts
+
+Proper error handling ensures your application remains functional and provides good user experience.
+
+## Error Types
+
+### 1. Rate Limit Errors
+
+Status: 429
+
+```typescript
+{
+  error: {
+    code: "RATE_LIMITED",
+    message: "Rate limit exceeded",
+    retryAfter: 60
+  }
+}
+```
+
+### 2. Provider Errors
+
+Status: 502 or 503
+
+```typescript
+{
+  error: {
+    code: "PROVIDER_UNAVAILABLE",
+    message: "All AI providers are currently unavailable"
+  }
+}
+```
+
+### 3. Validation Errors
+
+Status: 400
+
+```typescript
+{
+  error: {
+    code: "VALIDATION_ERROR",
+    message: "messages field is required"
+  }
+}
+```
+
+### 4. Timeout Errors
+
+Status: 408 or 504
+
+```typescript
+{
+  error: {
+    code: "WORKFLOW_TIMEOUT",
+    message: "Workflow exceeded timeout"
+  }
+}
+```
+
+## Best Practices
+
+### 1. Implement Exponential Backoff
+
+Retry failed requests with increasing delays:
+
+```typescript
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3
+): Promise<T> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+
+      // Exponential backoff: 1s, 2s, 4s, 8s...
+      const delay = Math.pow(2, attempt) * 1000;
+      console.log(`Retry ${attempt + 1}/${maxRetries} after ${delay}ms`);
+      await sleep(delay);
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+
+// Usage
+const result = await retryWithBackoff(() =>
+  client.chat.completions.create(request)
+);
+```
+
+### 2. Handle Specific Error Codes
+
+```typescript
+try {
+  const result = await client.chat.completions.create(request);
+} catch (error) {
+  switch (error.code) {
+    case 'RATE_LIMITED':
+      // Implement backoff or queue
+      await handleRateLimit(error.retryAfter);
+      break;
+
+    case 'QUOTA_EXCEEDED':
+      // Notify user or upgrade plan
+      await notifyQuotaExceeded();
+      break;
+
+    case 'PROVIDER_UNAVAILABLE':
+      // Try different provider
+      const result = await client.chat.completions.create({
+        ...request,
+        provider: 'groq'
+      });
+      break;
+
+    case 'WORKFLOW_TIMEOUT':
+      // Retry with longer timeout
+      const result = await client.agents.orchestrate({
+        ...request,
+        timeout: 600 // 10 minutes
+      });
+      break;
+
+    default:
+      // Log and handle unexpected errors
+      console.error('Unexpected error:', error);
+      throw error;
+  }
+}
+```
+
+### 3. Use Request IDs for Debugging
+
+```typescript
+try {
+  const result = await client.chat.completions.create(request);
+} catch (error) {
+  if (error.requestId) {
+    console.error('Error ID:', error.requestId);
+    // Store for support requests
+    await logError({
+      requestId: error.requestId,
+      code: error.code,
+      message: error.message,
+      timestamp: Date.now()
+    });
+  }
+}
+```
+
+### 4. Implement Graceful Degradation
+
+```typescript
+async function generateCodeWithFallback(prompt: string) {
+  try {
+    // Try primary approach
+    return await client.code.generate({
+      prompt,
+      provider: 'cloudflare'
+    });
+  } catch (error) {
+    console.warn('Primary provider failed, using fallback');
+
+    // Fallback to simpler approach
+    return await client.code.generate({
+      prompt,
+      provider: 'groq',
+      options: {
+        maxTokens: 250, // Reduce complexity
+        temperature: 0.2
+      }
+    });
+  }
+}
+```
+
+### 5. Queue Requests for Rate Limits
+
+```typescript
+class RequestQueue {
+  private queue: Array<() => Promise<any>> = [];
+  private processing = false;
+  private delay = 1000; // 1 second between requests
+
+  async add<T>(fn: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          resolve(await fn());
+        } catch (error) {
+          reject(error);
+        }
+      });
+      this.process();
+    });
+  }
+
+  private async process() {
+    if (this.processing || this.queue.length === 0) return;
+
+    this.processing = true;
+    while (this.queue.length > 0) {
+      const fn = this.queue.shift();
+      await fn();
+      await sleep(this.delay);
+    }
+    this.processing = false;
+  }
+}
+
+// Usage
+const queue = new RequestQueue();
+const result = await queue.add(() =>
+  client.chat.completions.create(request)
+);
+```
+
+## SDK Error Handling
+
+### TypeScript/JavaScript
+
+```typescript
+import { ClaudeFlare, ClaudeFlareError } from '@claudeflare/sdk';
+
+const client = new ClaudeFlare({ apiKey: 'your-api-key' });
+
+try {
+  const result = await client.chat.completions.create({
+    messages: [{ role: 'user', content: 'Hello' }]
+  });
+} catch (error) {
+  if (error instanceof ClaudeFlareError) {
+    console.error('ClaudeFlare error:', {
+      code: error.code,
+      message: error.message,
+      requestId: error.requestId,
+      retryable: error.retryable,
+      retryAfter: error.retryAfter
+    });
+
+    // Handle retryable errors
+    if (error.retryable) {
+      await sleep(error.retryAfter * 1000);
+      // Retry request
+    }
+  } else {
+    // Handle unexpected errors
+    console.error('Unexpected error:', error);
+  }
+}
+```
+
+### Python
+
+```python
+from claudeflare import ClaudeFlare, ClaudeFlareError, RateLimitError
+import asyncio
+
+async def handle_request():
+    client = ClaudeFlare(api_key='your-api-key')
+
+    try:
+        result = await client.chat.completions.create(
+            messages=[{'role': 'user', 'content': 'Hello'}]
+        )
+        return result
+    except RateLimitError as e:
+        print(f"Rate limited. Retry after {e.retry_after} seconds")
+        await asyncio.sleep(e.retry_after)
+        # Retry request
+    except ClaudeFlareError as e:
+        print(f"Error: {e.code} - {e.message}")
+        if e.request_id:
+            print(f"Request ID: {e.request_id}")
+        raise
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        raise
+```
+
+### Go
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "time"
+
+    "github.com/claudeflare/sdk-go"
+    "github.com/claudeflare/sdk-go/errors"
+)
+
+func handleRequest() error {
+    client := claudeflare.NewClient("your-api-key")
+
+    result, err := client.Chat.Completions.Create(claudeflare.ChatRequest{
+        Messages: []claudeflare.Message{
+            {Role: "user", Content: "Hello"},
+        },
+    })
+
+    if err != nil {
+        if apiErr, ok := err.(*errors.APIError); ok {
+            log.Printf("API Error: %s - %s", apiErr.Code, apiErr.Message)
+
+            switch apiErr.Code {
+            case "RATE_LIMITED":
+                retryAfter := time.Duration(apiErr.RetryAfter) * time.Second
+                time.Sleep(retryAfter)
+                // Retry request
+            case "PROVIDER_UNAVAILABLE":
+                // Use fallback provider
+            default:
+                return fmt.Errorf("unhandled error: %w", err)
+            }
+        }
+        return err
+    }
+
+    fmt.Println(result)
+    return nil
+}
+```
+
+## Retry Strategies
+
+### Fixed Delay Retry
+
+```typescript
+async function fixedDelayRetry<T>(
+  fn: () => Promise<T>,
+  retries = 3,
+  delay = 1000
+): Promise<T> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await sleep(delay);
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+```
+
+### Exponential Backoff with Jitter
+
+```typescript
+async function exponentialBackoffRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3
+): Promise<T> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+
+      // Exponential backoff with jitter
+      const baseDelay = Math.pow(2, attempt) * 1000;
+      const jitter = Math.random() * 1000;
+      const delay = baseDelay + jitter;
+
+      await sleep(delay);
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+```
+
+### Circuit Breaker Pattern
+
+```typescript
+class CircuitBreaker {
+  private failures = 0;
+  private lastFailureTime = 0;
+  private state: 'closed' | 'open' | 'half-open' = 'closed';
+  private threshold = 5;
+  private timeout = 60000; // 1 minute
+
+  async execute<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.state === 'open') {
+      if (Date.now() - this.lastFailureTime > this.timeout) {
+        this.state = 'half-open';
+      } else {
+        throw new Error('Circuit breaker is open');
+      }
+    }
+
+    try {
+      const result = await fn();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+
+  private onSuccess() {
+    this.failures = 0;
+    this.state = 'closed';
+  }
+
+  private onFailure() {
+    this.failures++;
+    this.lastFailureTime = Date.now();
+
+    if (this.failures >= this.threshold) {
+      this.state = 'open';
+    }
+  }
+}
+
+// Usage
+const breaker = new CircuitBreaker();
+const result = await breaker.execute(() =>
+  client.chat.completions.create(request)
+);
+```
+
+## Monitoring and Logging
+
+### Log All Errors
+
+```typescript
+interface ErrorLog {
+  code: string;
+  message: string;
+  requestId?: string;
+  timestamp: number;
+  context?: any;
+}
+
+async function logError(error: ClaudeFlareError, context?: any) {
+  const log: ErrorLog = {
+    code: error.code,
+    message: error.message,
+    requestId: error.requestId,
+    timestamp: Date.now(),
+    context
+  };
+
+  // Send to logging service
+  await loggingService.log('error', log);
+
+  // Track metrics
+  metrics.increment('claudeflare.errors', {
+    code: error.code
+  });
+}
+```
+
+### Track Error Rates
+
+```typescript
+class ErrorTracker {
+  private errors = new Map<string, number>();
+  private window = 60000; // 1 minute
+  private timestamps: Map<string, number[]> = new Map();
+
+  record(code: string) {
+    const now = Date.now();
+    const timestamps = this.timestamps.get(code) || [];
+
+    // Remove old timestamps
+    const recent = timestamps.filter(t => now - t < this.window);
+    recent.push(now);
+
+    this.timestamps.set(code, recent);
+    this.errors.set(code, recent.length);
+  }
+
+  getRate(code: string): number {
+    const count = this.errors.get(code) || 0;
+    return count / (this.window / 1000); // errors per second
+  }
+
+  shouldTriggerAlert(code: string, threshold = 10): boolean {
+    return this.getRate(code) > threshold;
+  }
+}
+```
+
+## Error Recovery
+
+### Provider Fallback
+
+```typescript
+async function requestWithProviderFallback(
+  request: ChatRequest
+): Promise<ChatResponse> {
+  const providers = ['cloudflare', 'groq', 'cerebras'];
+
+  for (const provider of providers) {
+    try {
+      return await client.chat.completions.create({
+        ...request,
+        provider
+      });
+    } catch (error) {
+      console.warn(`${provider} failed:`, error.message);
+      // Try next provider
+    }
+  }
+
+  throw new Error('All providers failed');
+}
+```
+
+### Degraded Mode
+
+```typescript
+class DegradedModeHandler {
+  private errorCount = 0;
+  private threshold = 10;
+  private degraded = false;
+
+  async handle(request: ChatRequest) {
+    try {
+      const result = await client.chat.completions.create(request);
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onError();
+
+      if (this.degraded) {
+        return this.handleDegraded(request);
+      }
+
+      throw error;
+    }
+  }
+
+  private onSuccess() {
+    this.errorCount = 0;
+    this.degraded = false;
+  }
+
+  private onError() {
+    this.errorCount++;
+    if (this.errorCount >= this.threshold) {
+      this.degraded = true;
+      console.warn('Entering degraded mode');
+    }
+  }
+
+  private async handleDegraded(request: ChatRequest) {
+    // Return cached response if available
+    const cached = await cache.get(request);
+    if (cached) return cached;
+
+    // Return simplified response
+    return {
+      message: 'Service temporarily unavailable',
+      suggestions: ['Try again later', 'Contact support']
+    };
+  }
+}
+```
+
+## User Communication
+
+### Friendly Error Messages
+
+```typescript
+function getErrorMessage(error: ClaudeFlareError): string {
+  switch (error.code) {
+    case 'RATE_LIMITED':
+      return 'Too many requests. Please wait a moment and try again.';
+    case 'QUOTA_EXCEEDED':
+      return 'Monthly quota exceeded. Please upgrade your plan.';
+    case 'PROVIDER_UNAVAILABLE':
+      return 'Service temporarily unavailable. Please try again.';
+    case 'INVALID_REQUEST':
+      return 'Invalid request. Please check your input.';
+    default:
+      return 'An error occurred. Please try again or contact support.';
+  }
+}
+```
+
+### Progress Indication
+
+```typescript
+async function executeLongRunningTask(taskId: string) {
+  try {
+    updateProgress(taskId, 'starting');
+
+    const result = await client.agents.orchestrate({
+      workflow: 'complex-task',
+      onProgress: (step) => {
+        updateProgress(taskId, step);
+      }
+    });
+
+    updateProgress(taskId, 'completed');
+    return result;
+  } catch (error) {
+    updateProgress(taskId, 'failed', error.message);
+    throw error;
+  }
+}
+```
+
+## Testing Error Handling
+
+### Mock Errors
+
+```typescript
+function mockClient() {
+  return {
+    chat: {
+      completions: {
+        create: vi.fn()
+          .mockRejectedValueOnce(new ClaudeFlareError('RATE_LIMITED'))
+          .mockRejectedValueOnce(new ClaudeFlareError('PROVIDER_UNAVAILABLE'))
+          .mockResolvedValueOnce({ message: 'Success' })
+      }
+    }
+  };
+}
+
+describe('Error handling', () => {
+  it('should handle rate limit errors', async () => {
+    const client = mockClient();
+    const result = await retryWithBackoff(() =>
+      client.chat.completions.create(request)
+    );
+    expect(result).toBeDefined();
+  });
+});
+```
+
+## Checklist
+
+- [ ] Implement retry logic with exponential backoff
+- [ ] Handle specific error codes appropriately
+- [ ] Log errors with request IDs
+- [ ] Implement graceful degradation
+- [ ] Use circuit breakers for failing services
+- [ ] Provide user-friendly error messages
+- [ ] Monitor error rates and alert on thresholds
+- [ ] Test error handling scenarios
+- [ ] Document error handling approach
+- [ ] Set up alerts for critical errors
+
+## Related Guides
+
+- [Rate Limiting](/guides/rate-limiting) - Understanding and handling rate limits
+- [Webhooks](/api-reference/webhooks) - Error notifications via webhooks
+- [Error Codes](/api-reference/error-codes) - Complete error code reference

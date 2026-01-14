@@ -1,0 +1,46 @@
+name = "claudeflare-edge-cache"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "claudeflare-edge-cache-prod"
+routes = [
+  { pattern = "cache.claudeflare.com/*", zone_name = "claudeflare.com" }
+]
+
+[env.staging]
+name = "claudeflare-edge-cache-staging"
+
+[[env.production.kv_namespaces]]
+binding = "CACHE_KV"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-id"
+
+[[env.staging.kv_namespaces]]
+binding = "CACHE_KV"
+id = "your-staging-kv-id"
+
+[[env.production.r2_buckets]]
+binding = "CACHE_R2"
+bucket_name = "claudeflare-cache"
+
+[[env.staging.r2_buckets]]
+binding = "CACHE_R2"
+bucket_name = "claudeflare-cache-staging"
+
+[env.production.durable_objects]
+bindings = [
+  { name = "CACHE_COORDINATOR", class_name = "CacheCoordinator" }
+]
+
+[env.staging.durable_objects]
+bindings = [
+  { name = "CACHE_COORDINATOR", class_name = "CacheCoordinator" }
+]
+
+[build]
+command = "npm run build"
+
+[build.upload]
+format = "modules"
+main = "./dist/index.mjs"

@@ -1,0 +1,465 @@
+---
+title: Code Generation API
+description: Complete reference for the code generation endpoints
+---
+
+# Code Generation API
+
+The Code Generation API provides intelligent code completion, generation, and refactoring capabilities powered by multiple AI providers with automatic failover and cost optimization.
+
+## Endpoints
+
+### Generate Code
+
+Generate code snippets, functions, or complete modules based on natural language descriptions.
+
+**Endpoint:** `POST /v1/code/generate`
+
+**Authentication:** Bearer token required
+
+#### Request
+
+```typescript
+interface CodeGenerationRequest {
+  // Required
+  prompt: string;           // Natural language description
+  language: string;         // Programming language (typescript, python, go, etc.)
+
+  // Optional
+  context?: {
+    filePath?: string;      // File path for context
+    surroundingCode?: string; // Code around the insertion point
+    dependencies?: string[]; // Available dependencies/packages
+  };
+
+  options?: {
+    maxLength?: number;     // Maximum tokens to generate (default: 500)
+    temperature?: number;   // Creativity 0-1 (default: 0.3)
+    includeComments?: boolean; // Add explanatory comments (default: true)
+    includeTests?: boolean; // Generate unit tests (default: false)
+    includeTypes?: boolean; // Include TypeScript types (default: true)
+  };
+
+  // Provider selection
+  provider?: 'auto' | 'cloudflare' | 'groq' | 'cerebras' | 'openrouter';
+  model?: string;           // Specific model to use
+}
+```
+
+#### Example Request
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/code/generate \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Create a function that validates email addresses using regex",
+    "language": "typescript",
+    "context": {
+      "filePath": "src/utils/validators.ts"
+    },
+    "options": {
+      "includeComments": true,
+      "includeTests": true,
+      "temperature": 0.3
+    }
+  }'
+```
+
+#### Response
+
+```typescript
+interface CodeGenerationResponse {
+  success: boolean;
+  data: {
+    code: string;              // Generated code
+    language: string;          // Programming language
+    lines: number;             // Number of lines generated
+    tokens: number;            // Tokens used
+
+    // Optional generated content
+    tests?: string;            // Unit tests if requested
+    documentation?: string;    // Generated documentation
+
+    // Metadata
+    model: string;
+    provider: string;
+    latency: number;           // Generation time in ms
+  };
+
+  // Routing information
+  _routing?: {
+    provider: string;
+    model: string;
+    fallback: boolean;
+    totalLatency: number;
+  };
+}
+```
+
+#### Example Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "code": "/**\n * Validates an email address using RFC 5322 regex pattern\n * @param email - Email address to validate\n * @returns True if email is valid\n */\nexport function validateEmail(email: string): boolean {\n  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;\n  return emailRegex.test(email);\n}",
+    "language": "typescript",
+    "lines": 7,
+    "tokens": 156,
+    "tests": "import { describe, it, expect } from 'vitest';\nimport { validateEmail } from './validators';\n\ndescribe('validateEmail', () => {\n  it('should validate correct emails', () => {\n    expect(validateEmail('user@example.com')).toBe(true);\n    expect(validateEmail('user.name@example.co.uk')).toBe(true);\n  });\n\n  it('should reject invalid emails', () => {\n    expect(validateEmail('invalid')).toBe(false);\n    expect(validateEmail('user@')).toBe(false);\n  });\n});",
+    "documentation": "# Email Validator\n\n## Purpose\nValidates email addresses according to RFC 5322 standard.\n\n## Usage\n```ts\nimport { validateEmail } from './validators';\n\nif (validateEmail('user@example.com')) {\n  // Email is valid\n}\n```",
+    "model": "@cf/meta/llama-3.1-8b-instruct",
+    "provider": "cloudflare",
+    "latency": 234
+  },
+  "_routing": {
+    "provider": "cloudflare",
+    "model": "@cf/meta/llama-3.1-8b-instruct",
+    "fallback": false,
+    "totalLatency": 234
+  }
+}
+```
+
+### Complete Code
+
+Complete partial code snippets or fill in function bodies.
+
+**Endpoint:** `POST /v1/code/complete`
+
+#### Request
+
+```typescript
+interface CodeCompletionRequest {
+  // Required
+  prefix: string;            // Code before cursor
+  suffix?: string;           // Code after cursor (for infilling)
+  language: string;          // Programming language
+
+  // Optional
+  options?: {
+    maxTokens?: number;      // Maximum tokens (default: 100)
+    temperature?: number;    // Creativity (default: 0.2)
+    numSuggestions?: number; // Number of alternatives (default: 1)
+  };
+
+  provider?: string;
+  model?: string;
+}
+```
+
+#### Example Request
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/code/complete \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prefix": "async function fetchUserData(userId: string) {\n  const response = await fetch(`/api/users/${userId}`);\n  if (!response.ok) {\n    throw new Error(",
+    "suffix": "    );\n  }\n  return response.json();\n}",
+    "language": "typescript",
+    "options": {
+      "maxTokens": 50,
+      "temperature": 0.2
+    }
+  }'
+```
+
+#### Response
+
+```typescript
+interface CodeCompletionResponse {
+  success: boolean;
+  data: {
+    completions: Array<{
+      text: string;           // Suggested completion
+      confidence: number;     // 0-1 score
+    }>;
+    model: string;
+    provider: string;
+  };
+}
+```
+
+### Refactor Code
+
+Refactor existing code for improved readability, performance, or to adopt specific patterns.
+
+**Endpoint:** `POST /v1/code/refactor`
+
+#### Request
+
+```typescript
+interface CodeRefactorRequest {
+  code: string;              // Code to refactor
+  language: string;          // Programming language
+
+  // Refactoring goals
+  goals?: Array<
+    | 'performance'
+    | 'readability'
+    | 'modernize'
+    | 'type-safety'
+    | 'error-handling'
+    | 'async-patterns'
+  >;
+
+  // Optional
+  options?: {
+    preserveComments?: boolean;
+    addTests?: boolean;
+    explainChanges?: boolean;
+  };
+}
+```
+
+#### Example Request
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/code/refactor \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "function getUsers() {\n  var users = [];\n  for (var i = 0; i < data.length; i++) {\n    users.push(data[i]);\n  }\n  return users;\n}",
+    "language": "javascript",
+    "goals": ["modernize", "readability"],
+    "options": {
+      "explainChanges": true
+    }
+  }'
+```
+
+#### Response
+
+```typescript
+interface CodeRefactorResponse {
+  success: boolean;
+  data: {
+    originalCode: string;
+    refactoredCode: string;
+    changes: Array<{
+      type: string;
+      description: string;
+      location?: { line: number; column: number };
+    }>;
+    explanation?: string;
+  };
+}
+```
+
+### Explain Code
+
+Get detailed explanations of code logic, patterns, and potential issues.
+
+**Endpoint:** `POST /v1/code/explain`
+
+#### Request
+
+```typescript
+interface CodeExplanationRequest {
+  code: string;
+  language: string;
+  focus?: Array<
+    | 'logic'
+    | 'patterns'
+    | 'performance'
+    | 'security'
+    | 'bugs'
+    | 'improvements'
+  >;
+  detailLevel?: 'brief' | 'standard' | 'comprehensive';
+}
+```
+
+#### Response
+
+```typescript
+interface CodeExplanationResponse {
+  success: boolean;
+  data: {
+    summary: string;
+    explanation: string;
+    patterns: Array<{ name: string; description: string }>;
+    issues?: Array<{
+      type: 'warning' | 'error' | 'suggestion';
+      message: string;
+      location: { line: number; column: number };
+    }>;
+    improvements?: string[];
+  };
+}
+```
+
+### Generate Tests
+
+Generate unit tests for existing code.
+
+**Endpoint:** `POST /v1/code/generate-tests`
+
+#### Request
+
+```typescript
+interface TestGenerationRequest {
+  code: string;
+  language: string;
+  testFramework?: 'vitest' | 'jest' | 'pytest' | 'go-test';
+  coverage?: 'basic' | 'comprehensive';
+  includeEdgeCases?: boolean;
+}
+```
+
+#### Response
+
+```typescript
+interface TestGenerationResponse {
+  success: boolean;
+  data: {
+    testCode: string;
+    framework: string;
+    testCases: Array<{
+      description: string;
+      type: 'unit' | 'integration' | 'edge-case';
+    }>;
+    setupRequired?: string[];
+  };
+}
+```
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `INVALID_PROMPT` | Prompt is too short or empty |
+| `UNSUPPORTED_LANGUAGE` | Language not supported |
+| `CONTEXT_TOO_LARGE` | Context exceeds maximum size |
+| `RATE_LIMITED` | Too many requests |
+| `PROVIDER_ERROR` | AI provider error |
+| `QUOTA_EXCEEDED` | Quota limit reached |
+
+## Rate Limits
+
+- Free tier: 100 requests/hour
+- Pro tier: 1,000 requests/hour
+- Enterprise: Custom limits
+
+## Best Practices
+
+1. **Provide Context**: Include surrounding code for better results
+2. **Specify Language**: Always specify the programming language
+3. **Set Temperature**: Use lower values (0.2-0.3) for code generation
+4. **Request Tests**: Enable test generation for verified code
+5. **Handle Errors**: Always check for errors and fallbacks
+
+## Examples
+
+### Example 1: Generate API Handler
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/code/generate \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Create a REST API handler for user registration with input validation, password hashing, and error handling",
+    "language": "typescript",
+    "options": {
+      "includeComments": true,
+      "includeTests": true
+    }
+  }'
+```
+
+### Example 2: Complete Function
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/code/complete \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prefix": "export function debounce<T extends (...args: any[]) => any>(",
+    "suffix": "): T {\n  // Implementation\n}",
+    "language": "typescript",
+    "options": {
+      "maxTokens": 200,
+      "temperature": 0.2
+    }
+  }'
+```
+
+### Example 3: Refactor for Performance
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/code/refactor \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "function findDuplicates(arr) {\n  var duplicates = [];\n  for (var i = 0; i < arr.length; i++) {\n    for (var j = i + 1; j < arr.length; j++) {\n      if (arr[i] === arr[j] && duplicates.indexOf(arr[i]) === -1) {\n        duplicates.push(arr[i]);\n      }\n    }\n  }\n  return duplicates;\n}",
+    "language": "javascript",
+    "goals": ["performance", "modernize"],
+    "options": {
+      "explainChanges": true
+    }
+  }'
+```
+
+## SDK Examples
+
+### TypeScript/JavaScript
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk';
+
+const client = new ClaudeFlare({ apiKey: 'your-api-key' });
+
+// Generate code
+const result = await client.code.generate({
+  prompt: 'Create a debounce function',
+  language: 'typescript',
+  options: {
+    includeTests: true
+  }
+});
+
+console.log(result.data.code);
+```
+
+### Python
+
+```python
+from claudeflare import ClaudeFlare
+
+client = ClaudeFlare(api_key='your-api-key')
+
+# Generate code
+result = await client.code.generate(
+    prompt='Create a debounce function',
+    language='typescript',
+    options={
+        'include_tests': True
+    }
+)
+
+print(result.data.code)
+```
+
+### Go
+
+```go
+import "github.com/claudeflare/sdk-go"
+
+client := claudeflare.NewClient("your-api-key")
+
+result, err := client.Code.Generate(claudeflare.CodeGenerationRequest{
+    Prompt:   "Create a debounce function",
+    Language: "typescript",
+    Options: &claudeflare.CodeOptions{
+        IncludeTests: true,
+    },
+})
+```
+
+## Related Endpoints
+
+- [Chat API](/api-reference/chat-api) - General chat completions
+- [Agents API](/api-reference/agents-api) - Multi-agent workflows
+- [Webhooks](/api-reference/webhooks) - Configure webhooks for async generation

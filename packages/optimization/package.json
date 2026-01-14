@@ -1,0 +1,124 @@
+{
+  "name": "@claudeflare/optimization",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Advanced performance optimization suite for ClaudeFlare platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./bundle": {
+      "types": "./dist/bundle/index.d.ts",
+      "import": "./dist/bundle/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    },
+    "./memory": {
+      "types": "./dist/memory/index.d.ts",
+      "import": "./dist/memory/index.js"
+    },
+    "./network": {
+      "types": "./dist/network/index.d.ts",
+      "import": "./dist/network/index.js"
+    },
+    "./caching": {
+      "types": "./dist/caching/index.d.ts",
+      "import": "./dist/caching/index.js"
+    },
+    "./regression": {
+      "types": "./dist/regression/index.d.ts",
+      "import": "./dist/regression/index.js"
+    }
+  },
+  "bin": {
+    "claudeflare-optimize": "./dist/cli/optimize.js",
+    "claudeflare-analyze-bundle": "./dist/cli/analyze-bundle.js",
+    "claudeflare-profile-memory": "./dist/cli/profile-memory.js"
+  },
+  "files": [
+    "dist",
+    "config",
+    "scripts"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "analyze": "tsx scripts/analyze.ts",
+    "optimize": "tsx scripts/optimize.ts",
+    "profile": "tsx scripts/profile-memory.ts",
+    "bundle-check": "tsx scripts/bundle-check.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "optimization",
+    "bundle-analysis",
+    "code-splitting",
+    "tree-shaking",
+    "runtime-performance",
+    "memory-optimization",
+    "network-optimization",
+    "caching-strategies",
+    "performance-regression",
+    "claudeflare"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@claudeflare/shared": "^1.0.0",
+    "@claudeflare/performance": "^1.0.0",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-replace": "^5.0.0",
+    "@rollup/plugin-terser": "^0.4.0",
+    "rollup": "^4.0.0",
+    "rollup-plugin-visualizer": "^5.11.0",
+    "acorn": "^8.11.0",
+    "acorn-walk": "^8.3.0",
+    "magic-string": "^0.30.0",
+    "source-map": "^0.7.4",
+    "webpack-bundle-analyzer": "^4.10.0",
+    "bytes": "^3.1.2",
+    "gzip-size": "^6.0.0",
+    "brotli-size": "^4.0.0",
+    "lz-string": "^1.5.0",
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.4",
+    "commander": "^12.0.0",
+    "ora": "^8.1.0",
+    "picocolors": "^1.0.0",
+    "zod": "^3.22.4",
+    "fast-json-stable-stringify": "^2.1.0",
+    "lru-cache": "^10.0.0",
+    "mnemonist": "^0.39.0",
+    "p-map": "^7.0.0",
+    "p-queue": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/bytes": "^3.1.4",
+    "@types/gzip-size": "^6.0.2",
+    "@types/acorn": "^6.0.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  },
+  "peerDependencies": {
+    "wrangler": "^3.0.0",
+    "vite": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

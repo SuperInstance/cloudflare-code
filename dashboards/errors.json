@@ -1,0 +1,372 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "ClaudeFlare - Error Tracking",
+    "tags": ["claudeflare", "errors", "failures"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Error Rate",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_errors_total[5m]) / rate(claudeflare_requests_total[5m])",
+            "legendFormat": "Error Rate",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "decimals": 3,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 0.01, "color": "yellow"},
+                {"value": 0.05, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Errors",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(increase(claudeflare_errors_total[1h]))",
+            "legendFormat": "Total Errors (1h)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Critical Errors",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(increase(claudeflare_errors_total{severity=\"critical\"}[1h]))",
+            "legendFormat": "Critical (1h)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 10, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Error Trend",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "(rate(claudeflare_errors_total[5m]) - rate(claudeflare_errors_total[10m] offset 5m)) / rate(claudeflare_errors_total[10m] offset 5m)",
+            "legendFormat": "Error Trend",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": -100, "color": "green"},
+                {"value": 0, "color": "yellow"},
+                {"value": 50, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Error Rate Over Time",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_errors_total[1m])",
+            "legendFormat": "{{type}} - {{severity}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Error Rate by Endpoint",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_errors_total{endpoint=\"/api/code\"}[5m]) / rate(claudeflare_requests_total{endpoint=\"/api/code\"}[5m])",
+            "legendFormat": "/api/code",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(claudeflare_errors_total{endpoint=\"/api/review\"}[5m]) / rate(claudeflare_requests_total{endpoint=\"/api/review\"}[5m])",
+            "legendFormat": "/api/review",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(claudeflare_errors_total{endpoint=\"/api/chat\"}[5m]) / rate(claudeflare_requests_total{endpoint=\"/api/chat\"}[5m])",
+            "legendFormat": "/api/chat",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Error Rate by Provider",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_provider_errors_total{provider=\"anthropic\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"anthropic\"}[5m])",
+            "legendFormat": "Anthropic",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(claudeflare_provider_errors_total{provider=\"openai\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"openai\"}[5m])",
+            "legendFormat": "OpenAI",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(claudeflare_provider_errors_total{provider=\"groq\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"groq\"}[5m])",
+            "legendFormat": "Groq",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Error Rate by Type",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "sum by (error_type) (increase(claudeflare_errors_total[1h]))",
+            "legendFormat": "{{error_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+          "pieType": "pie",
+          "tooltip": {"mode": "single", "sort": "none"}}
+      },
+      {
+        "id": 9,
+        "title": "Top Error Messages",
+        "type": "table",
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "topk(10, sum by (error_message) (increase(claudeflare_errors_total[1h])))",
+            "legendFormat": "{{error_message}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "frameIndex": 0
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true, "__name__": true},
+              "indexByName": {},
+              "renameByName": {
+                "Value": "Count",
+                "error_message": "Error Message"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Error Trends (24h)",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_errors_total[1h])",
+            "legendFormat": "{{type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Error Distribution by Status Code",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
+        "targets": [
+          {
+            "expr": "sum by (status_code) (increase(claudeflare_errors_total[1h]))",
+            "legendFormat": "{{status_code}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true,
+          "maxVizHeight": 300
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 50, "color": "yellow"},
+                {"value": 100, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Recent Errors",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 38},
+        "targets": [
+          {
+            "expr": "{job=\"claudeflare\", level=\"error\"}",
+            "legendFormat": "",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showLabels": false,
+          "showCommonLabels": false,
+          "showTime": true,
+          "wrapLogMessage": false,
+          "sortOrder": "Descending",
+          "dedupStrategy": "exact",
+          "enableLogDetails": true
+        }
+      }
+    ]
+  }
+}

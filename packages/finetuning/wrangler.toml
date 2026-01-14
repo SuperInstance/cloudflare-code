@@ -1,0 +1,126 @@
+# ClaudeFlare Fine-tuning System
+# Cloudflare Workers Configuration
+
+name = "claudeflare-finetuning"
+main = "dist/worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ============================================================================
+# Environment Variables
+# ============================================================================
+
+[env.production]
+name = "claudeflare-finetuning-prod"
+
+[env.staging]
+name = "claudeflare-finetuning-staging"
+
+[env.development]
+name = "claudeflare-finetuning-dev"
+
+# ============================================================================
+# D1 Database
+# ============================================================================
+
+[[d1_databases]]
+binding = "DB"
+database_name = "claudeflare-finetuning"
+database_id = "your-database-id-here"
+
+# ============================================================================
+# R2 Storage
+# ============================================================================
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "claudeflare-finetuning-storage"
+
+# ============================================================================
+# Durable Objects
+# ============================================================================
+
+[[durable_objects.bindings]]
+name = "MODEL_REGISTRY"
+class_name = "ModelRegistryDO"
+
+[[durable_objects.bindings]]
+name = "TRAINING_ORCHESTRATOR"
+class_name = "TrainingOrchestratorDO"
+
+[[durable_objects.bindings]]
+name = "DATASET_MANAGER"
+class_name = "DatasetManagerDO"
+
+# ============================================================================
+# KV Namespaces (for caching)
+# ============================================================================
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+# ============================================================================
+# Queues (for async processing)
+# ============================================================================
+
+[[queues.producers]]
+binding = "TRAINING_QUEUE"
+queue = "training-jobs"
+
+[[queues.consumers]]
+queue = "training-jobs"
+max_batch_size = 10
+max_wait_time = 5
+
+# ============================================================================
+# Scheduled Events (Cron Triggers)
+# ============================================================================
+
+[triggers]
+crons = [
+  "0 * * * *", # Every hour
+  "0 0 * * *", # Every day at midnight
+]
+
+# ============================================================================
+# Environment Variables (secrets)
+# ============================================================================
+
+# Run with: wrangler secret put OPENAI_API_KEY
+# Run with: wrangler secret put ANTHROPIC_API_KEY
+
+# ============================================================================
+# Workers AI (optional)
+# ============================================================================
+
+[ai]
+binding = "AI"
+
+# ============================================================================
+# Service Bindings (for connecting to other Workers)
+# ============================================================================
+
+[[services]]
+binding = "API_SERVICE"
+service = "claudeflare-api"
+environment = "production"
+
+# ============================================================================
+# Build Configuration
+# ============================================================================
+
+[build]
+command = "npm run build"
+
+[build.upload]
+format = "modules"
+main = "./dist/worker.js"
+
+# ============================================================================
+# Limits
+# ============================================================================
+
+[limits]
+cpu_ms = 180000 # 3 minutes

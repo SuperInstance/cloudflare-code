@@ -1,0 +1,574 @@
+---
+title: Chat API
+description: Generate chat completions with multi-provider AI routing
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Chat API
+
+Generate conversational completions with intelligent multi-provider routing.
+
+## Overview
+
+The Chat API provides a unified interface for generating chat completions across multiple AI providers (Cloudflare Workers AI, Groq, Cerebras, OpenRouter).
+
+## Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/chat` | POST | Generate chat completion |
+| `/v1/chat/stream` | POST | Generate streaming completion |
+
+## Create Chat Completion
+
+Generate a non-streaming chat completion.
+
+### Request
+
+```bash
+POST /v1/chat
+Content-Type: application/json
+X-API-Key: your-api-key
+```
+
+### Request Body
+
+<Tabs>
+  <Tab label="Minimal">
+    ```json
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hello, ClaudeFlare!"
+        }
+      ]
+    }
+    ```
+  </Tab>
+  <Tab label="Complete">
+    ```json
+    {
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a helpful coding assistant."
+        },
+        {
+          "role": "user",
+          "content": "Write a function to sort an array in JavaScript"
+        }
+      ],
+      "model": "auto",
+      "temperature": 0.7,
+      "max_tokens": 1000,
+      "top_p": 0.9,
+      "frequency_penalty": 0,
+      "presence_penalty": 0,
+      "stream": false
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `messages` | array | Yes | - | Array of message objects |
+| `model` | string | No | `auto` | Model to use (or `auto` for routing) |
+| `temperature` | number | No | `0.7` | Sampling temperature (0-2) |
+| `max_tokens` | number | No | `2048` | Maximum tokens to generate |
+| `top_p` | number | No | `0.9` | Nucleus sampling threshold |
+| `frequency_penalty` | number | No | `0` | Frequency penalty (-2 to 2) |
+| `presence_penalty` | number | No | `0` | Presence penalty (-2 to 2) |
+| `stream` | boolean | No | `false` | Enable streaming |
+
+### Message Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role` | string | Yes | `system`, `user`, or `assistant` |
+| `content` | string | Yes | Message content |
+| `name` | string | No | Optional name for the message |
+
+### Response
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "llama-2-70b-chat",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here's a JavaScript function to sort an array:\n\n```javascript\nfunction sortArray(arr) {\n  return arr.sort((a, b) => a - b);\n}\n```"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 25,
+    "completion_tokens": 45,
+    "total_tokens": 70
+  },
+  "_routing": {
+    "provider": "groq",
+    "model": "llama-2-70b-chat",
+    "totalLatency": 245,
+    "routingOverhead": 12
+  }
+}
+```
+
+### Response Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique completion ID |
+| `object` | string | Object type (`chat.completion`) |
+| `created` | number | Unix timestamp |
+| `model` | string | Model used |
+| `choices` | array | Generated completions |
+| `usage` | object | Token usage statistics |
+| `_routing` | object | Routing metadata |
+
+### Finish Reasons
+
+| Reason | Description |
+|--------|-------------|
+| `stop` | Natural stop or stop sequence |
+| `length` | Max tokens reached |
+| `content_filter` | Content filtered by policy |
+| `error` | API error during generation |
+
+## Create Streaming Completion
+
+Generate a streaming chat completion using Server-Sent Events (SSE).
+
+### Request
+
+```bash
+POST /v1/chat/stream
+Content-Type: application/json
+X-API-Key: your-api-key
+```
+
+### Request Body
+
+Same as non-streaming endpoint, with `stream: true`.
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Write a short story about AI"
+    }
+  ],
+  "stream": true
+}
+```
+
+### Response
+
+The response is a stream of Server-Sent Events:
+
+```
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","created":1234567890,"model":"llama-2-70b-chat","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","created":1234567890,"model":"llama-2-70b-chat","choices":[{"index":0,"delta":{"content":"Once"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","created":1234567890,"model":"llama-2-70b-chat","choices":[{"index":0,"delta":{"content":" upon"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","created":1234567890,"model":"llama-2-70b-chat","choices":[{"index":0,"delta":{"content":" a"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","created":1234567890,"model":"llama-2-70b-chat","choices":[{"index":0,"delta":{"content":" time"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-abc","object":"chat.completion.chunk","created":1234567890,"model":"llama-2-70b-chat","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+```
+
+### Handling Streams in Code
+
+<Tabs>
+  <Tab label="JavaScript">
+    ```javascript
+    async function streamChat(messages) {
+      const response = await fetch('/v1/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, stream: true })
+      })
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let fullContent = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const text = decoder.decode(value)
+        const lines = text.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+
+            try {
+              const parsed = JSON.parse(data)
+              const content = parsed.choices[0]?.delta?.content
+              if (content) {
+                fullContent += content
+                process.stdout.write(content)
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
+      }
+
+      return fullContent
+    }
+    ```
+  </Tab>
+  <Tab label="Python">
+    ```python
+    import json
+
+    async def stream_chat(messages):
+      response = requests.post(
+        '/v1/chat/stream',
+        json={'messages': messages, 'stream': True},
+        stream=True
+      )
+
+      full_content = ''
+
+      for line in response.iter_lines():
+        if line:
+          line = line.decode('utf-8')
+          if line.startswith('data: '):
+            data = line[6:]
+            if data == '[DONE]':
+              continue
+
+            try:
+              parsed = json.loads(data)
+              content = parsed['choices'][0].get('delta', {}).get('content', '')
+              if content:
+                full_content += content
+                print(content, end='', flush=True)
+            except json.JSONDecodeError:
+              pass
+
+      return full_content
+    ```
+  </Tab>
+  <Tab label="Go">
+    ```go
+    func streamChat(messages []Message) (string, error) {
+        resp, err := http.Post(
+            "/v1/chat/stream",
+            "application/json",
+            bytes.NewBuffer(json.Marshal(map[string]interface{}{
+                "messages": messages,
+                "stream": true,
+            })),
+        )
+        if err != nil {
+            return "", err
+        }
+        defer resp.Body.Close()
+
+        scanner := bufio.NewScanner(resp.Body)
+        var fullContent strings.Builder
+
+        for scanner.Scan() {
+            line := scanner.Text()
+            if strings.HasPrefix(line, "data: ") {
+                data := strings.TrimPrefix(line, "data: ")
+                if data == "[DONE]" {
+                    continue
+                }
+
+                var chunk StreamChunk
+                if err := json.Unmarshal([]byte(data), &chunk); err != nil {
+                    continue
+                }
+
+                if len(chunk.Choices) > 0 {
+                    content := chunk.Choices[0].Delta.Content
+                    fullContent.WriteString(content)
+                    fmt.Print(content)
+                }
+            }
+        }
+
+        return fullContent.String(), nil
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Multi-Provider Routing
+
+ClaudeFlare automatically routes requests to the optimal provider:
+
+### Routing Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `FREE_TIER_FIRST` | Prioritize free tier quotas (default) |
+| `FASTEST` | Prioritize lowest latency |
+| `COST_OPTIMIZED` | Minimize API costs |
+| `ROUND_ROBIN` | Distribute load evenly |
+
+### Provider Priority
+
+```javascript
+const providerPriority = [
+  { name: 'cloudflare', priority: 10, freeQuota: 100000 },
+  { name: 'groq', priority: 8, freeQuota: 10000 },
+  { name: 'cerebras', priority: 7, freeQuota: 5000 },
+  { name: 'openrouter', priority: 5, freeQuota: 100 }
+]
+```
+
+### Routing Metadata
+
+Each response includes routing information:
+
+```json
+{
+  "_routing": {
+    "provider": "groq",
+    "model": "llama-2-70b-chat",
+    "totalLatency": 245,
+    "routingOverhead": 12,
+    "quotaUsed": 45,
+    "quotaRemaining": 9955
+  }
+}
+```
+
+## Code Examples
+
+### Basic Chat Completion
+
+<Tabs>
+  <Tab label="JavaScript">
+    ```javascript
+    import { ClaudeFlare } from '@claudeflare/sdk'
+
+    const client = new ClaudeFlare({
+      apiKey: process.env.CLAUDEFLARE_API_KEY
+    })
+
+    const response = await client.chat.completions.create({
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        { role: 'user', content: 'What is Cloudflare Workers?' }
+      ]
+    })
+
+    console.log(response.choices[0].message.content)
+    ```
+  </Tab>
+  <Tab label="Python">
+    ```python
+    import claudeflare
+
+    client = claudeflare.Client(api_key=os.getenv('CLAUDEFLARE_API_KEY'))
+
+    response = client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": "What is Cloudflare Workers?"}
+        ]
+    )
+
+    print(response.choices[0].message.content)
+    ```
+  </Tab>
+  <Tab label="cURL">
+    ```bash
+    curl -X POST https://api.claudeflare.com/v1/chat \
+      -H "Content-Type: application/json" \
+      -H "X-API-Key: your-api-key" \
+      -d '{
+        "messages": [
+          {"role": "system", "content": "You are a helpful assistant."},
+          {"role": "user", "content": "What is Cloudflare Workers?"}
+        ]
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+### Multi-Turn Conversation
+
+```javascript
+const conversation = [
+  { role: 'system', content: 'You are a coding tutor.' },
+  { role: 'user', content: 'What is recursion?' },
+  { role: 'assistant', content: 'Recursion is when a function calls itself...' },
+  { role: 'user', content: 'Can you show me an example?' }
+]
+
+const response = await client.chat.completions.create({
+  messages: conversation
+})
+```
+
+### With Temperature Control
+
+```javascript
+const response = await client.chat.completions.create({
+  messages: [
+    { role: 'user', content: 'Write a story about a robot' }
+  ],
+  temperature: 0.9,  // Higher for more creativity
+  max_tokens: 1000
+})
+```
+
+### Streaming Example
+
+```javascript
+const stream = await client.chat.completions.stream({
+  messages: [
+    { role: 'user', content: 'Tell me a joke' }
+  ]
+})
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content
+  if (content) {
+    process.stdout.write(content)
+  }
+}
+```
+
+## Error Handling
+
+### Common Errors
+
+<Tabs>
+  <Tab label="Invalid Request">
+    ```json
+    {
+      "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "messages field is required",
+        "timestamp": 1234567890
+      }
+    }
+    ```
+    **Status**: 400
+
+    **Solution**: Ensure all required fields are present.
+  </Tab>
+  <Tab label="Service Unavailable">
+    ```json
+    {
+      "error": {
+        "code": "SERVICE_UNAVAILABLE",
+        "message": "No AI providers configured",
+        "timestamp": 1234567890
+      }
+    }
+    ```
+    **Status**: 503
+
+    **Solution**: Configure at least one AI provider.
+  </Tab>
+  <Tab label="Rate Limited">
+    ```json
+    {
+      "error": {
+        "code": "RATE_LIMIT_EXCEEDED",
+        "message": "Rate limit exceeded",
+        "retry_after": 60
+      }
+    }
+    ```
+    **Status**: 429
+
+    **Solution**: Implement exponential backoff and retry.
+  </Tab>
+</Tabs>
+
+### Retry Strategy
+
+```javascript
+async function callWithRetry(messages, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await client.chat.completions.create({ messages })
+      return response
+    } catch (error) {
+      if (i === maxRetries - 1) throw error
+      if (error.status >= 500 || error.status === 429) {
+        const delay = Math.pow(2, i) * 1000
+        await new Promise(r => setTimeout(r, delay))
+      } else {
+        throw error
+      }
+    }
+  }
+}
+```
+
+## Best Practices
+
+### 1. Use System Messages
+
+```javascript
+const response = await client.chat.completions.create({
+  messages: [
+    {
+      role: 'system',
+      content: 'You are an expert in TypeScript and React.'
+    },
+    { role: 'user', content: 'How do I use hooks?' }
+  ]
+})
+```
+
+### 2. Control Token Usage
+
+```javascript
+const response = await client.chat.completions.create({
+  messages: messages,
+  max_tokens: 500,  // Limit response length
+  temperature: 0.5  // Lower for more focused responses
+})
+```
+
+### 3. Implement Caching
+
+```javascript
+const cache = new Map()
+
+async function cachedChat(messages) {
+  const key = JSON.stringify(messages)
+  if (cache.has(key)) return cache.get(key)
+
+  const response = await client.chat.completions.create({ messages })
+  cache.set(key, response)
+  return response
+}
+```
+
+<Callout type="success">
+  **Chat API mastered!** Next, explore the [Agents API](/docs/api-reference/agents-api) for multi-agent workflows.
+</Callout>

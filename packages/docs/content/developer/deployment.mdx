@@ -1,0 +1,549 @@
+---
+title: Deployment Guide
+description: How to deploy ClaudeFlare to production
+---
+
+# Deployment Guide
+
+Complete guide for deploying ClaudeFlare to production environments.
+
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Environment Setup](#environment-setup)
+- [Cloudflare Workers Deployment](#cloudflare-workers-deployment)
+- [Dashboard Deployment](#dashboard-deployment)
+- [Documentation Deployment](#documentation-deployment)
+- [Monitoring](#monitoring)
+- [Rollback Procedures](#rollback-procedures)
+
+## Prerequisites
+
+### Required Accounts
+
+- Cloudflare account (free tier available)
+- GitHub account (for CI/CD)
+- Domain name (optional)
+
+### Required Tools
+
+- Node.js 20+
+- npm 10+
+- Wrangler CLI
+- Git
+
+```bash
+# Install Wrangler CLI
+npm install -g wrangler
+
+# Login to Cloudflare
+wrangler login
+```
+
+## Environment Setup
+
+### Environment Variables
+
+Create `.env.production`:
+
+```bash
+# Cloudflare
+CLOUDFLARE_ACCOUNT_ID=your-account-id
+CLOUDFLARE_API_TOKEN=your-api-token
+
+# AI Providers (at least one required)
+GROQ_API_KEY=your-groq-key
+CEREBRAS_API_KEY=your-cerebras-key
+OPENROUTER_API_KEY=your-openrouter-key
+
+# Application
+NODE_ENV=production
+LOG_LEVEL=info
+API_URL=https://api.claudeflare.com
+
+# Monitoring (optional)
+SENTRY_DSN=your-sentry-dsn
+DATADOG_API_KEY=your-datadog-key
+```
+
+### Cloudflare Resources
+
+```bash
+# Create KV namespace
+wrangler kv:namespace create "CACHE_KV" --preview
+wrangler kv:namespace create "CACHE_KV"
+
+# Create R2 bucket
+wrangler r2 bucket create claudeflare-storage
+
+# Create D1 database
+wrangler d1 create claudeflare-db
+
+# Create Durable Objects bindings (in wrangler.toml)
+```
+
+## Cloudflare Workers Deployment
+
+### Configure Wrangler
+
+Update `wrangler.toml`:
+
+```toml
+name = "claudeflare"
+main = "packages/edge/dist/index.js"
+compatibility_date = "2024-01-01"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+LOG_LEVEL = "info"
+
+# KV namespaces
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-id"
+
+# R2 buckets
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "claudeflare-storage"
+
+# D1 databases
+[[d1_databases]]
+binding = "DB"
+database_name = "claudeflare-db"
+database_id = "your-database-id"
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "SESSIONS"
+class_name = "SessionDO"
+
+[[durable_objects.bindings]]
+name = "DIRECTOR"
+class_name = "DirectorDO"
+
+# Secrets (use wrangler secret command)
+# wrangler secret put GROQ_API_KEY --env production
+```
+
+### Build for Production
+
+```bash
+# Build all packages
+npm run build
+
+# Build edge package specifically
+npm run build --workspace=packages/edge
+
+# Verify bundle size
+npm run analyze-bundle
+```
+
+### Deploy to Workers
+
+```bash
+# Deploy to production
+wrangler deploy --env production
+
+# Deploy with custom name
+wrangler deploy --env production --name claudeflare-prod
+
+# Deploy specific version
+wrangler deploy --env production --version 1.0.0
+```
+
+### Verify Deployment
+
+```bash
+# Health check
+curl https://claudeflare.workers.dev/health
+
+# Version check
+curl https://claudeflare.workers.dev/version
+
+# Status check
+curl https://claudeflare.workers.dev/v1/status
+```
+
+## Dashboard Deployment
+
+### Build Dashboard
+
+```bash
+# Install dependencies
+npm install --workspace=packages/dashboard
+
+# Build for production
+npm run build --workspace=packages/dashboard
+
+# Output is in packages/dashboard/.next/
+```
+
+### Deploy to Cloudflare Pages
+
+```bash
+# Create Pages project
+wrangler pages project create claudeflare-dashboard \
+  --production-branch=main
+
+# Deploy
+wrangler pages deploy packages/dashboard/.next \
+  --project-name=claudeflare-dashboard
+```
+
+### Configure Domain
+
+```bash
+# Add custom domain
+wrangler pages deployment create \
+  --project-name=claudeflare-dashboard \
+  --branch=main
+```
+
+## Documentation Deployment
+
+### Build Documentation
+
+```bash
+# Build docs site
+npm run build --workspace=packages/docs
+
+# Export static site
+npm run export --workspace=packages/docs
+```
+
+### Deploy to Pages
+
+```bash
+# Deploy documentation
+wrangler pages deploy packages/docs/out \
+  --project-name=claudeflare-docs
+```
+
+## CI/CD Deployment
+
+### GitHub Actions Workflow
+
+`.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --env production
+
+      - name: Run smoke tests
+        run: npm run test:smoke -- --env production
+
+      - name: Notify deployment
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              text: "ClaudeFlare deployed to production",
+              attachments: [{
+                color: "good",
+                text: "Version: ${{ github.sha }}"
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+```
+
+## Monitoring
+
+### Cloudflare Analytics
+
+Access at: https://dash.cloudflare.com
+
+- Request count and errors
+- Response times
+- Geographic distribution
+- Worker CPU time
+
+### Custom Metrics
+
+```typescript
+// Add custom metrics
+import { MetricsCollector } from './lib/metrics';
+
+const metrics = new MetricsCollector(env);
+
+// Record metrics
+await metrics.record('request.duration', latency, {
+  endpoint: '/v1/chat',
+  status: 'success'
+});
+
+await metrics.increment('request.count', {
+  endpoint: '/v1/chat',
+  method: 'POST'
+});
+```
+
+### Health Checks
+
+```bash
+# Add cron job for health checks
+curl https://claudeflare.workers.dev/health
+
+# Expected response
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "timestamp": 1234567890
+}
+```
+
+### Alerts
+
+Configure in Cloudflare:
+
+```bash
+# Create alert for error rate
+wrangler monitoring create \
+  --name="high-error-rate" \
+  --condition="error_rate > 5%" \
+  --notification=email
+```
+
+## Rollback Procedures
+
+### Immediate Rollback
+
+```bash
+# Rollback to previous version
+wrangler rollback --env production
+
+# Rollback to specific version
+wrangler rollback --env production --version 0.9.0
+```
+
+### Rollback via Script
+
+```bash
+#!/bin/bash
+# rollback.sh
+
+VERSION=$1
+
+if [ -z "$VERSION" ]; then
+  echo "Usage: ./rollback.sh <version>"
+  exit 1
+fi
+
+echo "Rolling back to version $VERSION"
+
+# Checkout version
+git checkout v$VERSION
+
+# Build
+npm run build
+
+# Deploy
+wrangler deploy --env production
+
+# Verify
+curl -f https://claudeflare.workers.dev/health || {
+  echo "Health check failed!"
+  exit 1
+}
+
+echo "Rollback successful"
+```
+
+### Database Rollback
+
+```bash
+# Rollback migrations
+wrangler d1 execute claudeflare-db --file=./migrations/rollback.sql
+```
+
+## Scaling
+
+### Horizontal Scaling
+
+Cloudflare Workers automatically scales:
+
+- No need to configure instances
+- Auto-scales based on traffic
+- Edge replication worldwide
+
+### Vertical Scaling
+
+Increase limits in `wrangler.toml`:
+
+```toml
+[limits]
+cpu_ms = 50 # Maximum CPU time per request
+```
+
+### Durable Objects Scaling
+
+```bash
+# Increase Durable Objects limit
+wrangler d1 execute claudeflare-db --command="
+  ALTER TABLE sessions SET max_concurrent = 10000;
+"
+```
+
+## Performance Optimization
+
+### Bundle Optimization
+
+```bash
+# Analyze bundle
+npm run analyze-bundle
+
+# Optimize imports
+# Use tree-shaking
+# Code splitting
+```
+
+### Caching Strategy
+
+```typescript
+// Set cache headers
+const cacheHeaders = {
+  'Cache-Control': 'public, max-age=3600',
+  'CDN-Cache-Control': 'public, max-age=86400'
+};
+```
+
+### Edge Caching
+
+```bash
+# Configure cache rules in Cloudflare
+# Cache static assets
+# Cache API responses (where appropriate)
+# Purge cache on deployment
+```
+
+## Security
+
+### API Key Management
+
+```bash
+# Use environment variables, never commit keys
+wrangler secret put GROQ_API_KEY --env production
+
+# Rotate keys regularly
+# Use different keys for each environment
+# Audit key usage
+```
+
+### CORS Configuration
+
+```typescript
+// Configure CORS in production
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'https://claudeflare.com',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type,Authorization'
+};
+```
+
+### Rate Limiting
+
+```typescript
+// Configure rate limits
+const rateLimits = {
+  free: 100, // requests per hour
+  pro: 1000,
+  enterprise: 10000
+};
+```
+
+## Troubleshooting
+
+### Deployment Fails
+
+```bash
+# Check wrangler version
+wrangler --version
+
+# Check authentication
+wrangler whoami
+
+# Check configuration
+wrangler tail --format pretty
+```
+
+### High Error Rate
+
+```bash
+# View logs
+wrangler tail --format pretty
+
+# Check metrics
+curl https://claudeflare.workers.dev/metrics
+
+# Check provider status
+curl https://api.claudeflare.com/v1/providers/status
+```
+
+### Performance Issues
+
+```bash
+# Check CPU time
+wrangler analytics --sort-by cpu_time
+
+# Check memory usage
+# Add memory profiling in dev mode
+
+# Optimize bundle
+npm run analyze-bundle
+```
+
+## Checklist
+
+Before deploying to production:
+
+- [ ] All tests passing
+- [ ] Environment variables configured
+- [ ] Secrets set in production
+- [ ] Database migrations run
+- [ ] Cache configured
+- [ ] Monitoring set up
+- [ ] Alerts configured
+- [ ] Rollback plan prepared
+- [ ] Documentation updated
+- [ ] Stakeholders notified
+
+## Related Documentation
+
+- [Architecture](/architecture/system-overview) - System architecture
+- [Monitoring](/guides/monitoring) - Monitoring guide
+- [Troubleshooting](/troubleshooting/) - Troubleshooting guide

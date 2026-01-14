@@ -1,0 +1,99 @@
+{
+  "name": "@claudeflare/billing",
+  "version": "1.0.0",
+  "description": "Enterprise-grade billing and pricing system for ClaudeFlare with usage-based billing, subscription management, and payment processing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:unit": "vitest tests/unit",
+    "test:integration": "vitest tests/integration",
+    "test:e2e": "vitest tests/e2e",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write src",
+    "typecheck": "tsc --noEmit",
+    "migrate:create": "node dist/migrations/create.js",
+    "migrate:up": "node dist/migrations/migrate.js up",
+    "migrate:down": "node dist/migrations/migrate.js down",
+    "stripe:sync": "node dist/scripts/sync-stripe.js",
+    "stripe:webhook": "node dist/scripts/stripe-webhook.js",
+    "invoice:generate": "node dist/scripts/generate-invoices.js",
+    "billing:analyze": "node dist/scripts/analyze-usage.js"
+  },
+  "keywords": [
+    "billing",
+    "payments",
+    "stripe",
+    "subscriptions",
+    "usage-based",
+    "invoicing",
+    "pricing",
+    "metering",
+    "enterprise",
+    "saas",
+    "cloudflare",
+    "workers"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "stripe": "^14.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./metering": {
+      "import": "./dist/metering/index.js",
+      "types": "./dist/metering/index.d.ts"
+    },
+    "./subscriptions": {
+      "import": "./dist/subscriptions/index.js",
+      "types": "./dist/subscriptions/index.d.ts"
+    },
+    "./pricing": {
+      "import": "./dist/pricing/index.js",
+      "types": "./dist/pricing/index.d.ts"
+    },
+    "./invoicing": {
+      "import": "./dist/invoicing/index.js",
+      "types": "./dist/invoicing/index.d.ts"
+    },
+    "./payments": {
+      "import": "./dist/payments/index.js",
+      "types": "./dist/payments/index.d.ts"
+    },
+    "./analytics": {
+      "import": "./dist/analytics/index.js",
+      "types": "./dist/analytics/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "migrations",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

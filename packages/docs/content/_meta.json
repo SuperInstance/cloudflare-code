@@ -1,0 +1,141 @@
+{
+  "docs": {
+    "title": "Documentation",
+    "type": "page"
+  },
+  "getting-started": {
+    "title": "Getting Started",
+    "type": "folder",
+    "items": {
+      "introduction": {
+        "title": "Introduction"
+      },
+      "quick-start": {
+        "title": "Quick Start"
+      },
+      "installation": {
+        "title": "Installation"
+      },
+      "configuration": {
+        "title": "Configuration"
+      },
+      "first-project": {
+        "title": "First Project"
+      }
+    }
+  },
+  "api-reference": {
+    "title": "API Reference",
+    "type": "folder",
+    "items": {
+      "overview": {
+        "title": "Overview"
+      },
+      "authentication": {
+        "title": "Authentication"
+      },
+      "chat-api": {
+        "title": "Chat API"
+      },
+      "code-generation": {
+        "title": "Code Generation"
+      },
+      "agents-api": {
+        "title": "Agents API"
+      },
+      "webhooks": {
+        "title": "Webhooks"
+      },
+      "error-codes": {
+        "title": "Error Codes"
+      }
+    }
+  },
+  "sdks": {
+    "title": "SDKs",
+    "type": "folder",
+    "items": {
+      "javascript": {
+        "title": "JavaScript/TypeScript"
+      },
+      "python": {
+        "title": "Python"
+      },
+      "go": {
+        "title": "Go"
+      },
+      "rest-api": {
+        "title": "REST API"
+      }
+    }
+  },
+  "guides": {
+    "title": "Guides",
+    "type": "folder",
+    "items": {
+      "code-completion": {
+        "title": "Code Completion"
+      },
+      "multi-agent-workflows": {
+        "title": "Multi-Agent Workflows"
+      },
+      "custom-agents": {
+        "title": "Custom Agents"
+      },
+      "rate-limiting": {
+        "title": "Rate Limiting"
+      },
+      "error-handling": {
+        "title": "Error Handling"
+      }
+    }
+  },
+  "developer": {
+    "title": "Developer Docs",
+    "type": "folder",
+    "items": {
+      "contributing": {
+        "title": "Contributing Guide"
+      },
+      "deployment": {
+        "title": "Deployment Guide"
+      }
+    }
+  },
+  "architecture": {
+    "title": "Architecture",
+    "type": "folder",
+    "items": {
+      "system-overview": {
+        "title": "System Overview"
+      },
+      "durable-objects": {
+        "title": "Durable Objects"
+      },
+      "vector-database": {
+        "title": "Vector Database"
+      },
+      "caching-strategy": {
+        "title": "Caching Strategy"
+      }
+    }
+  },
+  "troubleshooting": {
+    "title": "Troubleshooting",
+    "type": "folder",
+    "items": {
+      "common-issues": {
+        "title": "Common Issues"
+      }
+    }
+  },
+  "migration": {
+    "title": "Migration",
+    "type": "folder",
+    "items": {
+      "v0-to-v1": {
+        "title": "Migrating from v0 to v1"
+      }
+    }
+  }
+}

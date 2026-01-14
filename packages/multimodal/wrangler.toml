@@ -1,0 +1,56 @@
+name = "claudeflare-multimodal"
+main = "src/worker.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "claudeflare-multimodal-prod"
+routes = [
+  { pattern = "api.claudeflare.com/multimodal/*", zone_name = "claudeflare.com" }
+]
+
+[env.staging]
+name = "claudeflare-multimodal-staging"
+routes = [
+  { pattern = "api-staging.claudeflare.com/multimodal/*", zone_name = "claudeflare.com" }
+]
+
+[[env.production.bindings]]
+name = "R2"
+type = "r2_bucket"
+bucket_name = "claudeflare-multimodal-images"
+
+[[env.production.bindings]]
+name = "VECTORIZE"
+type = "vectorize"
+index_name = "claudeflare-multimodal-embeddings"
+
+[[env.staging.bindings]]
+name = "R2"
+type = "r2_bucket"
+bucket_name = "claudeflare-multimodal-images-staging"
+
+[[env.staging.bindings]]
+name = "VECTORIZE"
+type = "vectorize"
+index_name = "claudeflare-multimodal-embeddings-staging"
+
+[vars]
+ENVIRONMENT = "production"
+API_VERSION = "1.0.0"
+
+[[env.production.vars]]
+ENVIRONMENT = "production"
+
+[[env.staging.vars]]
+ENVIRONMENT = "staging"
+
+[build]
+command = "npm run build"
+
+[build.upload]
+format = "modules"
+main = "./dist/worker.mjs"
+
+[miniflare]
+port = 8787
+watch = true

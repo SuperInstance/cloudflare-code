@@ -1,0 +1,411 @@
+# ClaudeFlare Alert Rules
+# Comprehensive alerting configuration for monitoring system
+
+groups:
+  - name: system_health
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (rate(claudeflare_errors_total[5m]) /
+           rate(claudeflare_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          category: system
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+          runbook_url: "https://docs.claudeflare.ai/runbooks/high-error-rate"
+
+      - alert: CriticalErrorRate
+        expr: |
+          (rate(claudeflare_errors_total[5m]) /
+           rate(claudeflare_requests_total[5m])) > 0.10
+        for: 2m
+        labels:
+          severity: emergency
+          category: system
+        annotations:
+          summary: "Critical error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for the last 2 minutes"
+          runbook_url: "https://docs.claudeflare.ai/runbooks/critical-error-rate"
+
+      - alert: LowSuccessRate
+        expr: |
+          (rate(claudeflare_requests_total{status=~"5.."}[5m]) /
+           rate(claudeflare_requests_total[5m])) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+          category: system
+        annotations:
+          summary: "Low success rate detected"
+          description: "Success rate is below 90% for the last 5 minutes"
+
+  - name: performance
+    interval: 30s
+    rules:
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High latency detected"
+          description: "P95 latency is {{ $value }}s for the last 10 minutes"
+          runbook_url: "https://docs.claudeflare.ai/runbooks/high-latency"
+
+      - alert: CriticalLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: critical
+          category: performance
+        annotations:
+          summary: "Critical latency detected"
+          description: "P95 latency is {{ $value }}s for the last 5 minutes"
+
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le)
+          ) > 3
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High P99 latency detected"
+          description: "P99 latency is {{ $value }}s for the last 5 minutes"
+
+      - alert: HighColdStartRate
+        expr: |
+          (rate(claudeflare_cold_starts_total[5m]) /
+           rate(claudeflare_requests_total[5m])) > 0.10
+        for: 10m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High cold start rate detected"
+          description: "Cold start rate is {{ $value | humanizePercentage }} for the last 10 minutes"
+
+  - name: providers
+    interval: 30s
+    rules:
+      - alert: ProviderDown
+        expr: |
+          claudeflare_provider_up == 0
+        for: 1m
+        labels:
+          severity: emergency
+          category: providers
+        annotations:
+          summary: "Provider {{ $labels.provider }} is down"
+          description: "Provider {{ $labels.provider }} has been down for 1 minute"
+          runbook_url: "https://docs.claudeflare.ai/runbooks/provider-down"
+
+      - alert: ProviderDegraded
+        expr: |
+          (rate(claudeflare_provider_errors_total{provider="{{ $labels.provider }}"}[5m]) /
+           rate(claudeflare_provider_requests_total{provider="{{ $labels.provider }}"}[5m])) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+          category: providers
+        annotations:
+          summary: "Provider {{ $labels.provider }} is degraded"
+          description: "Provider {{ $labels.provider }} error rate is {{ $value | humanizePercentage }}"
+
+      - alert: ProviderHighLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(claudeflare_provider_latency_seconds_bucket{provider="{{ $labels.provider }}"}[5m])) by (le)
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: providers
+        annotations:
+          summary: "Provider {{ $labels.provider }} has high latency"
+          description: "Provider {{ $labels.provider }} P95 latency is {{ $value }}s"
+
+      - alert: ProviderRateLimitNear
+        expr: |
+          (claudeflare_provider_quota_used / claudeflare_provider_quota_total) > 0.80
+        for: 5m
+        labels:
+          severity: warning
+          category: providers
+        annotations:
+          summary: "Provider {{ $labels.provider }} rate limit nearly exhausted"
+          description: "Provider {{ $labels.provider }} has used {{ $value | humanizePercentage }} of quota"
+
+      - alert: ProviderRateLimitExceeded
+        expr: |
+          (claudeflare_provider_quota_used / claudeflare_provider_quota_total) >= 1.0
+        for: 1m
+        labels:
+          severity: critical
+          category: providers
+        annotations:
+          summary: "Provider {{ $labels.provider }} rate limit exceeded"
+          description: "Provider {{ $labels.provider }} has exceeded rate limit"
+
+  - name: cache
+    interval: 30s
+    rules:
+      - alert: LowCacheHitRate
+        expr: |
+          (rate(claudeflare_cache_hits_total[5m]) /
+           (rate(claudeflare_cache_hits_total[5m]) + rate(claudeflare_cache_misses_total[5m]))) < 0.50
+        for: 10m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "Low cache hit rate detected"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} for the last 10 minutes"
+          runbook_url: "https://docs.claudeflare.ai/runbooks/low-cache-hit-rate"
+
+      - alert: CriticalCacheHitRate
+        expr: |
+          (rate(claudeflare_cache_hits_total[5m]) /
+           (rate(claudeflare_cache_hits_total[5m]) + rate(claudeflare_cache_misses_total[5m]))) < 0.30
+        for: 5m
+        labels:
+          severity: critical
+          category: cache
+        annotations:
+          summary: "Critical cache hit rate detected"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+      - alert: HighCacheLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(claudeflare_cache_latency_seconds_bucket[5m])) by (le)
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "High cache latency detected"
+          description: "Cache P95 latency is {{ $value }}s"
+
+      - alert: HotCacheFull
+        expr: |
+          (claudeflare_cache_size_bytes{tier="hot"} /
+           claudeflare_cache_max_size_bytes{tier="hot"}) > 0.90
+        for: 5m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "Hot cache is nearly full"
+          description: "Hot cache is at {{ $value | humanizePercentage }} capacity"
+
+  - name: costs
+    interval: 1m
+    rules:
+      - alert: HighCostRate
+        expr: |
+          rate(claudeflare_cost_total_dollars[1h]) > 100
+        for: 5m
+        labels:
+          severity: critical
+          category: costs
+        annotations:
+          summary: "High cost rate detected"
+          description: "Cost rate is ${{ $value }}/h for the last 5 minutes"
+          runbook_url: "https://docs.claudeflare.ai/runbooks/high-cost-rate"
+
+      - alert: BudgetExceeded
+        expr: |
+          increase(claudeflare_cost_total_dollars[1d]) > 100
+        for: 1m
+        labels:
+          severity: emergency
+          category: costs
+        annotations:
+          summary: "Daily budget exceeded"
+          description: "Daily cost has exceeded $100"
+
+      - alert: ProjectedBudgetExceeded
+        expr: |
+          predict_linear(claudeflare_cost_total_dollars[1h], 86400) - claudeflare_cost_total_dollars > 100
+        for: 10m
+        labels:
+          severity: warning
+          category: costs
+        annotations:
+          summary: "Projected budget overrun"
+          description: "Projected daily cost will exceed $100 at current rate"
+
+      - alert: LowCacheSavings
+        expr: |
+          (rate(claudeflare_cache_savings_dollars[1h]) /
+           rate(claudeflare_cost_total_dollars[1h])) < 0.10
+        for: 30m
+        labels:
+          severity: warning
+          category: costs
+        annotations:
+          summary: "Low cache savings detected"
+          description: "Cache savings are only {{ $value | humanizePercentage }} of total cost"
+
+  - name: resources
+    interval: 30s
+    rules:
+      - alert: HighMemoryUsage
+        expr: |
+          (claudeflare_memory_bytes / claudeflare_memory_limit_bytes) > 0.90
+        for: 5m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          (claudeflare_memory_bytes / claudeflare_memory_limit_bytes) > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          category: resources
+        annotations:
+          summary: "Critical memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} for the last 2 minutes"
+
+      - alert: HighKVOperations
+        expr: |
+          rate(claudeflare_kv_operations_total[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High KV operation rate detected"
+          description: "KV operation rate is {{ $value }} ops/s"
+
+      - alert: HighR2Operations
+        expr: |
+          rate(claudeflare_r2_operations_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High R2 operation rate detected"
+          description: "R2 operation rate is {{ $value }} ops/s"
+
+  - name: availability
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: |
+          up{job="claudeflare"} == 0
+        for: 1m
+        labels:
+          severity: emergency
+          category: availability
+        annotations:
+          summary: "Service is down"
+          description: "ClaudeFlare service has been down for 1 minute"
+          runbook_url: "https://docs.claudeflare.ai/runbooks/service-down"
+
+      - alert: LowUptime
+        expr: |
+          (time() - claudeflare_start_time_seconds) / 86400 < 1
+        for: 1m
+        labels:
+          severity: warning
+          category: availability
+        annotations:
+          summary: "Service recently restarted"
+          description: "Service uptime is less than 1 day"
+
+  - name: anomalies
+    interval: 1m
+    rules:
+      - alert: CostSpike
+        expr: |
+          (rate(claudeflare_cost_total_dollars[5m]) -
+           rate(claudeflare_cost_total_dollars[30m] offset 25m)) /
+          rate(claudeflare_cost_total_dollars[30m] offset 25m) > 2
+        for: 5m
+        labels:
+          severity: warning
+          category: anomalies
+        annotations:
+          summary: "Cost spike detected"
+          description: "Cost rate has increased by {{ $value | humanizePercentage }} compared to baseline"
+
+      - alert: LatencyAnomaly
+        expr: |
+          (histogram_quantile(0.95,
+            sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le)
+          ) -
+          histogram_quantile(0.95,
+            sum(rate(claudeflare_request_duration_seconds_bucket[30m] offset 25m)) by (le)
+          )) /
+          histogram_quantile(0.95,
+            sum(rate(claudeflare_request_duration_seconds_bucket[30m] offset 25m)) by (le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          category: anomalies
+        annotations:
+          summary: "Latency anomaly detected"
+          description: "P95 latency has increased by {{ $value | humanizePercentage }} compared to baseline"
+
+      - alert: ErrorSpike
+        expr: |
+          (rate(claudeflare_errors_total[5m]) -
+           rate(claudeflare_errors_total[30m] offset 25m)) /
+          rate(claudeflare_errors_total[30m] offset 25m) > 2
+        for: 5m
+        labels:
+          severity: critical
+          category: anomalies
+        annotations:
+          summary: "Error spike detected"
+          description: "Error rate has increased by {{ $value | humanizePercentage }} compared to baseline"
+
+      - alert: RequestVolumeSpike
+        expr: |
+          (rate(claudeflare_requests_total[5m]) -
+           rate(claudeflare_requests_total[30m] offset 25m)) /
+          rate(claudeflare_requests_total[30m] offset 25m) > 3
+        for: 5m
+        labels:
+          severity: warning
+          category: anomalies
+        annotations:
+          summary: "Request volume spike detected"
+          description: "Request rate has increased by {{ $value | humanizePercentage }} compared to baseline"
+
+      - alert: CacheDrop
+        expr: |
+          (rate(claudeflare_cache_hits_total[5m]) /
+           (rate(claudeflare_cache_hits_total[5m]) + rate(claudeflare_cache_misses_total[5m]))) -
+          (rate(claudeflare_cache_hits_total[30m] offset 25m) /
+           (rate(claudeflare_cache_hits_total[30m] offset 25m) + rate(claudeflare_cache_misses_total[30m] offset 25m))) < -0.20
+        for: 10m
+        labels:
+          severity: warning
+          category: anomalies
+        annotations:
+          summary: "Cache hit rate drop detected"
+          description: "Cache hit rate has dropped by more than 20% compared to baseline"

@@ -1,0 +1,117 @@
+# Prometheus Configuration for ClaudeFlare Monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'claudeflare'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+# Load and evaluate rules
+rule_files:
+  - 'alerts/rules.yml'
+
+# Scrape configurations
+scrape_configs:
+  # ClaudeFlare Workers metrics
+  - job_name: 'claudeflare-workers'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    static_configs:
+      - targets:
+          - 'worker1.example.com:8787'
+          - 'worker2.example.com:8787'
+          - 'worker3.example.com:8787'
+        labels:
+          service: 'claudeflare'
+          component: 'workers'
+
+  # ClaudeFlare API metrics
+  - job_name: 'claudeflare-api'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - 'api.example.com:8787'
+        labels:
+          service: 'claudeflare'
+          component: 'api'
+
+  # ClaudeFlare Dashboard metrics
+  - job_name: 'claudeflare-dashboard'
+    metrics_path: '/dashboard'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+          - 'dashboard.example.com:8787'
+        labels:
+          service: 'claudeflare'
+          component: 'dashboard'
+
+  # Cloudflare Workers Analytics (if available)
+  - job_name: 'cloudflare-workers'
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+    static_configs:
+      - targets:
+          - 'analytics.cloudflare.com:443'
+        labels:
+          service: 'cloudflare'
+          component: 'workers'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets:
+          - 'localhost:9090'
+
+# Recording rules for performance optimization
+recording_rules:
+  - name: claudeflare_aggregates
+    interval: 30s
+    rules:
+      # Pre-compute error rate
+      - record: claudeflare:error_rate:5m
+        expr: |
+          rate(claudeflare_errors_total[5m]) /
+          rate(claudeflare_requests_total[5m])
+
+      # Pre-compute cache hit rate
+      - record: claudeflare:cache_hit_rate:5m
+        expr: |
+          rate(claudeflare_cache_hits_total[5m]) /
+          (rate(claudeflare_cache_hits_total[5m]) + rate(claudeflare_cache_misses_total[5m]))
+
+      # Pre-compute p95 latency
+      - record: claudeflare:latency:p95:5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(claudeflare_request_duration_seconds_bucket[5m])) by (le)
+          )
+
+      # Pre-compute cost rate
+      - record: claudeflare:cost_rate:1h
+        expr: |
+          rate(claudeflare_cost_total_dollars[1h]) * 3600
+
+      # Pre-compute provider success rate
+      - record: claudeflare:provider_success_rate:5m
+        expr: |
+          rate(claudeflare_provider_success_total[5m]) /
+          rate(claudeflare_provider_requests_total[5m])
+
+# Storage configuration
+storage:
+  tsdb:
+    path: /prometheus/data
+    retention:
+      time: 15d
+      size: 10GB

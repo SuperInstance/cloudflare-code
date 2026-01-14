@@ -1,0 +1,21 @@
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Tests
+*.test.ts
+**/__tests__/
+
+# CI/CD
+.github/

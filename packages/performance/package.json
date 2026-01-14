@@ -1,0 +1,110 @@
+{
+  "name": "@claudeflare/performance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Performance optimization and benchmarking suite for ClaudeFlare platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./profiler": {
+      "types": "./dist/profiler/index.d.ts",
+      "import": "./dist/profiler/index.js"
+    },
+    "./load-test": {
+      "types": "./dist/load-test/index.d.ts",
+      "import": "./dist/load-test/index.js"
+    },
+    "./benchmark": {
+      "types": "./dist/benchmark/index.d.ts",
+      "import": "./dist/benchmark/index.js"
+    },
+    "./optimizer": {
+      "types": "./dist/optimizer/index.d.ts",
+      "import": "./dist/optimizer/index.js"
+    },
+    "./regression": {
+      "types": "./dist/regression/index.d.ts",
+      "import": "./dist/regression/index.js"
+    }
+  },
+  "bin": {
+    "claudeflare-bench": "./dist/cli/bench.js",
+    "claudeflare-loadtest": "./dist/cli/loadtest.js",
+    "claudeflare-profile": "./dist/cli/profile.js"
+  },
+  "files": [
+    "dist",
+    "config",
+    "dashboards",
+    "scripts",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "bench": "tsx scripts/bench.ts",
+    "bench:ci": "tsx scripts/bench.ts --ci",
+    "loadtest": "tsx scripts/loadtest.ts",
+    "profile": "tsx scripts/profile.ts",
+    "regression-check": "tsx scripts/regression-check.ts",
+    "optimize": "tsx scripts/optimize.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "performance",
+    "benchmarking",
+    "profiling",
+    "load-testing",
+    "optimization",
+    "cloudflare-workers",
+    "claudeflare"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@claudeflare/shared": "^1.0.0",
+    "tinybench": "^2.9.0",
+    "k6": "^0.50.0",
+    "autocannon": "^7.15.0",
+    "clinic": "^13.0.0",
+    "0x": "^6.0.0",
+    "lighthouse": "^12.0.0",
+    "chrome-launcher": "^1.1.2",
+    "pidusage": "^3.0.2",
+    "systeminformation": "^5.22.0",
+    "event-loop-lag": "^3.0.0",
+    "perf_hooks": "^0.0.1",
+    "cli-table3": "^0.6.4",
+    "chalk": "^5.3.0",
+    "ora": "^8.1.0",
+    "commander": "^12.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/autocannon": "^7.12.0",
+    "@types/cli-table3": "^0.6.5",
+    "@types/chrome-launcher": "^1.0.4",
+    "@types/pidusage": "^2.0.5",
+    "@vitest/coverage-v8": "^1.2.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  },
+  "peerDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

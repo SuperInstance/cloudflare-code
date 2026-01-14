@@ -1,0 +1,184 @@
+# Alertmanager Configuration for ClaudeFlare
+
+global:
+  resolve_timeout: 5m
+  # Slack webhook from environment
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+
+# Template files
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default'
+
+  routes:
+    # Critical alerts go to PagerDuty + Slack
+    - match:
+        severity: emergency
+      receiver: 'pagerduty-critical'
+      continue: true
+
+    - match:
+        severity: critical
+      receiver: 'slack-critical'
+      continue: true
+
+    # Warning alerts go to Slack only
+    - match:
+        severity: warning
+      receiver: 'slack-warning'
+
+    # Provider alerts go to dedicated channel
+    - match:
+        category: providers
+      receiver: 'slack-providers'
+
+    # Cost alerts go to dedicated channel
+    - match:
+        category: costs
+      receiver: 'slack-costs'
+
+    # Incident alerts go to dedicated channel
+    - match:
+        category: incidents
+      receiver: 'slack-incidents'
+
+# Inhibition rules
+inhibit_rules:
+  # Inhibit warnings if critical is firing for same alert
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+
+  # Inhibit provider degraded if provider down
+  - source_match:
+      alertname: 'ProviderDown'
+    target_match:
+      alertname: 'ProviderDegraded'
+    equal: ['provider']
+
+# Receivers configuration
+receivers:
+  - name: 'default'
+    slack_configs:
+      - channel: '#claudeflare-alerts'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+  - name: 'slack-critical'
+    slack_configs:
+      - channel: '#claudeflare-critical'
+        title: ':rotating_light: CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          *Summary:* {{ .CommonAnnotations.summary }}
+          *Description:* {{ .CommonAnnotations.description }}
+          *Severity:* {{ .CommonLabels.severity }}
+          *Runbook:* {{ .CommonAnnotations.runbook_url }}
+        color: 'danger'
+        send_resolved: true
+        actions:
+          - type: button
+            text: 'View Dashboard'
+            url: 'https://grafana.example.com/d/claudeflare-overview'
+          - type: button
+            text: 'Acknowledge'
+            url: 'https://alertmanager.example.com/#/alerts'
+
+  - name: 'slack-warning'
+    slack_configs:
+      - channel: '#claudeflare-alerts'
+        title: ':warning: WARNING: {{ .GroupLabels.alertname }}'
+        text: |
+          *Summary:* {{ .CommonAnnotations.summary }}
+          *Description:* {{ .CommonAnnotations.description }}
+        color: 'warning'
+        send_resolved: true
+
+  - name: 'slack-providers'
+    slack_configs:
+      - channel: '#claudeflare-providers'
+        title: ':robot_face: Provider Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          *Provider:* {{ .CommonLabels.provider }}
+          *Summary:* {{ .CommonAnnotations.summary }}
+          *Description:* {{ .CommonAnnotations.description }}
+        send_resolved: true
+
+  - name: 'slack-costs'
+    slack_configs:
+      - channel: '#claudeflare-costs'
+        title: ':moneybag: Cost Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          *Summary:* {{ .CommonAnnotations.summary }}
+          *Description:* {{ .CommonAnnotations.description }}
+          *Impact:* {{ .CommonAnnotations.impact }}
+        send_resolved: true
+
+  - name: 'slack-incidents'
+    slack_configs:
+      - channel: '#claudeflare-incidents'
+        title: ':ambulance: Incident: {{ .GroupLabels.alertname }}'
+        text: |
+          *Severity:* {{ .CommonLabels.severity }}
+          *Summary:* {{ .CommonAnnotations.summary }}
+          *Description:* {{ .CommonAnnotations.description }}
+          *Runbook:* {{ .CommonAnnotations.runbook_url }}
+        color: 'danger'
+        send_resolved: true
+
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_INTEGRATION_KEY'
+        description: '{{ .GroupLabels.alertname }}'
+        severity: '{{ .CommonLabels.severity }}'
+        details:
+          firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
+          resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
+          num_firing: '{{ .Alerts.Firing | len }}'
+          num_resolved: '{{ .Alerts.Resolved | len }}'
+
+  - name: 'email-ops'
+    email_configs:
+      - to: 'ops-team@example.com'
+        subject: '[ClaudeFlare] {{ .GroupLabels.alertname }}'
+        html: |
+          {{ range .Alerts }}
+          <h2>{{ .Annotations.summary }}</h2>
+          <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
+          <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+          <p><strong>Triggered:</strong> {{ .StartsAt }}</p>
+          {{ end }}
+        send_resolved: true
+
+# Time intervals for alert routing
+time_intervals:
+  - name: 'business-hours'
+    time_intervals:
+      - times:
+          - start_time: '09:00'
+            end_time: '17:00'
+        weekdays: ['monday:friday']
+
+  - name: 'after-hours'
+    time_intervals:
+      - times:
+          - start_time: '17:00'
+            end_time: '09:00'
+        weekdays: ['monday:friday']
+      - weekdays: ['saturday', 'sunday']
+
+# Mute timing for maintenance windows
+mute_time_intervals:
+  - name: 'maintenance-window'
+    time_intervals:
+      - start_time: '2024-01-01T02:00:00Z'
+        end_time: '2024-01-01T04:00:00Z'

@@ -1,0 +1,66 @@
+{
+  "name": "@claudeflare/nas",
+  "version": "1.0.0",
+  "description": "Neural Architecture Search system for AI optimization with multiple search strategies, model compression, and hyperparameter tuning",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "neural-architecture-search",
+    "nas",
+    "auto-ml",
+    "hyperparameter-optimization",
+    "model-compression",
+    "pruning",
+    "quantization",
+    "evolutionary-algorithms",
+    "reinforcement-learning",
+    "bayesian-optimization",
+    "deep-learning",
+    "cloudflare-workers"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@claudeflare/shared": "workspace:*",
+    "typescript": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.0",
+    "ts-jest": "^29.1.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/claudeflare/claudeflare.git",
+    "directory": "packages/nas"
+  },
+  "bugs": {
+    "url": "https://github.com/claudeflare/claudeflare/issues"
+  },
+  "homepage": "https://github.com/claudeflare/claudeflare/tree/main/packages/nas#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

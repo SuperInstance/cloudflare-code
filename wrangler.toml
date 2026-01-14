@@ -1,0 +1,154 @@
+# ClaudeFlare Cloudflare Workers Configuration
+# Environment variables: staging, production
+
+name = "claudeflare"
+main = "dist/worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Account settings
+account_id = ""  # Set via CLOUDFLARE_ACCOUNT_ID environment variable
+workers_dev = true
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "."
+watch_paths = ["src/**/*.ts"]
+
+# Development environment
+[env.development]
+name = "claudeflare-dev"
+vars = { ENVIRONMENT = "development" }
+
+# Staging environment
+[env.staging]
+name = "claudeflare-staging"
+route = { pattern = "staging.claudeflare.workers.dev", zone_name = "workers.dev" }
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+# API Endpoints
+API_ENDPOINT = "https://staging-api.claudeflare.workers.dev"
+GRAPHQL_ENDPOINT = "https://staging-graphql.claudeflare.workers.dev"
+
+# Feature flags
+ENABLE_CACHE = "true"
+ENABLE_ANALYTICS = "true"
+ENABLE_RATE_LIMITING = "true"
+LOG_LEVEL = "debug"
+
+# Provider configuration
+PROVIDER_ROUTING_STRATEGY = "round-robin"
+MAX_CONCURRENT_REQUESTS = "100"
+
+# KV Namespaces (staging)
+[[env.staging.kv_namespaces]]
+binding = "CACHE_KV"
+id = ""  # Set via CLOUDFLARE KV namespace ID
+preview_id = ""
+
+# Durable Objects (staging)
+[[env.staging.durable_objects.bindings]]
+name = "AGENT_ORCHESTRATOR"
+class_name = "AgentOrchestrator"
+
+[[env.staging.durable_objects.bindings]]
+name = "VECTOR_INDEX"
+class_name = "VectorIndex"
+
+# R2 Buckets (staging)
+[[env.staging.r2_buckets]]
+binding = "STORAGE_BUCKET"
+bucket_name = "claudeflare-staging-storage"
+
+# D1 Databases (staging)
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "claudeflare-staging-db"
+database_id = ""  # Set via CLOUDFLARE D1 database ID
+
+# Queues (staging)
+[[env.staging.queues.producers]]
+binding = "TASK_QUEUE"
+queue = "claudeflare-staging-tasks"
+
+[[env.staging.queues.consumers]]
+queue = "claudeflare-staging-tasks"
+max_batch_size = 10
+max_wait_time = 5
+
+# Production environment
+[env.production]
+name = "claudeflare"
+route = { pattern = "claudeflare.workers.dev", zone_name = "workers.dev" }
+
+[env.production.vars]
+ENVIRONMENT = "production"
+# API Endpoints
+API_ENDPOINT = "https://api.claudeflare.workers.dev"
+GRAPHQL_ENDPOINT = "https://graphql.claudeflare.workers.dev"
+
+# Feature flags
+ENABLE_CACHE = "true"
+ENABLE_ANALYTICS = "true"
+ENABLE_RATE_LIMITING = "true"
+LOG_LEVEL = "info"
+
+# Provider configuration
+PROVIDER_ROUTING_STRATEGY = "least-latency"
+MAX_CONCURRENT_REQUESTS = "1000"
+
+# KV Namespaces (production)
+[[env.production.kv_namespaces]]
+binding = "CACHE_KV"
+id = ""  # Set via CLOUDFLARE KV namespace ID
+preview_id = ""
+
+# Durable Objects (production)
+[[env.production.durable_objects.bindings]]
+name = "AGENT_ORCHESTRATOR"
+class_name = "AgentOrchestrator"
+
+[[env.production.durable_objects.bindings]]
+name = "VECTOR_INDEX"
+class_name = "VectorIndex"
+
+# R2 Buckets (production)
+[[env.production.r2_buckets]]
+binding = "STORAGE_BUCKET"
+bucket_name = "claudeflare-production-storage"
+
+# D1 Databases (production)
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "claudeflare-production-db"
+database_id = ""  # Set via CLOUDFLARE D1 database ID
+
+# Queues (production)
+[[env.production.queues.producers]]
+binding = "TASK_QUEUE"
+queue = "claudeflare-production-tasks"
+
+[[env.production.queues.consumers]]
+queue = "claudeflare-production-tasks"
+max_batch_size = 25
+max_wait_time = 10
+
+# Metrics and monitoring
+[triggers.crons]
+# Health check every 5 minutes
+"*/5 * * * *" = "cron/health-check"
+# Metrics aggregation every hour
+"0 * * * *" = "cron/aggregate-metrics"
+# Cache cleanup every 6 hours
+"0 */6 * * *" = "cron/cache-cleanup"
+
+# Analytics
+[analytics]
+enabled = true
+format = "json"
+
+# Limits
+[limits]
+cpu_ms = 50  # CPU time limit per request

@@ -1,0 +1,651 @@
+---
+title: Custom Agents
+description: Create and configure custom AI agents for specialized tasks
+---
+
+# Custom Agents
+
+Custom agents allow you to create specialized AI agents tailored to your specific use cases. Define custom behaviors, tools, and workflows to extend ClaudeFlare's capabilities.
+
+## Overview
+
+ClaudeFlare supports several types of custom agents:
+
+- **Tool Agents**: Agents with specific tools and capabilities
+- **Workflow Agents**: Agents that follow predefined workflows
+- **Domain Agents**: Agents specialized in specific domains
+- **Composite Agents**: Agents that combine multiple sub-agents
+
+## Creating Custom Agents
+
+### Agent Definition
+
+Define your custom agent with a configuration object:
+
+```typescript
+interface CustomAgentConfig {
+  // Identity
+  name: string;                  // Unique agent name
+  type: 'tool' | 'workflow' | 'domain' | 'composite';
+  version: string;               // Version semver
+
+  // Description
+  description: string;
+  capabilities: string[];        // List of capabilities
+
+  // Behavior
+  systemPrompt: string;          // System prompt for the agent
+  temperature?: number;          // Default temperature (0-2)
+  maxTokens?: number;            // Default max tokens
+
+  // Tools (for tool agents)
+  tools?: Array<{
+    name: string;
+    description: string;
+    parameters: any;
+    handler: string;             // Reference to handler function
+  }>;
+
+  // Workflow (for workflow agents)
+  workflow?: {
+    steps: Array<{
+      name: string;
+      agent?: string;            // Sub-agent to use
+      action: string;
+      input: any;
+      output?: any;
+    }>;
+  };
+
+  // Sub-agents (for composite agents)
+  subAgents?: string[];          // Agent IDs to delegate to
+
+  // Configuration
+  config?: {
+    provider?: 'auto' | 'cloudflare' | 'groq' | 'cerebras';
+    model?: string;
+    timeout?: number;
+    retryAttempts?: number;
+  };
+}
+```
+
+### Example: Code Review Agent
+
+Create a specialized code review agent:
+
+```typescript
+const codeReviewAgent: CustomAgentConfig = {
+  name: 'code-reviewer',
+  type: 'domain',
+  version: '1.0.0',
+  description: 'Specialized agent for code review and quality analysis',
+  capabilities: [
+    'security-analysis',
+    'performance-analysis',
+    'best-practices-check',
+    'code-style-review'
+  ],
+  systemPrompt: `You are a specialized code review agent with expertise in:
+- Security vulnerabilities (OWASP Top 10, common exploits)
+- Performance optimization techniques
+- Language-specific best practices
+- Clean code principles and design patterns
+
+Review code thoroughly and provide:
+1. Security issues with severity ratings
+2. Performance concerns with optimization suggestions
+3. Best practice violations with improvements
+4. Code style recommendations
+
+Be constructive, specific, and provide examples.`,
+  temperature: 0.3,
+  maxTokens: 2000,
+  config: {
+    provider: 'auto',
+    model: '@cf/meta/llama-3.1-8b-instruct',
+    timeout: 60
+  }
+};
+```
+
+### Example: Testing Agent
+
+Create an agent specialized in test generation:
+
+```typescript
+const testingAgent: CustomAgentConfig = {
+  name: 'test-generator',
+  type: 'tool',
+  version: '1.0.0',
+  description: 'Generates comprehensive unit tests for code',
+  capabilities: [
+    'unit-test-generation',
+    'integration-test-generation',
+    'edge-case-identification',
+    'mock-creation'
+  ],
+  systemPrompt: `You are a test generation expert. Create comprehensive tests that:
+- Cover normal use cases
+- Test edge cases and error conditions
+- Include boundary value testing
+- Use appropriate test doubles (mocks, stubs, fakes)
+- Follow testing best practices (AAA pattern, descriptive names)
+
+Generate tests for the following framework: {framework}`,
+  temperature: 0.4,
+  tools: [
+    {
+      name: 'analyze-function',
+      description: 'Analyze function to identify test cases',
+      parameters: {
+        type: 'object',
+        properties: {
+          code: { type: 'string' },
+          language: { type: 'string' }
+        }
+      },
+      handler: 'analyzeFunctionHandler'
+    },
+    {
+      name: 'generate-mock',
+      description: 'Generate mock for dependency',
+      parameters: {
+        type: 'object',
+        properties: {
+          dependency: { type: 'string' },
+          framework: { type: 'string' }
+        }
+      },
+      handler: 'generateMockHandler'
+    }
+  ]
+};
+```
+
+### Example: Workflow Agent
+
+Create an agent that follows a specific workflow:
+
+```typescript
+const refactoringAgent: CustomAgentConfig = {
+  name: 'refactor-orchestrator',
+  type: 'workflow',
+  version: '1.0.0',
+  description: 'Orchestrates code refactoring workflow',
+  capabilities: [
+    'code-analysis',
+    'refactoring-planning',
+    'code-transformation',
+    'verification'
+  ],
+  systemPrompt: `You are a refactoring orchestrator. Guide code through:
+1. Analysis phase: Identify issues and improvements
+2. Planning phase: Create detailed refactoring plan
+3. Transformation phase: Apply refactoring changes
+4. Verification phase: Ensure tests pass and behavior preserved`,
+  workflow: {
+    steps: [
+      {
+        name: 'analyze',
+        agent: 'code-analyzer',
+        action: 'analyze-code',
+        input: {
+          code: '{code}',
+          goals: '{goals}'
+        }
+      },
+      {
+        name: 'plan',
+        agent: 'planner',
+        action: 'create-plan',
+        input: {
+          analysis: '{analyze.output}',
+          goals: '{goals}'
+        }
+      },
+      {
+        name: 'transform',
+        agent: 'executor',
+        action: 'apply-refactoring',
+        input: {
+          plan: '{plan.output}',
+          code: '{code}'
+        }
+      },
+      {
+        name: 'verify',
+        agent: 'reviewer',
+        action: 'verify-refactoring',
+        input: {
+          original: '{code}',
+          refactored: '{transform.output}'
+        }
+      }
+    ]
+  }
+};
+```
+
+## Registering Custom Agents
+
+### Register via API
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/agents/custom \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d @code-review-agent.json
+```
+
+### Register via SDK
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk';
+
+const client = new ClaudeFlare({ apiKey: 'your-api-key' });
+
+const agent = await client.agents.register({
+  name: 'code-reviewer',
+  type: 'domain',
+  version: '1.0.0',
+  description: 'Specialized code review agent',
+  capabilities: ['security-analysis', 'performance-analysis'],
+  systemPrompt: 'You are a code review expert...',
+  temperature: 0.3
+});
+
+console.log('Agent registered:', agent.id);
+```
+
+## Using Custom Agents
+
+### Direct Invocation
+
+```typescript
+const result = await client.agents.invoke({
+  agentId: 'code-reviewer',
+  input: {
+    code: `
+      function authenticateUser(username, password) {
+        const query = \`SELECT * FROM users WHERE username = '\${username}' AND password = '\${password}'\`;
+        return db.execute(query);
+      }
+    `,
+    language: 'javascript'
+  }
+});
+```
+
+### In Workflows
+
+```typescript
+const orchestration = await client.agents.orchestrate({
+  sessionId: 'sess_123',
+  userId: 'user_456',
+  messages: [
+    {
+      role: 'user',
+      content: 'Review this code for security issues'
+    }
+  ],
+  context: {
+    files: ['src/auth.js']
+  },
+  workflow: {
+    steps: [
+      {
+        agent: 'code-reviewer',
+        action: 'security-review'
+      }
+    ]
+  }
+});
+```
+
+## Agent Tools
+
+### Built-in Tools
+
+ClaudeFlare provides built-in tools:
+
+- **file-read**: Read files from codebase
+- **file-write**: Write files to codebase
+- **code-search**: Search codebase
+- **execute-command**: Execute shell commands (sandboxed)
+- **run-tests**: Execute test suite
+- **analyze-dependencies**: Analyze project dependencies
+
+### Custom Tools
+
+Define custom tools:
+
+```typescript
+const customTool = {
+  name: 'check-security',
+  description: 'Check code for security vulnerabilities',
+  parameters: {
+    type: 'object',
+    properties: {
+      code: { type: 'string', description: 'Code to check' },
+      language: { type: 'string', description: 'Programming language' }
+    },
+    required: ['code', 'language']
+  },
+  handler: async (params) => {
+    // Implement security check logic
+    const issues = [];
+
+    // SQL injection check
+    if (params.code.includes('SELECT * FROM')) {
+      issues.push({
+        type: 'sql-injection',
+        severity: 'high',
+        line: findLineNumber(params.code, 'SELECT')
+      });
+    }
+
+    // XSS check
+    if (params.code.includes('innerHTML')) {
+      issues.push({
+        type: 'xss',
+        severity: 'medium',
+        line: findLineNumber(params.code, 'innerHTML')
+      });
+    }
+
+    return {
+      issues,
+      summary: `Found ${issues.length} security issues`
+    };
+  }
+};
+```
+
+## Agent Communication
+
+### Direct Messaging
+
+```typescript
+const response = await agent1.send({
+  to: 'code-reviewer',
+  message: {
+    type: 'review-request',
+    code: 'function foo() {}'
+  }
+});
+```
+
+### Broadcast
+
+```typescript
+await coordinator.broadcast({
+  message: {
+    type: 'task-update',
+    status: 'completed'
+  },
+  to: ['executor', 'reviewer', 'tester']
+});
+```
+
+### Request/Response
+
+```typescript
+const result = await agent1.request({
+  to: 'analyzer',
+  message: {
+    type: 'analyze',
+    code: '...'
+  },
+  timeout: 30000
+});
+```
+
+## Agent State Management
+
+### Persistent State
+
+```typescript
+await agent.setState({
+  lastReview: Date.now(),
+  issuesFound: 5,
+  preferences: {
+    severity: 'high',
+    categories: ['security', 'performance']
+  }
+});
+
+const state = await agent.getState();
+```
+
+### Shared Context
+
+```typescript
+await agent.setContext({
+  codebaseId: 'cb_123',
+  files: ['src/**/*.ts'],
+  rules: ['no-any', 'strict-null-checks']
+});
+
+const context = await agent.getContext();
+```
+
+## Best Practices
+
+### 1. Clear Capabilities
+
+Define specific, actionable capabilities:
+
+```typescript
+capabilities: [
+  'sql-injection-detection',  // Good
+  'code-analysis'             // Too vague
+]
+```
+
+### 2. Structured System Prompts
+
+Use structured prompts with clear instructions:
+
+```typescript
+systemPrompt: `
+Role: Security Analyst
+Expertise: OWASP Top 10, Common Vulnerabilities
+
+Process:
+1. Scan for known vulnerability patterns
+2. Analyze data flow and input handling
+3. Check authentication and authorization
+4. Review cryptography usage
+
+Output Format:
+- Severity rating (Critical/High/Medium/Low)
+- Vulnerability type
+- Location (file:line)
+- Remediation steps
+- Code example of fix
+`
+```
+
+### 3. Appropriate Temperature
+
+Use lower temperatures for code analysis (0.2-0.4), higher for creative tasks (0.7-1.0).
+
+### 4. Tool Composition
+
+Combine tools for complex workflows:
+
+```typescript
+tools: [
+  analyzeStructure,
+  checkSecurity,
+  verifyPerformance,
+  generateTests
+]
+```
+
+### 5. Error Handling
+
+Implement robust error handling in tool handlers:
+
+```typescript
+handler: async (params) => {
+  try {
+    return await executeTool(params);
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      recovery: 'Try with different parameters'
+    };
+  }
+}
+```
+
+## Examples
+
+### Example 1: Database Migration Agent
+
+```typescript
+const migrationAgent: CustomAgentConfig = {
+  name: 'db-migrator',
+  type: 'workflow',
+  version: '1.0.0',
+  description: 'Generates and manages database migrations',
+  capabilities: [
+    'migration-generation',
+    'rollback-planning',
+    'data-migration'
+  ],
+  systemPrompt: `You are a database migration expert.
+Generate safe, reversible migrations that:
+- Use transactional DDL when possible
+- Include rollback steps
+- Preserve existing data
+- Follow database best practices`,
+  workflow: {
+    steps: [
+      {
+        name: 'analyze-changes',
+        agent: 'schema-analyzer',
+        action: 'compare-schemas'
+      },
+      {
+        name: 'generate-migration',
+        agent: 'migration-generator',
+        action: 'create-migration'
+      },
+      {
+        name: 'generate-rollback',
+        agent: 'rollback-generator',
+        action: 'create-rollback'
+      }
+    ]
+  }
+};
+```
+
+### Example 2: API Documentation Agent
+
+```typescript
+const docAgent: CustomAgentConfig = {
+  name: 'api-documenter',
+  type: 'tool',
+  version: '1.0.0',
+  description: 'Generates API documentation from code',
+  capabilities: [
+    'endpoint-discovery',
+    'parameter-extraction',
+    'response-documentation',
+    'example-generation'
+  ],
+  systemPrompt: `Extract and document API endpoints from code:
+1. Identify route definitions
+2. Extract parameters and validation
+3. Document response structures
+4. Generate usage examples`,
+  tools: [
+    {
+      name: 'parse-routes',
+      description: 'Parse route definitions',
+      handler: 'parseRoutes'
+    },
+    {
+      name: 'extract-types',
+      description: 'Extract TypeScript types',
+      handler: 'extractTypes'
+    },
+    {
+      name: 'generate-examples',
+      description: 'Generate curl/js/python examples',
+      handler: 'generateExamples'
+    }
+  ]
+};
+```
+
+## Testing Custom Agents
+
+### Unit Tests
+
+```typescript
+describe('CodeReviewAgent', () => {
+  it('should detect SQL injection vulnerabilities', async () => {
+    const result = await agent.invoke({
+      code: "db.query('SELECT * FROM users WHERE id = ' + input)",
+      language: 'javascript'
+    });
+
+    expect(result.issues).toContainEqual({
+      type: 'sql-injection',
+      severity: 'critical'
+    });
+  });
+});
+```
+
+### Integration Tests
+
+```typescript
+describe('Agent Workflow', () => {
+  it('should complete refactoring workflow', async () => {
+    const result = await client.agents.orchestrate({
+      workflow: 'refactor',
+      code: '...',
+      goals: ['performance']
+    });
+
+    expect(result.status).toBe('completed');
+    expect(result.results.artifacts).toBeDefined();
+  });
+});
+```
+
+## Troubleshooting
+
+### Agent Not Responding
+
+- Check agent is registered
+- Verify agent is healthy
+- Review agent logs
+- Check timeout settings
+
+### Tool Execution Failing
+
+- Verify tool parameters
+- Check tool handler implementation
+- Review error messages
+- Test tool in isolation
+
+### Workflow Stuck
+
+- Check workflow step definitions
+- Verify agent dependencies
+- Review step outputs
+- Check for circular dependencies
+
+## Related Guides
+
+- [Multi-Agent Workflows](/guides/multi-agent-workflows) - Complex multi-agent patterns
+- [Code Completion](/guides/code-completion) - Code completion techniques
+- [Error Handling](/guides/error-handling) - Handling agent errors

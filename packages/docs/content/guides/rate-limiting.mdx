@@ -1,0 +1,330 @@
+---
+title: Rate Limiting
+description: Implement effective rate limiting strategies
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Rate Limiting Guide
+
+Learn to implement and optimize rate limiting for your ClaudeFlare applications.
+
+## Overview
+
+ClaudeFlare provides built-in rate limiting with multiple strategies:
+
+- **Token Bucket** - Smooth rate limiting
+- **Sliding Window** - Accurate rate limiting
+- **Fixed Window** - Simple rate limiting
+
+## Token Bucket Strategy
+
+### Configuration
+
+```javascript
+const rateLimiter = createRateLimiter({
+  strategy: 'token-bucket',
+  rate: 100,        // 100 requests per minute
+  burst: 20,        // Allow burst of 20 requests
+  storage: 'kv'     // Store in KV
+})
+```
+
+### Implementation
+
+```typescript
+import { TokenBucketRateLimiter } from '@claudeflare/sdk'
+
+const limiter = new TokenBucketRateLimiter({
+  capacity: 100,    // Max tokens
+  refillRate: 100,  // Tokens per minute
+  storage: env.RATE_LIMIT_KV
+})
+
+export async function handleRequest(request: Request, env: Env) {
+  const clientId = request.headers.get('X-API-Key') || getClientIP(request)
+
+  const { allowed, remaining } = await limiter.check(clientId)
+
+  if (!allowed) {
+    return new Response('Rate limit exceeded', {
+      status: 429,
+      headers: {
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': Math.ceil(Date.now() / 1000 + 60).toString()
+      }
+    })
+  }
+
+  // Process request
+  const response = await processRequest(request)
+
+  // Add rate limit headers
+  response.headers.set('X-RateLimit-Remaining', remaining.toString())
+
+  return response
+}
+```
+
+## Sliding Window Strategy
+
+### Configuration
+
+```javascript
+const rateLimiter = createRateLimiter({
+  strategy: 'sliding-window',
+  window: 60000,      // 1 minute window
+  maxRequests: 100,   // Max requests per window
+  precision: 1000     // 1 second precision
+})
+```
+
+### Implementation
+
+```typescript
+import { SlidingWindowRateLimiter } from '@claudeflare/sdk'
+
+const limiter = new SlidingWindowRateLimiter({
+  windowMs: 60000,
+  maxRequests: 100,
+  storage: env.RATE_LIMIT_DURABLE_OBJECT
+})
+
+export async function handleRequest(request: Request, env: Env) {
+  const clientId = getClientId(request)
+
+  const result = await limiter.check(clientId)
+
+  if (!result.allowed) {
+    return new Response('Rate limit exceeded', {
+      status: 429,
+      headers: {
+        'Retry-After': Math.ceil(result.resetTime / 1000 - Date.now() / 1000).toString()
+      }
+    })
+  }
+
+  return processRequest(request)
+}
+```
+
+## Per-Endpoint Limits
+
+Different limits for different endpoints:
+
+```typescript
+const rateLimiters = {
+  '/v1/chat': {
+    rate: 100,    // 100 requests per minute
+    burst: 20
+  },
+  '/v1/agents/orchestrate': {
+    rate: 50,     // 50 requests per minute
+    burst: 10
+  },
+  '/v1/embeddings': {
+    rate: 200,    // 200 requests per minute
+    burst: 40
+  }
+}
+
+export async function handleRequest(request: Request, env: Env) {
+  const url = new URL(request.url)
+  const limits = rateLimiters[url.pathname]
+
+  if (limits) {
+    const limiter = new TokenBucketRateLimiter({
+      capacity: limits.rate,
+      refillRate: limits.rate,
+      storage: env.RATE_LIMIT_KV
+    })
+
+    const clientId = getClientId(request)
+    const { allowed } = await limiter.check(clientId)
+
+    if (!allowed) {
+      return new Response('Rate limit exceeded', { status: 429 })
+    }
+  }
+
+  return processRequest(request)
+}
+```
+
+## Tiered Rate Limiting
+
+Different limits for different user tiers:
+
+```typescript
+interface TierLimits {
+  free: { rate: number; burst: number }
+  pro: { rate: number; burst: number }
+  enterprise: { rate: number; burst: number }
+}
+
+const tierLimits: TierLimits = {
+  free: { rate: 100, burst: 20 },
+  pro: { rate: 1000, burst: 100 },
+  enterprise: { rate: 10000, burst: 1000 }
+}
+
+async function getUserTier(apiKey: string): Promise<keyof TierLimits> {
+  const user = await getUserByApiKey(apiKey)
+  return user.tier || 'free'
+}
+
+export async function handleRequest(request: Request, env: Env) {
+  const apiKey = request.headers.get('X-API-Key')
+  const tier = await getUserTier(apiKey!)
+  const limits = tierLimits[tier]
+
+  const limiter = new TokenBucketRateLimiter({
+    capacity: limits.rate,
+    refillRate: limits.rate,
+    storage: env.RATE_LIMIT_KV,
+    keyPrefix: `${tier}:${apiKey}`
+  })
+
+  const { allowed, remaining } = await limiter.check(apiKey!)
+
+  if (!allowed) {
+    return new Response('Rate limit exceeded', {
+      status: 429,
+      headers: {
+        'X-RateLimit-Limit': limits.rate.toString(),
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': getResetTime().toString()
+      }
+    })
+  }
+
+  const response = await processRequest(request)
+
+  response.headers.set('X-RateLimit-Limit', limits.rate.toString())
+  response.headers.set('X-RateLimit-Remaining', remaining.toString())
+
+  return response
+}
+```
+
+## Durable Objects Rate Limiting
+
+For high-precision rate limiting:
+
+```typescript
+export class RateLimiterDurableObject {
+  private state: DurableObjectState
+  private storage: DurableObjectStorage
+  private requests: number[] = []
+
+  constructor(state: DurableObjectState, env: Env) {
+    this.state = state
+    this.storage = state.storage
+  }
+
+  async check(limit: number, window: number): Promise<{ allowed: boolean; remaining: number }> {
+    const now = Date.now()
+
+    // Clean old requests outside the window
+    this.requests = this.requests.filter(time => now - time < window)
+
+    if (this.requests.length < limit) {
+      this.requests.push(now)
+      await this.storage.put('requests', this.requests)
+
+      return {
+        allowed: true,
+        remaining: limit - this.requests.length
+      }
+    }
+
+    return {
+      allowed: false,
+      remaining: 0
+    }
+  }
+}
+```
+
+## Rate Limit Headers
+
+Include informative headers in responses:
+
+```typescript
+export function setRateLimitHeaders(
+  response: Response,
+  info: {
+    limit: number
+    remaining: number
+    reset: number
+  }
+): Response {
+  response.headers.set('X-RateLimit-Limit', info.limit.toString())
+  response.headers.set('X-RateLimit-Remaining', info.remaining.toString())
+  response.headers.set('X-RateLimit-Reset', info.reset.toString())
+
+  return response
+}
+```
+
+## Client-Side Handling
+
+Handle rate limits gracefully:
+
+```typescript
+class RateLimitedClient {
+  private client: ClaudeFlare
+  private retryCount: number = 0
+  private maxRetries: number = 3
+
+  async request(method: string, path: string, data: any) {
+    try {
+      const response = await this.client.request(method, path, data)
+      this.retryCount = 0
+      return response
+    } catch (error) {
+      if (error.status === 429 && this.retryCount < this.maxRetries) {
+        const retryAfter = error.headers['Retry-After'] || 60
+        console.log(`Rate limited. Retrying after ${retryAfter} seconds...`)
+
+        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000))
+        this.retryCount++
+
+        return this.request(method, path, data)
+      }
+
+      throw error
+    }
+  }
+}
+```
+
+## Monitoring
+
+Track rate limit metrics:
+
+```typescript
+export async function checkRateLimitWithMetrics(
+  clientId: string,
+  limiter: RateLimiter
+): Promise<boolean> {
+  const start = Date.now()
+  const result = await limiter.check(clientId)
+  const latency = Date.now() - start
+
+  // Track metrics
+  await env.METRICS.put('rate_limit_check', JSON.stringify({
+    clientId,
+    allowed: result.allowed,
+    remaining: result.remaining,
+    latency,
+    timestamp: Date.now()
+  }))
+
+  return result.allowed
+}
+```
+
+<Callout type="tip">
+  **Best Practice**: Always include rate limit headers in API responses so clients can handle limits gracefully.
+</Callout>

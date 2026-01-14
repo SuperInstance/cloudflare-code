@@ -1,0 +1,83 @@
+{
+  "name": "@claudeflare/analytics",
+  "version": "0.1.0",
+  "description": "Comprehensive performance analytics and ML Ops system for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "analytics",
+    "monitoring",
+    "ab-testing",
+    "feature-flags",
+    "ml-ops",
+    "performance",
+    "cloudflare",
+    "workers"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./monitoring": {
+      "import": "./dist/monitoring/index.js",
+      "types": "./dist/monitoring/index.d.ts"
+    },
+    "./experiments": {
+      "import": "./dist/experiments/index.js",
+      "types": "./dist/experiments/index.d.ts"
+    },
+    "./features": {
+      "import": "./dist/features/index.js",
+      "types": "./dist/features/index.d.ts"
+    },
+    "./ml": {
+      "import": "./dist/ml/index.js",
+      "types": "./dist/ml/index.d.ts"
+    },
+    "./insights": {
+      "import": "./dist/insights/index.js",
+      "types": "./dist/insights/index.d.ts"
+    },
+    "./reports": {
+      "import": "./dist/reports/index.js",
+      "types": "./dist/reports/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

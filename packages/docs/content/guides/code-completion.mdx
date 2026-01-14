@@ -1,0 +1,388 @@
+---
+title: Code Completion
+description: Build intelligent code completion features
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Code Completion Guide
+
+Build intelligent code completion features with ClaudeFlare.
+
+## Overview
+
+Code completion is one of the most powerful features of ClaudeFlare. This guide shows you how to build production-ready code completion systems.
+
+## Quick Example
+
+```javascript
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+const client = new ClaudeFlare({ apiKey })
+
+async function completeCode(code, language) {
+  const response = await client.chat.completions.create({
+    messages: [
+      {
+        role: 'system',
+        content: `You are an expert ${language} programmer. Complete the given code snippet. Return only the completion, no explanations.`
+      },
+      {
+        role: 'user',
+        content: `Complete this code:\n\`\`\`${language}\n${code}\n\`\`\``
+      }
+    ],
+    temperature: 0.2,  // Low temperature for deterministic completions
+    max_tokens: 500
+  })
+
+  return response.choices[0].message.content
+}
+```
+
+## Advanced Techniques
+
+### 1. Context-Aware Completion
+
+Provide relevant context for better completions:
+
+```javascript
+async function contextAwareCompletion(code, language, projectContext) {
+  const response = await client.chat.completions.create({
+    messages: [
+      {
+        role: 'system',
+        content: `You are completing code in a ${language} project.
+
+Project context:
+${projectContext.map(f => `- ${f.path}: ${f.summary}`).join('\n')}
+
+Complete the code snippet. Return only the completion.`
+      },
+      {
+        role: 'user',
+        content: `Complete:\n\`\`\`${language}\n${code}\n\`\`\``
+      }
+    ],
+    temperature: 0.2
+  })
+
+  return response.choices[0].message.content
+}
+```
+
+### 2. Multi-Line Completion
+
+Complete entire function bodies:
+
+```javascript
+async function completeFunction(code, language) {
+  const response = await client.chat.completions.create({
+    messages: [
+      {
+        role: 'system',
+        content: `Complete the function. Return the entire function body including closing brace.`
+      },
+      {
+        role: 'user',
+        content: `Complete this function:\n\`\`\`${language}\n${code}\n\`\`\``
+      }
+    ],
+    max_tokens: 1000
+  })
+
+  return response.choices[0].message.content
+}
+```
+
+### 3. Streaming Completion
+
+Provide real-time completion as tokens arrive:
+
+```javascript
+async function* streamingCompletion(code, language) {
+  const stream = await client.chat.completions.stream({
+    messages: [
+      {
+        role: 'system',
+        content: `Complete the code. Return only the completion.`
+      },
+      {
+        role: 'user',
+        content: `Complete:\n\`\`\`${language}\n${code}\n\`\`\``
+      }
+    ],
+    temperature: 0.2,
+    stream: true
+  })
+
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content
+    if (content) {
+      yield content
+    }
+  }
+}
+```
+
+## Language-Specific Tips
+
+### JavaScript/TypeScript
+
+```javascript
+const jsPrompt = `You are a JavaScript/TypeScript expert.
+Follow these conventions:
+- Use async/await over promises
+- Prefer const over let when possible
+- Use arrow functions for callbacks
+- Follow TypeScript best practices
+
+Complete this code:`
+```
+
+### Python
+
+```javascript
+const pythonPrompt = `You are a Python expert.
+Follow these conventions:
+- Use type hints
+- Follow PEP 8 style guide
+- Use list comprehensions when appropriate
+- Prefer context managers for resource management
+
+Complete this code:`
+```
+
+### Go
+
+```javascript
+const goPrompt = `You are a Go expert.
+Follow these conventions:
+- Use short, descriptive names
+- Handle errors explicitly
+- Use goroutines for concurrency
+- Follow Go idioms
+
+Complete this code:`
+```
+
+## Integration Examples
+
+### VS Code Extension
+
+```typescript
+import * as vscode from 'vscode'
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+export class CompletionProvider implements vscode.CompletionItemProvider {
+  private client: ClaudeFlare
+
+  constructor(apiKey: string) {
+    this.client = new ClaudeFlare({ apiKey })
+  }
+
+  async provideCompletionItems(
+    document: vscode.TextDocument,
+    position: vscode.Position
+  ): Promise<vscode.CompletionItem[]> {
+    const line = document.lineAt(position.line)
+    const text = line.text.substring(0, position.character)
+
+    const completion = await this.completeCode(
+      text,
+      document.languageId
+    )
+
+    return [
+      new vscode.CompletionItem(
+        completion,
+        vscode.CompletionItemKind.Snippet
+      )
+    ]
+  }
+
+  private async completeCode(code: string, language: string) {
+    const response = await this.client.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `Complete this ${language} code. Return only the completion.`
+        },
+        {
+          role: 'user',
+          content: code
+        }
+      ],
+      temperature: 0.2,
+      max_tokens: 100
+    })
+
+    return response.choices[0].message.content
+  }
+}
+```
+
+### Web Editor Integration
+
+```javascript
+import { Editor } from '@monaco-editor/react'
+
+function CodeEditor({ apiKey }) {
+  const [completion, setCompletion] = useState(null)
+
+  const handleCompletion = async (code, language) => {
+    const response = await fetch('/api/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, language })
+    })
+
+    const data = await response.json()
+    setCompletion(data.completion)
+  }
+
+  return (
+    <Editor
+      height="600px"
+      language="javascript"
+      onChange={(value) => handleCompletion(value, 'javascript')}
+    />
+  )
+}
+```
+
+## Performance Optimization
+
+### 1. Semantic Caching
+
+```javascript
+class CompletionCache {
+  constructor() {
+    this.cache = new Map()
+    this.embeddings = new Map()
+  }
+
+  async getCachedCompletion(code, language) {
+    // Generate embedding for code
+    const embedding = await this.getEmbedding(code)
+
+    // Find similar cached completions
+    const similar = this.findSimilar(embedding)
+
+    if (similar && similar.score > 0.95) {
+      return similar.completion
+    }
+
+    // Generate new completion
+    const completion = await this.generateCompletion(code, language)
+
+    // Cache it
+    this.cache.set(code, {
+      completion,
+      embedding,
+      timestamp: Date.now()
+    })
+
+    return completion
+  }
+}
+```
+
+### 2. Debouncing
+
+```javascript
+class DebouncedCompleter {
+  constructor(delay = 300) {
+    this.delay = delay
+    this.timeout = null
+  }
+
+  complete(code, language) {
+    return new Promise((resolve) => {
+      clearTimeout(this.timeout)
+      this.timeout = setTimeout(async () => {
+        const completion = await generateCompletion(code, language)
+        resolve(completion)
+      }, this.delay)
+    })
+  }
+}
+```
+
+### 3. Batch Requests
+
+```javascript
+class BatchCompleter {
+  constructor() {
+    this.queue = []
+    this.flushInterval = 100
+  }
+
+  async complete(code, language) {
+    return new Promise((resolve) => {
+      this.queue.push({ code, language, resolve })
+
+      if (this.queue.length >= 10) {
+        this.flush()
+      } else {
+        setTimeout(() => this.flush(), this.flushInterval)
+      }
+    })
+  }
+
+  async flush() {
+    const batch = this.queue.splice(0, 10)
+
+    const response = await fetch('/v1/chat/batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requests: batch.map(b => ({
+          messages: [{
+            role: 'user',
+            content: `Complete:\n${b.code}`
+          }]
+        }))
+      })
+    })
+
+    const data = await response.json()
+    batch.forEach((item, i) => item.resolve(data.completions[i]))
+  }
+}
+```
+
+## Error Handling
+
+```javascript
+async function robustCompletion(code, language, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await client.chat.completions.create({
+        messages: [
+          {
+            role: 'system',
+            content: `Complete this ${language} code.`
+          },
+          { role: 'user', content: code }
+        ],
+        temperature: 0.2
+      })
+
+      return response.choices[0].message.content
+    } catch (error) {
+      if (i === retries - 1) {
+        // Fallback to simple completion
+        return fallbackCompletion(code, language)
+      }
+
+      // Exponential backoff
+      await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000))
+    }
+  }
+}
+```
+
+<Callout type="success">
+  **Code completion complete!** Learn more about [multi-agent workflows](/docs/guides/multi-agent-workflows) for more advanced features.
+</Callout>

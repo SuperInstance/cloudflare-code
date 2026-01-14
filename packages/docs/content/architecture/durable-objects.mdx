@@ -1,0 +1,708 @@
+---
+title: Durable Objects Architecture
+description: Durable Objects for stateful edge computing
+---
+
+# Durable Objects Architecture
+
+Durable Objects provide strongly consistent, low-latency state coordination for ClaudeFlare's agent system and session management.
+
+## Overview
+
+Durable Objects (DOs) are Cloudflare's primitive for building stateful applications on the edge. They provide:
+
+- **Strong Consistency**: ACID transactions
+- **Low Latency**: Single location worldwide
+- **High Scalability**: Unlimited instances
+- **Durable State**: Automatic persistence
+
+## Architecture
+
+### Session DO
+
+Manages user session state and conversation context.
+
+```typescript
+// packages/edge/src/do/session.ts
+export class SessionDO {
+  private state: DurableObjectState;
+  private env: Env;
+  private sessions: Map<string, Session>;
+
+  constructor(state: DurableObjectState, env: Env) {
+    this.state = state;
+    this.env = env;
+    this.sessions = new Map();
+  }
+
+  async fetch(request: Request) {
+    const url = new URL(request.url);
+    const sessionId = url.pathname.split('/')[2];
+
+    switch (request.method) {
+      case 'GET':
+        return this.getSession(sessionId);
+      case 'POST':
+        return this.updateSession(sessionId, await request.json());
+      case 'DELETE':
+        return this.deleteSession(sessionId);
+      default:
+        return new Response('Method not allowed', { status: 405 });
+    }
+  }
+
+  private async getSession(sessionId: string) {
+    let session = this.sessions.get(sessionId);
+
+    if (!session) {
+      // Load from storage
+      const stored = await this.state.storage.get<Session>(sessionId);
+      if (stored) {
+        session = stored;
+        this.sessions.set(sessionId, session);
+      }
+    }
+
+    return Response.json(session || null);
+  }
+
+  private async updateSession(sessionId: string, updates: Partial<Session>) {
+    let session = this.sessions.get(sessionId) || {
+      id: sessionId,
+      messages: [],
+      context: {},
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
+
+    session = { ...session, ...updates, updatedAt: Date.now() };
+    this.sessions.set(sessionId, session);
+
+    // Persist to storage
+    await this.state.storage.put(sessionId, session);
+
+    return Response.json(session);
+  }
+
+  private async deleteSession(sessionId: string) {
+    this.sessions.delete(sessionId);
+    await this.state.storage.delete(sessionId);
+    return new Response(null, { status: 204 });
+  }
+}
+```
+
+### Director DO
+
+Orchestrates multi-agent workflows and task delegation.
+
+```typescript
+// packages/edge/src/do/director.ts
+export class DirectorDO {
+  private state: DurableObjectState;
+  private env: Env;
+  private workflows: Map<string, Workflow>;
+
+  constructor(state: DurableObjectState, env: Env) {
+    this.state = state;
+    this.env = env;
+    this.workflows = new Map();
+  }
+
+  async fetch(request: Request) {
+    const url = new URL(request.url);
+
+    switch (url.pathname) {
+      case '/orchestrate':
+        return this.orchestrate(await request.json());
+      case '/status':
+        return this.getStatus(url.searchParams.get('workflowId'));
+      default:
+        return new Response('Not found', { status: 404 });
+    }
+  }
+
+  private async orchestrate(request: OrchestrationRequest) {
+    const workflowId = crypto.randomUUID();
+    const workflow: Workflow = {
+      id: workflowId,
+      sessionId: request.sessionId,
+      status: 'pending',
+      steps: [],
+      currentStep: 0,
+      createdAt: Date.now()
+    };
+
+    this.workflows.set(workflowId, workflow);
+    await this.state.storage.put(workflowId, workflow);
+
+    // Execute workflow asynchronously
+    this.executeWorkflow(workflowId, request).catch(error => {
+      console.error('Workflow execution failed:', error);
+    });
+
+    return Response.json({
+      workflowId,
+      status: 'pending',
+      message: 'Workflow started'
+    });
+  }
+
+  private async executeWorkflow(workflowId: string, request: OrchestrationRequest) {
+    const workflow = this.workflows.get(workflowId)!;
+    workflow.status = 'running';
+    await this.state.storage.put(workflowId, workflow);
+
+    try {
+      for (let i = 0; i < workflow.steps.length; i++) {
+        const step = workflow.steps[i];
+        workflow.currentStep = i;
+
+        step.status = 'running';
+        step.startTime = Date.now();
+        await this.state.storage.put(workflowId, workflow);
+
+        // Execute step
+        const result = await this.executeStep(step, request);
+
+        step.status = 'completed';
+        step.output = result;
+        step.endTime = Date.now();
+        step.duration = step.endTime - step.startTime!;
+
+        await this.state.storage.put(workflowId, workflow);
+      }
+
+      workflow.status = 'completed';
+      workflow.completedAt = Date.now();
+    } catch (error) {
+      workflow.status = 'failed';
+      workflow.error = error instanceof Error ? error.message : 'Unknown error';
+    }
+
+    await this.state.storage.put(workflowId, workflow);
+  }
+
+  private async executeStep(step: WorkflowStep, request: OrchestrationRequest) {
+    // Delegate to appropriate agent
+    const agent = this.getAgent(step.agent);
+    return await agent.execute(step.action, request);
+  }
+
+  private getStatus(workflowId: string | null) {
+    if (!workflowId) {
+      return Response.json({ error: 'workflowId required' }, { status: 400 });
+    }
+
+    const workflow = this.workflows.get(workflowId);
+    if (!workflow) {
+      return new Response('Workflow not found', { status: 404 });
+    }
+
+    return Response.json(workflow);
+  }
+}
+```
+
+### Planner DO
+
+Creates execution plans for complex tasks.
+
+```typescript
+// packages/edge/src/do/planner.ts
+export class PlannerDO {
+  private state: DurableObjectState;
+  private env: Env;
+
+  constructor(state: DurableObjectState, env: Env) {
+    this.state = state;
+    this.env = env;
+  }
+
+  async fetch(request: Request) {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/plan') {
+      return this.createPlan(await request.json());
+    }
+
+    return new Response('Not found', { status: 404 });
+  }
+
+  private async createPlan(request: PlanningRequest) {
+    // Analyze task complexity
+    const complexity = await this.analyzeComplexity(request);
+
+    // Create execution plan
+    const plan: ExecutionPlan = {
+      steps: [],
+      estimatedDuration: 0,
+      requires: [],
+      order: []
+    };
+
+    // Break down into steps
+    if (complexity > 0.7) {
+      // Complex task - use multi-step approach
+      plan.steps.push(
+        { name: 'analyze', agent: 'analyzer', action: 'analyze-code' },
+        { name: 'plan', agent: 'planner', action: 'create-implementation-plan' },
+        { name: 'execute', agent: 'executor', action: 'generate-code' },
+        { name: 'review', agent: 'reviewer', action: 'review-code' },
+        { name: 'test', agent: 'tester', action: 'generate-tests' }
+      );
+    } else {
+      // Simple task - direct execution
+      plan.steps.push(
+        { name: 'execute', agent: 'executor', action: 'generate-code' }
+      );
+    }
+
+    // Estimate duration
+    plan.estimatedDuration = plan.steps.length * 30; // 30s per step
+
+    return Response.json(plan);
+  }
+
+  private async analyzeComplexity(request: PlanningRequest): Promise<number> {
+    // Use AI to analyze complexity
+    // Returns 0-1 score
+    return 0.5;
+  }
+}
+```
+
+### Executor DO
+
+Executes code generation and file operations.
+
+```typescript
+// packages/edge/src/do/executor.ts
+export class ExecutorDO {
+  private state: DurableObjectState;
+  private env: Env;
+
+  constructor(state: DurableObjectState, env: Env) {
+    this.state = state;
+    this.env = env;
+  }
+
+  async fetch(request: Request) {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/execute') {
+      return this.execute(await request.json());
+    }
+
+    return new Response('Not found', { status: 404 });
+  }
+
+  private async execute(request: ExecutionRequest) {
+    const results: ExecutionResult[] = [];
+
+    for (const action of request.actions) {
+      const result = await this.executeAction(action);
+      results.push(result);
+    }
+
+    return Response.json({
+      results,
+      summary: {
+        total: results.length,
+        successful: results.filter(r => r.success).length,
+        failed: results.filter(r => !r.success).length
+      }
+    });
+  }
+
+  private async executeAction(action: Action): Promise<ExecutionResult> {
+    try {
+      switch (action.type) {
+        case 'generate-code':
+          return await this.generateCode(action);
+        case 'modify-file':
+          return await this.modifyFile(action);
+        case 'create-file':
+          return await this.createFile(action);
+        case 'delete-file':
+          return await this.deleteFile(action);
+        default:
+          return {
+            success: false,
+            error: `Unknown action type: ${action.type}`
+          };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  private async generateCode(action: Action): Promise<ExecutionResult> {
+    // Use AI to generate code
+    const provider = this.selectProvider();
+    const result = await provider.generate({
+      prompt: action.prompt,
+      language: action.language,
+      context: action.context
+    });
+
+    return {
+      success: true,
+      data: result
+    };
+  }
+
+  private async modifyFile(action: Action): Promise<ExecutionResult> {
+    // Read existing file
+    const existing = await this.env.STORAGE.get(action.path);
+    if (!existing) {
+      return {
+        success: false,
+        error: 'File not found'
+      };
+    }
+
+    // Apply modifications
+    const modified = await this.applyModifications(
+      await existing.text(),
+      action.modifications
+    );
+
+    // Store modified file
+    await this.env.STORAGE.put(action.path, modified);
+
+    return {
+      success: true,
+      data: { path: action.path, size: modified.length }
+    };
+  }
+
+  private selectProvider() {
+    // Select optimal provider based on availability and cost
+    return this.providers[0];
+  }
+}
+```
+
+## Communication Patterns
+
+### Direct Messaging
+
+DOs communicate directly via HTTP:
+
+```typescript
+// Send message to another DO
+const targetId = env.DIRECTOR.idFromName('global-director');
+const targetStub = env.DIRECTOR.get(targetId);
+const response = await targetStub.fetch(
+  new Request('https://director/orchestrate', {
+    method: 'POST',
+    body: JSON.stringify(request)
+  })
+);
+```
+
+### Broadcast Messaging
+
+Send messages to multiple DOs:
+
+```typescript
+async function broadcast(env: Env, message: any) {
+  const sessions = await listSessions(env);
+  const promises = sessions.map(session => {
+    const stub = env.SESSIONS.get(session.id);
+    return stub.fetch(
+      new Request('https://session/message', {
+        method: 'POST',
+        body: JSON.stringify(message)
+      })
+    );
+  });
+
+  await Promise.allSettled(promises);
+}
+```
+
+### Request/Response Pattern
+
+Synchronous communication with DOs:
+
+```typescript
+async function requestWorkflowStatus(env: Env, workflowId: string) {
+  const stub = env.DIRECTOR.get(
+    env.DIRECTOR.idFromName('global-director')
+  );
+
+  const response = await stub.fetch(
+    new Request(`https://director/status?workflowId=${workflowId}`)
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to get workflow status');
+  }
+
+  return await response.json();
+}
+```
+
+## State Management
+
+### Storage Operations
+
+```typescript
+// Read state
+const session = await this.state.storage.get<Session>('sessionId');
+
+// Write state
+await this.state.storage.put('sessionId', session);
+
+// Delete state
+await this.state.storage.delete('sessionId');
+
+// List all keys
+const keys = await this.state.storage.list();
+
+// Transactional operations
+await this.state.storage.transaction(async txn => {
+  const session = await txn.get('sessionId');
+  session.count = (session.count || 0) + 1;
+  await txn.put('sessionId', session);
+});
+```
+
+### Memory Caching
+
+```typescript
+class CachedDO {
+  private cache = new Map<string, { data: any; expiry: number }>();
+  private readonly CACHE_TTL = 60000; // 1 minute
+
+  async get(key: string) {
+    const cached = this.cache.get(key);
+    if (cached && cached.expiry > Date.now()) {
+      return cached.data;
+    }
+
+    // Load from storage
+    const data = await this.state.storage.get(key);
+    if (data) {
+      this.cache.set(key, {
+        data,
+        expiry: Date.now() + this.CACHE_TTL
+      });
+    }
+
+    return data;
+  }
+
+  async set(key: string, value: any) {
+    this.cache.set(key, {
+      data: value,
+      expiry: Date.now() + this.CACHE_TTL
+    });
+    await this.state.storage.put(key, value);
+  }
+}
+```
+
+## Scalability
+
+### Horizontal Scaling
+
+DOs automatically scale based on load:
+
+```typescript
+// Each session gets its own DO instance
+const sessionId = 'user-session-id';
+const stub = env.SESSIONS.idFromName(sessionId);
+const session = env.SESSIONS.get(stub);
+```
+
+### Load Balancing
+
+Requests route to nearest DO instance:
+
+```typescript
+// DO is created in closest datacenter to first request
+const stub = env.SESSIONS.get(
+  env.SESSIONS.idFromName(sessionId)
+);
+```
+
+### Concurrency
+
+DOs handle concurrent requests sequentially:
+
+```typescript
+// Requests are processed one at a time
+// State remains consistent
+async handleRequest(request: Request) {
+  // Safe to access state
+  const count = this.state.count++;
+  await this.state.storage.put('count', count);
+}
+```
+
+## Performance
+
+### Latency Optimization
+
+```typescript
+// Use in-memory cache for hot data
+private cache = new Map();
+
+// Batch storage writes
+async function batchWrite(items: Map<string, any>) {
+  const txn = this.state.storage.transaction async txn => {
+    for (const [key, value] of items) {
+      await txn.put(key, value);
+    }
+  });
+  await txn;
+}
+```
+
+### Storage Optimization
+
+```typescript
+// Use compact data structures
+interface CompactSession {
+  i: string;  // id
+  m: string[]; // messages
+  c: any;     // context
+  t: number;  // timestamp
+}
+
+// Compress large data
+import { compress, decompress } from './lib/compression';
+
+async function storeLargeData(key: string, data: any) {
+  const compressed = await compress(JSON.stringify(data));
+  await this.state.storage.put(key, compressed);
+}
+```
+
+## Monitoring
+
+### Metrics Collection
+
+```typescript
+class InstrumentedDO {
+  private metrics: MetricsCollector;
+
+  async fetch(request: Request) {
+    const start = Date.now();
+
+    try {
+      const response = await this.handleRequest(request);
+      const duration = Date.now() - start;
+
+      await this.metrics.record('do.request.duration', duration, {
+        do: this.constructor.name,
+        status: 'success'
+      });
+
+      return response;
+    } catch (error) {
+      const duration = Date.now() - start;
+
+      await this.metrics.record('do.request.duration', duration, {
+        do: this.constructor.name,
+        status: 'error'
+      });
+
+      throw error;
+    }
+  }
+}
+```
+
+### Health Checks
+
+```typescript
+async function healthCheck(this: DurableObjectState) {
+  const checks = {
+    storage: false,
+    memory: false,
+    alarms: false
+  };
+
+  try {
+    await this.storage.get('health-check');
+    checks.storage = true;
+  } catch {}
+
+  try {
+    // Check memory usage
+    const usage = process.memoryUsage();
+    checks.memory = usage.heapUsed < 100_000_000; // 100MB
+  } catch {}
+
+  try {
+    // Check for alarms
+    checks.alarms = this.getAlarmCount() === 0;
+  } catch {}
+
+  return checks;
+}
+```
+
+## Best Practices
+
+### 1. Minimize State Size
+
+```typescript
+// Good - store only necessary data
+interface Session {
+  id: string;
+  messages: Message[];
+  lastAccessed: number;
+}
+
+// Bad - store entire conversation history
+interface Session {
+  id: string;
+  fullConversationHistory: string; // Can be huge
+  embeddings: number[][]; // Very large
+}
+```
+
+### 2. Use Transactions
+
+```typescript
+// Good - atomic updates
+await this.state.storage.transaction(async txn => {
+  const balance = await txn.get('balance');
+  await txn.put('balance', balance - amount);
+  await txn.put('transaction', { amount, timestamp: Date.now() });
+});
+
+// Bad - non-atomic updates
+const balance = await this.state.storage.get('balance');
+await this.state.storage.put('balance', balance - amount);
+await this.state.storage.put('transaction', { amount, timestamp: Date.now() });
+```
+
+### 3. Implement Timeouts
+
+```typescript
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeout: number
+): Promise<T> {
+  const timer = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Timeout')), timeout)
+  );
+
+  return Promise.race([promise, timer]);
+}
+```
+
+## Related Documentation
+
+- [System Overview](/architecture/system-overview) - Overall architecture
+- [Vector Database](/architecture/vector-database) - Semantic search
+- [Caching Strategy](/architecture/caching-strategy) - Multi-layer caching

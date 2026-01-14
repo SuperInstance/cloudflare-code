@@ -1,0 +1,331 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'packages/e2e/**'
+      - 'packages/edge/**'
+      - 'packages/dashboard/**'
+      - 'packages/shared/**'
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20.x'
+  BASE_URL: http://localhost:3000
+
+jobs:
+  e2e-tests:
+    name: E2E Tests - ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        shard: [1, 2, 3, 4]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd packages/e2e
+          npm ci
+
+      - name: Install Playwright browsers
+        run: |
+          cd packages/e2e
+          npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Start services
+        run: |
+          docker-compose up -d
+          npm run dev &
+          npm run dev:dashboard &
+          npx wait-on ${{ env.BASE_URL }} -t 120000
+
+      - name: Run E2E tests
+        run: |
+          cd packages/e2e
+          npx playwright test \
+            --project=${{ matrix.browser }} \
+            --shard=${{ matrix.shard }}/4 \
+            --reporter=json \
+            --reporter=html \
+            --reporter=junit
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results-${{ matrix.browser }}-${{ matrix.shard }}.json
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-results-${{ matrix.browser }}-${{ matrix.shard }}
+          path: |
+            packages/e2e/test-results/
+            packages/e2e/playwright-report/
+          retention-days: 7
+
+      - name: Upload coverage reports
+        if: matrix.browser == 'chromium' && matrix.shard == '1'
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: packages/e2e/coverage/
+          retention-days: 7
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd packages/e2e
+          npm ci
+
+      - name: Setup test environment
+        run: |
+          docker-compose up -d
+          npx wait-on tcp://localhost:8787 -t 120000
+
+      - name: Run integration tests
+        run: |
+          cd packages/e2e
+          npm run test:integration
+        env:
+          CI: true
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-results
+          path: packages/e2e/test-results/
+          retention-days: 7
+
+  contract-tests:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd packages/e2e
+          npm ci
+
+      - name: Run contract tests
+        run: |
+          cd packages/e2e
+          npm run test:contract
+        env:
+          CI: true
+
+      - name: Publish contracts
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd packages/e2e
+          npm run test:contract:publish
+        env:
+          PACT_BROKER_BASE_URL: ${{ secrets.PACT_BROKER_BASE_URL }}
+          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+
+  chaos-tests:
+    name: Chaos Engineering Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd packages/e2e
+          npm ci
+
+      - name: Setup chaos environment
+        run: |
+          docker-compose -f docker-compose.chaos.yml up -d
+          npx wait-on tcp://localhost:8787 -t 120000
+
+      - name: Run chaos tests
+        run: |
+          cd packages/e2e
+          npm run test:chaos
+        env:
+          CI: true
+
+      - name: Upload chaos test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: chaos-test-results
+          path: packages/e2e/test-results/
+          retention-days: 7
+
+  quality-checks:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, integration-tests, contract-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd packages/e2e
+          npm ci
+
+      - name: Download all test results
+        uses: actions/download-artifact@v3
+        with:
+          path: packages/e2e/test-results/
+
+      - name: Run quality metrics
+        run: |
+          cd packages/e2e
+          npm run test:quality:report
+        env:
+          CI: true
+
+      - name: Upload quality dashboard
+        uses: actions/upload-artifact@v3
+        with:
+          name: quality-dashboard
+          path: packages/e2e/reports/
+          retention-days: 30
+
+      - name: Check coverage thresholds
+        run: |
+          cd packages/e2e
+          npm run quality:check
+        env:
+          CI: true
+
+  test-report:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, integration-tests, contract-tests, chaos-tests]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: test-results/
+
+      - name: Merge test reports
+        run: |
+          cd packages/e2e
+          npx playwright merge-reports
+
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: '**/test-results/junit.xml'
+          check_name: E2E Test Results
+          detailed_summary: true
+          include_passed: true
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('test-results/results.json', 'utf8'));
+
+            const comment = `## 🧪 E2E Test Results
+
+            **Total Tests:** ${results.stats.expected}
+            **Passed:** ${results.stats.passed} ✅
+            **Failed:** ${results.stats.failed} ❌
+            **Skipped:** ${results.stats.skipped} ⏭️
+            **Duration:** ${Math.round(results.stats.duration / 1000)}s
+
+            [View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, integration-tests, contract-tests, chaos-tests, quality-checks]
+    if: always()
+
+    steps:
+      - name: Send Slack notification
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "E2E Test Results",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*E2E Test Results*\n*Status:* ${{ job.status }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}"
+                  }
+                }
+              ]
+            }

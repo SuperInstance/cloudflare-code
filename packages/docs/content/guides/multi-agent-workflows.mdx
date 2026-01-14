@@ -1,0 +1,367 @@
+---
+title: Multi-Agent Workflows
+description: Orchestrate multiple AI agents for complex tasks
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Multi-Agent Workflows
+
+Learn to orchestrate multiple AI agents to solve complex coding tasks.
+
+## Overview
+
+ClaudeFlare's agent orchestration system enables you to coordinate multiple specialized agents to work together on complex tasks.
+
+## Available Agents
+
+| Agent | Description | Use Case |
+|-------|-------------|----------|
+| **Director** | Orchestrates workflows | Managing multi-step tasks |
+| **Planner** | Decomposes tasks | Breaking down complex problems |
+| **Executor** | Generates code | Writing and modifying code |
+| **Optimizer** | Refines code | Performance optimization |
+| **Reviewer** | Reviews code | Code quality checks |
+| **Debugger** | Fixes bugs | Error diagnosis and fixes |
+| **Documenter** | Generates docs | API documentation |
+
+## Basic Agent Orchestration
+
+```javascript
+const response = await client.agents.orchestrate({
+  task: "Create a REST API with user authentication",
+  agents: ["planner", "executor", "reviewer"],
+  input: {
+    language: "typescript",
+    framework: "express"
+  }
+})
+```
+
+## Workflow Patterns
+
+### 1. Sequential Workflow
+
+Agents work one after another:
+
+```javascript
+const workflow = {
+  type: 'sequential',
+  agents: [
+    {
+      name: 'planner',
+      task: 'Break down the task into steps'
+    },
+    {
+      name: 'executor',
+      task: 'Implement each step',
+      dependsOn: 'planner'
+    },
+    {
+      name: 'reviewer',
+      task: 'Review the implementation',
+      dependsOn: 'executor'
+    }
+  ]
+}
+```
+
+### 2. Parallel Workflow
+
+Agents work simultaneously:
+
+```javascript
+const workflow = {
+  type: 'parallel',
+  agents: [
+    {
+      name: 'optimizer',
+      task: 'Optimize performance'
+    },
+    {
+      name: 'reviewer',
+      task: 'Review code quality'
+    },
+    {
+      name: 'documenter',
+      task: 'Generate documentation'
+    }
+  ]
+}
+```
+
+### 3. Hierarchical Workflow
+
+Director manages sub-agents:
+
+```javascript
+const workflow = {
+  type: 'hierarchical',
+  director: {
+    name: 'director',
+    task: 'Coordinate the development process',
+    subordinates: [
+      {
+        name: 'planner',
+        task: 'Create implementation plan'
+      },
+      {
+        name: 'executor',
+        task: 'Implement the solution',
+        subordinates: [
+          { name: 'frontend-developer', task: 'Build UI' },
+          { name: 'backend-developer', task: 'Build API' }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Example Workflows
+
+### Code Generation with Review
+
+```javascript
+async function generateAndReview(requirements) {
+  const response = await client.agents.orchestrate({
+    task: requirements,
+    agents: ['planner', 'executor', 'reviewer'],
+    workflow: {
+      type: 'sequential',
+      steps: [
+        {
+          agent: 'planner',
+          output: 'plan'
+        },
+        {
+          agent: 'executor',
+          input: 'plan',
+          output: 'code'
+        },
+        {
+          agent: 'reviewer',
+          input: 'code',
+          output: 'review'
+        }
+      ]
+    }
+  })
+
+  return response
+}
+```
+
+### Debugging Workflow
+
+```javascript
+async function debugCode(code, error) {
+  const response = await client.agents.orchestrate({
+    task: `Debug this error: ${error}`,
+    agents: ['debugger', 'executor', 'reviewer'],
+    input: {
+      code,
+      error,
+      language: 'typescript'
+    },
+    workflow: {
+      type: 'iterative',
+      maxIterations: 3,
+      steps: [
+        {
+          agent: 'debugger',
+          task: 'Analyze the error and propose fixes'
+        },
+        {
+          agent: 'executor',
+          task: 'Apply the proposed fixes'
+        },
+        {
+          agent: 'reviewer',
+          task: 'Verify the fix'
+        }
+      ]
+    }
+  })
+
+  return response
+}
+```
+
+### Refactoring Workflow
+
+```javascript
+async function refactorCode(code) {
+  const response = await client.agents.orchestrate({
+    task: 'Refactor this code for better performance and readability',
+    agents: ['optimizer', 'reviewer', 'documenter'],
+    input: {
+      code,
+      language: 'javascript'
+    },
+    workflow: {
+      type: 'parallel-then-sequential',
+      parallel: [
+        {
+          agent: 'optimizer',
+          task: 'Optimize performance'
+        },
+        {
+          agent: 'reviewer',
+          task: 'Identify code smells'
+        }
+      ],
+      sequential: [
+        {
+          agent: 'executor',
+          task: 'Apply optimizations and fixes'
+        },
+        {
+          agent: 'documenter',
+          task: 'Update documentation'
+        }
+      ]
+    }
+  })
+
+  return response
+}
+```
+
+## Custom Agents
+
+Create custom agents for your specific needs:
+
+```javascript
+const customAgent = {
+  name: 'security-scanner',
+  description: 'Scans code for security vulnerabilities',
+  systemPrompt: `You are a security expert.
+  Scan the given code for:
+  - SQL injection vulnerabilities
+  - XSS vulnerabilities
+  - Authentication issues
+  - Authorization flaws
+
+  Report findings with severity and fix suggestions.`,
+  tools: ['code-analyzer', 'vulnerability-db']
+}
+
+// Register the agent
+await client.agents.register(customAgent)
+
+// Use it in workflow
+const response = await client.agents.orchestrate({
+  task: 'Scan for security issues',
+  agents: ['security-scanner', 'executor'],
+  input: { code }
+})
+```
+
+## Agent Communication
+
+Agents can communicate with each other:
+
+```javascript
+const workflow = {
+  type: 'collaborative',
+  agents: [
+    {
+      name: 'planner',
+      task: 'Create a plan',
+      outputsTo: ['executor', 'reviewer']
+    },
+    {
+      name: 'executor',
+      task: 'Execute the plan',
+      inputsFrom: ['planner'],
+      outputsTo: ['reviewer']
+    },
+    {
+      name: 'reviewer',
+      task: 'Review the work',
+      inputsFrom: ['planner', 'executor'],
+      canRequestChanges: true
+    }
+  ]
+}
+```
+
+## State Management
+
+Track workflow state across agents:
+
+```javascript
+const workflow = {
+  initialState: {
+    requirements: 'Build a todo app',
+    language: 'typescript',
+    framework: 'react'
+  },
+  agents: [
+    {
+      name: 'planner',
+      task: 'Create implementation plan',
+      updatesState: (state, output) => ({
+        ...state,
+        plan: output.plan
+      })
+    },
+    {
+      name: 'executor',
+      task: 'Implement based on plan',
+      readsState: ['plan', 'requirements'],
+      updatesState: (state, output) => ({
+        ...state,
+        code: output.code
+      })
+    }
+  ]
+}
+```
+
+## Error Handling
+
+```javascript
+const workflow = {
+  type: 'resilient',
+  agents: ['planner', 'executor', 'reviewer'],
+  errorHandling: {
+    retryPolicy: {
+      maxRetries: 3,
+      backoff: 'exponential'
+    },
+    fallbackAgents: {
+      executor: ['backup-executor', 'simple-executor']
+    },
+    continueOnError: false
+  }
+}
+```
+
+## Monitoring
+
+Track agent performance:
+
+```javascript
+const response = await client.agents.orchestrate({
+  task: 'Build the feature',
+  agents: ['planner', 'executor', 'reviewer'],
+  monitoring: {
+    enabled: true,
+    metrics: ['latency', 'token-usage', 'success-rate'],
+    logging: 'detailed'
+  }
+})
+
+console.log(response.metrics)
+// {
+//   planner: { latency: 1234, tokens: 500, success: true },
+//   executor: { latency: 5678, tokens: 2000, success: true },
+//   reviewer: { latency: 2345, tokens: 800, success: true }
+// }
+```
+
+<Callout type="success">
+  **Multi-agent workflows mastered!** Check out [custom agents](/docs/guides/custom-agents) to build your own specialized agents.
+</Callout>

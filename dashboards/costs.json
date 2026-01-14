@@ -1,0 +1,480 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "ClaudeFlare - Cost Analytics",
+    "tags": ["claudeflare", "costs", "billing"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "1m",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["1m", "5m", "15m", "30m", "1h"],
+      "time_options": ["1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Cost (Today)",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "increase(claudeflare_cost_total_dollars[1d])",
+            "legendFormat": "Total Cost",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 50, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Cost per Hour",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_cost_total_dollars[1h])",
+            "legendFormat": "Cost/Hour",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Cost per 1K Requests",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "(increase(claudeflare_cost_total_dollars[1h]) / increase(claudeflare_requests_total[1h])) * 1000",
+            "legendFormat": "Cost/1K Req",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 4
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Cache Savings",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "increase(claudeflare_cache_savings_dollars[1d])",
+            "legendFormat": "Savings (Today)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 5, "color": "yellow"},
+                {"value": 10, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Cost Over Time",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_cost_total_dollars[5m]) * 3600",
+            "legendFormat": "Cost Rate ($/h)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Cost by Provider",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_provider_cost_dollars{provider=\"anthropic\"}[5m]) * 3600",
+            "legendFormat": "Anthropic",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(claudeflare_provider_cost_dollars{provider=\"openai\"}[5m]) * 3600",
+            "legendFormat": "OpenAI",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(claudeflare_provider_cost_dollars{provider=\"groq\"}[5m]) * 3600",
+            "legendFormat": "Groq",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Cost by Model",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_model_cost_dollars{model=\"claude-3-opus\"}[5m]) * 3600",
+            "legendFormat": "Claude 3 Opus",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(claudeflare_model_cost_dollars{model=\"claude-3-sonnet\"}[5m]) * 3600",
+            "legendFormat": "Claude 3 Sonnet",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(claudeflare_model_cost_dollars{model=\"gpt-4\"}[5m]) * 3600",
+            "legendFormat": "GPT-4",
+            "refId": "C"
+          },
+          {
+            "expr": "rate(claudeflare_model_cost_dollars{model=\"gpt-3.5-turbo\"}[5m]) * 3600",
+            "legendFormat": "GPT-3.5 Turbo",
+            "refId": "D"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Cost by Feature",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "sum by (feature) (increase(claudeflare_feature_cost_dollars[1d]))",
+            "legendFormat": "{{feature}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+          "pieType": "donut",
+          "tooltip": {"mode": "single", "sort": "none"}
+        }
+      },
+      {
+        "id": 9,
+        "title": "Cost per 1K Tokens by Provider",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "claudeflare_provider_cost_per_1k_tokens",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 4,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 0.01, "color": "yellow"},
+                {"value": 0.03, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Cost Breakdown",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+        "targets": [
+          {
+            "expr": "sum by (provider, model) (increase(claudeflare_cost_total_dollars[1d]))",
+            "legendFormat": "{{provider}} - {{model}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "options": {
+          "showHeader": true
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true, "__name__": true},
+              "indexByName": {},
+              "renameByName": {
+                "Value": "Cost ($)",
+                "model": "Model",
+                "provider": "Provider"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Cost Forecast",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
+        "targets": [
+          {
+            "expr": "predict_linear(claudeflare_cost_total_dollars[1h], 3600)",
+            "legendFormat": "Forecast (Next Hour)",
+            "refId": "A"
+          },
+          {
+            "expr": "claudeflare_cost_total_dollars",
+            "legendFormat": "Actual",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Daily Cost Comparison",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28},
+        "targets": [
+          {
+            "expr": "increase(claudeflare_cost_total_dollars[1d])",
+            "legendFormat": "Today",
+            "refId": "A"
+          },
+          {
+            "expr": "increase(claudeflare_cost_total_dollars[1d] offset 1d)",
+            "legendFormat": "Yesterday",
+            "refId": "B"
+          },
+          {
+            "expr": "increase(claudeflare_cost_total_dollars[1d] offset 7d)",
+            "legendFormat": "Last Week",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Cost Efficiency Score",
+        "type": "gauge",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 36},
+        "targets": [
+          {
+            "expr": "(claudeflare_cache_savings_dollars / claudeflare_cost_total_dollars) * 100",
+            "legendFormat": "Efficiency",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "red"},
+              {"value": 20, "color": "yellow"},
+              {"value": 40, "color": "green"}
+            ]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "Budget Utilization",
+        "type": "gauge",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 36},
+        "targets": [
+          {
+            "expr": "(increase(claudeflare_cost_total_dollars[1d]) / 100) * 100",
+            "legendFormat": "Budget Used",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"value": 0, "color": "green"},
+              {"value": 70, "color": "yellow"},
+              {"value": 90, "color": "red"}
+            ]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "Avg Cost per Request",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 36},
+        "targets": [
+          {
+            "expr": "increase(claudeflare_cost_total_dollars[1h]) / increase(claudeflare_requests_total[1h])",
+            "legendFormat": "Cost/Request",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 6
+          }
+        }
+      }
+    ]
+  }
+}

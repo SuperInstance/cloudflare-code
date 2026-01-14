@@ -1,0 +1,32 @@
+{
+  "name": "@claudeflare/test",
+  "version": "0.1.0",
+  "private": true,
+  "description": "E2E testing infrastructure for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:performance": "vitest run --mode performance",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@claudeflare/edge": "workspace:*",
+    "hono": "^4.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "wrangler": "^3.22.0"
+  },
+  "peerDependencies": {
+    "vitest": ">=1.0.0"
+  }
+}

@@ -1,0 +1,693 @@
+---
+title: Error Codes
+description: Complete reference of error codes and troubleshooting
+---
+
+# Error Codes
+
+Reference for all error codes returned by the ClaudeFlare API, including causes, solutions, and example responses.
+
+## Error Response Format
+
+All errors follow this format:
+
+```typescript
+interface ErrorResponse {
+  error: {
+    code: string;           // Machine-readable error code
+    message: string;        // Human-readable error message
+    details?: any;          // Additional error details
+    requestId?: string;     // Request identifier for support
+    timestamp: number;      // Unix timestamp
+  };
+}
+```
+
+## Authentication Errors
+
+### `INVALID_API_KEY`
+
+The provided API key is invalid or expired.
+
+**Status:** 401
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "INVALID_API_KEY",
+    "message": "The provided API key is invalid or has been revoked",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Verify API key is correct
+- Check key hasn't been revoked
+- Regenerate API key if needed
+
+### `MISSING_API_KEY`
+
+No API key provided in request.
+
+**Status:** 401
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "MISSING_API_KEY",
+    "message": "API key is required. Include it in the Authorization header.",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Add Authorization header: `Authorization: Bearer YOUR_API_KEY`
+
+### `INSUFFICIENT_PERMISSIONS`
+
+API key doesn't have required permissions.
+
+**Status:** 403
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "INSUFFICIENT_PERMISSIONS",
+    "message": "Your API key doesn't have permission to access this resource",
+    "required": ["agents:write"],
+    "current": ["agents:read"],
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Check API key permissions
+- Use API key with appropriate scope
+- Contact support for permission upgrade
+
+## Request Errors
+
+### `INVALID_REQUEST`
+
+Request body is invalid or malformed.
+
+**Status:** 400
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "INVALID_REQUEST",
+    "message": "The request body is invalid",
+    "details": {
+      "errors": [
+        {
+          "field": "messages",
+          "message": "must be a non-empty array"
+        }
+      ]
+    },
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Validate request body
+- Check required fields
+- Ensure correct data types
+
+### `VALIDATION_ERROR`
+
+Request validation failed.
+
+**Status:** 400
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "messages field is required and must be a non-empty array",
+    "field": "messages",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Check required fields are present
+- Validate field types
+- Ensure arrays are not empty
+
+### `INVALID_JSON`
+
+Invalid JSON in request body.
+
+**Status:** 400
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "INVALID_JSON",
+    "message": "Request body contains invalid JSON",
+    "position": 42,
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Validate JSON syntax
+- Use JSON linter
+- Check for trailing commas
+
+### `INVALID_PARAMETER`
+
+Invalid query or path parameter.
+
+**Status:** 400
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "INVALID_PARAMETER",
+    "message": "Invalid parameter value",
+    "parameter": "temperature",
+    "value": "2.5",
+    "constraint": "must be between 0 and 2",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Check parameter constraints
+- Validate parameter types
+- Use allowed values
+
+## Rate Limit Errors
+
+### `RATE_LIMITED`
+
+Too many requests sent.
+
+**Status:** 429
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "RATE_LIMITED",
+    "message": "Rate limit exceeded. Please retry after 60 seconds.",
+    "limit": 100,
+    "remaining": 0,
+    "reset": 1234567950,
+    "retryAfter": 60,
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Implement exponential backoff
+- Check `retryAfter` header
+- Reduce request frequency
+- Consider upgrading plan
+
+### `QUOTA_EXCEEDED`
+
+Monthly quota exceeded.
+
+**Status:** 429
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "QUOTA_EXCEEDED",
+    "message": "Monthly quota exceeded. Please upgrade your plan.",
+    "quota": {
+      "limit": 10000,
+      "used": 10000,
+      "remaining": 0,
+      "resets": "2026-02-01T00:00:00Z"
+    },
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Wait for quota reset
+- Upgrade plan
+- Optimize usage
+
+## Provider Errors
+
+### `PROVIDER_UNAVAILABLE`
+
+AI provider is not available.
+
+**Status:** 503
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "PROVIDER_UNAVAILABLE",
+    "message": "All AI providers are currently unavailable",
+    "providers": [
+      {
+        "name": "cloudflare",
+        "status": "unhealthy",
+        "error": "connection timeout"
+      },
+      {
+        "name": "groq",
+        "status": "unhealthy",
+        "error": "rate limited"
+      }
+    ],
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Wait and retry
+- Check status page
+- Configure fallback providers
+
+### `PROVIDER_ERROR`
+
+Error from AI provider.
+
+**Status:** 502
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "PROVIDER_ERROR",
+    "message": "Error from AI provider",
+    "provider": "cloudflare",
+    "originalError": "model_not_found",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Check provider status
+- Try different provider
+- Verify model name
+
+### `MODEL_NOT_AVAILABLE`
+
+Requested model not available.
+
+**Status:** 400
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "MODEL_NOT_AVAILABLE",
+    "message": "Model 'gpt-4' is not available. Available models: @cf/meta/llama-3.1-8b-instruct",
+    "requested": "gpt-4",
+    "available": [
+      "@cf/meta/llama-3.1-8b-instruct",
+      "groq/llama-3.1-70b"
+    ],
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Use available models
+- Set provider to 'auto'
+- Check models endpoint
+
+## Workflow Errors
+
+### `WORKFLOW_TIMEOUT`
+
+Workflow exceeded timeout.
+
+**Status:** 408
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "WORKFLOW_TIMEOUT",
+    "message": "Workflow exceeded timeout of 300 seconds",
+    "sessionId": "sess_abc123",
+    "timeout": 300,
+    "elapsed": 305,
+    "lastStep": "step_5",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Increase timeout
+- Simplify workflow
+- Break into smaller tasks
+
+### `AGENT_UNAVAILABLE`
+
+Required agent not available.
+
+**Status:** 503
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "AGENT_UNAVAILABLE",
+    "message": "Executor agent is currently unavailable",
+    "agent": "executor",
+    "reason": "capacity reached",
+    "retryAfter": 30,
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Wait and retry
+- Check agent status
+- Use different workflow
+
+### `STEP_FAILED`
+
+Workflow step failed.
+
+**Status:** 500
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "STEP_FAILED",
+    "message": "Workflow step failed",
+    "sessionId": "sess_abc123",
+    "step": {
+      "stepId": "step_3",
+      "agent": "executor",
+      "action": "generate_code"
+    },
+    "error": "Code generation failed",
+    "recoverable": true,
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Check step error details
+- Retry if recoverable
+- Review workflow configuration
+
+## Resource Errors
+
+### `CONTEXT_TOO_LARGE`
+
+Request context exceeds maximum size.
+
+**Status:** 413
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "CONTEXT_TOO_LARGE",
+    "message": "Request context exceeds maximum size of 100KB",
+    "size": 157286,
+    "maxSize": 102400,
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Reduce context size
+- Remove unnecessary content
+- Use codebase upload for large files
+
+### `CODEBASE_NOT_FOUND`
+
+Specified codebase not found.
+
+**Status:** 404
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "CODEBASE_NOT_FOUND",
+    "message": "Codebase 'cb_abc123' not found",
+    "codebaseId": "cb_abc123",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Verify codebase ID
+- Check codebase exists
+- Upload codebase if needed
+
+### `FILE_NOT_FOUND`
+
+File not found in codebase.
+
+**Status:** 404
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "FILE_NOT_FOUND",
+    "message": "File 'src/utils/auth.ts' not found in codebase",
+    "path": "src/utils/auth.ts",
+    "codebaseId": "cb_abc123",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Verify file path
+- Check file exists in codebase
+- Use correct path separator
+
+## Server Errors
+
+### `INTERNAL_ERROR`
+
+Internal server error.
+
+**Status:** 500
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "INTERNAL_ERROR",
+    "message": "An unexpected error occurred",
+    "requestId": "req_xyz789",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Retry request
+- Contact support with requestId
+- Check status page
+
+### `SERVICE_UNAVAILABLE`
+
+Service temporarily unavailable.
+
+**Status:** 503
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "SERVICE_UNAVAILABLE",
+    "message": "Service is temporarily unavailable for maintenance",
+    "retryAfter": 300,
+    "statusPage": "https://status.claudeflare.com",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Wait and retry
+- Check status page
+- Subscribe to status updates
+
+## Webhook Errors
+
+### `WEBHOOK_FAILED`
+
+Webhook delivery failed.
+
+**Status:** (included in webhook payload)
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "WEBHOOK_FAILED",
+    "message": "Webhook delivery failed after 3 attempts",
+    "webhookId": "wh_abc123",
+    "url": "https://your-app.com/webhook",
+    "attempts": 3,
+    "lastError": "Connection timeout",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Check webhook endpoint
+- Verify URL is accessible
+- Check signature verification
+- Review server logs
+
+### `INVALID_WEBHOOK_SIGNATURE`
+
+Webhook signature verification failed.
+
+**Status:** 401
+
+**Example:**
+```json
+{
+  "error": {
+    "code": "INVALID_WEBHOOK_SIGNATURE",
+    "message": "Webhook signature verification failed",
+    "webhookId": "wh_abc123",
+    "timestamp": 1234567890
+  }
+}
+```
+
+**Solutions:**
+- Verify webhook secret
+- Check signature algorithm
+- Ensure payload is not modified
+
+## Error Handling Best Practices
+
+### 1. Always Check Error Codes
+
+```typescript
+try {
+  const response = await client.chat.completions.create(request);
+} catch (error) {
+  if (error.code === 'RATE_LIMITED') {
+    // Implement backoff
+    await sleep(error.retryAfter * 1000);
+  } else if (error.code === 'QUOTA_EXCEEDED') {
+    // Handle quota exceeded
+    alert('Monthly quota exceeded');
+  } else {
+    // Handle other errors
+    console.error('Error:', error.message);
+  }
+}
+```
+
+### 2. Use Request IDs for Support
+
+```typescript
+catch (error) {
+  if (error.requestId) {
+    console.error('Error ID:', error.requestId);
+    // Include in support request
+  }
+}
+```
+
+### 3. Implement Retry Logic
+
+```typescript
+async function retryWithBackoff(fn, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (error.code === 'RATE_LIMITED' && i < maxRetries - 1) {
+        const delay = Math.pow(2, i) * 1000;
+        await sleep(delay);
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+```
+
+### 4. Log Errors for Debugging
+
+```typescript
+catch (error) {
+  console.error({
+    code: error.code,
+    message: error.message,
+    details: error.details,
+    timestamp: error.timestamp,
+    requestId: error.requestId
+  });
+}
+```
+
+## HTTP Status Codes
+
+| Status | Meaning |
+|--------|---------|
+| 200 | Success |
+| 201 | Created |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 408 | Request Timeout |
+| 413 | Payload Too Large |
+| 429 | Too Many Requests |
+| 500 | Internal Server Error |
+| 502 | Bad Gateway |
+| 503 | Service Unavailable |
+
+## Support
+
+For persistent errors:
+
+1. Note the error code
+2. Record the request ID
+3. Check status page: https://status.claudeflare.com
+4. Contact support with details
+
+## Related Endpoints
+
+- [Authentication](/api-reference/authentication) - API key management
+- [Rate Limiting](/guides/rate-limiting) - Handling rate limits
+- [Troubleshooting](/troubleshooting/) - Common issues and solutions

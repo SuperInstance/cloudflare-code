@@ -1,0 +1,79 @@
+{
+  "name": "@claudeflare/xai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Explainable AI (XAI) system for ClaudeFlare - SHAP, LIME, attention visualization, and model interpretation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./shap": {
+      "types": "./dist/shap/index.d.ts",
+      "import": "./dist/shap/index.js"
+    },
+    "./lime": {
+      "types": "./dist/lime/index.d.ts",
+      "import": "./dist/lime/index.js"
+    },
+    "./attention": {
+      "types": "./dist/attention/index.d.ts",
+      "import": "./dist/attention/index.js"
+    },
+    "./interpretation": {
+      "types": "./dist/interpretation/index.d.ts",
+      "import": "./dist/interpretation/index.js"
+    },
+    "./counterfactual": {
+      "types": "./dist/counterfactual/index.d.ts",
+      "import": "./dist/counterfactual/index.js"
+    },
+    "./reporting": {
+      "types": "./dist/reporting/index.d.ts",
+      "import": "./dist/reporting/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "xai",
+    "explainable-ai",
+    "shap",
+    "lime",
+    "interpretation",
+    "visualization",
+    "attention",
+    "counterfactual",
+    "model-interpretability",
+    "claudeflare"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@claudeflare/shared": "workspace:*",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

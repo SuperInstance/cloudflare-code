@@ -1,0 +1,402 @@
+---
+title: Installation
+description: Detailed installation instructions for ClaudeFlare
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Installation Guide
+
+Detailed instructions for installing and configuring ClaudeFlare in various environments.
+
+## System Requirements
+
+### Minimum Requirements
+
+- **Node.js**: 20.0.0 or higher
+- **npm**: 10.0.0 or higher
+- **Memory**: 2GB RAM minimum
+- **Disk Space**: 500MB for installation
+
+### Recommended Requirements
+
+- **Node.js**: Latest LTS version
+- **npm**: Latest version
+- **Memory**: 4GB RAM or more
+- **Disk Space**: 2GB for development with dependencies
+
+## Installation Methods
+
+### Method 1: Clone from GitHub
+
+<Tabs>
+  <Tab label="HTTPS">
+    ```bash
+    git clone https://github.com/your-org/claudeflare.git
+    cd claudeflare
+    npm install
+    ```
+  </Tab>
+  <Tab label="SSH">
+    ```bash
+    git clone git@github.com:your-org/claudeflare.git
+    cd claudeflare
+    npm install
+    ```
+  </Tab>
+  <Tab label="GitHub CLI">
+    ```bash
+    gh repo clone your-org/claudeflare
+    cd claudeflare
+    npm install
+    ```
+  </Tab>
+</Tabs>
+
+### Method 2: Fork and Clone
+
+If you plan to contribute to ClaudeFlare:
+
+1. Fork the repository on GitHub
+2. Clone your fork:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/claudeflare.git
+   cd claudeflare
+   git remote add upstream https://github.com/your-org/claudeflare.git
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Method 3: Using as a Package
+
+Install ClaudeFlare as a dependency in your project:
+
+<Tabs>
+  <Tab label="npm">
+    ```bash
+    npm install @claudeflare/edge
+    ```
+  </Tab>
+  <Tab label="yarn">
+    ```bash
+    yarn add @claudeflare/edge
+    ```
+  </Tab>
+  <Tab label="pnpm">
+    ```bash
+    pnpm add @claudeflare/edge
+    ```
+  </Tab>
+</Tabs>
+
+## Cloudflare Setup
+
+### Step 1: Create Cloudflare Account
+
+If you don't have one, sign up at [cloudflare.com](https://cloudflare.com):
+- Free plan includes all required features
+- No credit card required
+
+### Step 2: Install Wrangler CLI
+
+```bash
+npm install -g wrangler
+```
+
+Verify installation:
+
+```bash
+wrangler --version
+# Expected output: ⛅️ wrangler 3.x.x
+```
+
+### Step 3: Authenticate with Cloudflare
+
+```bash
+wrangler login
+```
+
+This opens your browser for authentication.
+
+### Step 4: Create Required Resources
+
+<Tabs>
+  <Tab label="KV Namespace">
+    ```bash
+    # Create KV namespace for caching
+    wrangler kv:namespace create "CACHE_KV"
+
+    # Create preview namespace
+    wrangler kv:namespace create "CACHE_KV" --preview
+
+    # Update wrangler.toml with returned IDs
+    ```
+    <Callout type="info">
+      KV provides low-latency key-value storage with global edge caching.
+    </Callout>
+  </Tab>
+  <Tab label="R2 Bucket">
+    ```bash
+    # Create R2 bucket for file storage
+    wrangler r2 bucket create claudeflare-storage
+    ```
+    <Callout type="info">
+      R2 provides S3-compatible object storage with zero egress fees.
+    </Callout>
+  </Tab>
+  <Tab label="D1 Database">
+    ```bash
+    # Create D1 database
+    wrangler d1 create claudeflare-db
+
+    # Update wrangler.toml with returned database_id
+    ```
+    <Callout type="info">
+      D1 is Cloudflare's edge-native SQL database.
+    </Callout>
+  </Tab>
+</Tabs>
+
+### Step 5: Configure wrangler.toml
+
+Update your `wrangler.toml` with the created resource IDs:
+
+```toml
+name = "claudeflare"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "your_kv_namespace_id"
+preview_id = "your_preview_kv_id"
+
+# R2 Buckets
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "claudeflare-storage"
+
+# D1 Databases
+[[d1_databases]]
+binding = "DB"
+database_name = "claudeflare-db"
+database_id = "your_database_id"
+
+# Environment Variables
+[vars]
+ENVIRONMENT = "development"
+
+# Secrets (use wrangler secret put)
+# wrangler secret put GROQ_API_KEY
+# wrangler secret put CEREBRAS_API_KEY
+```
+
+## AI Provider Setup
+
+ClaudeFlare supports multiple AI providers. Configure at least one:
+
+### Groq (Recommended)
+
+1. Sign up at [console.groq.com](https://console.groq.com)
+2. Create an API key
+3. Add to environment:
+
+```bash
+# Local development
+echo "GROQ_API_KEY=your_key_here" >> .env
+
+# Cloudflare Workers
+wrangler secret put GROQ_API_KEY
+```
+
+### Cerebras
+
+1. Sign up at [cerebras.ai](https://cerebras.ai)
+2. Create an API key
+3. Add to environment:
+
+```bash
+# Local development
+echo "CEREBRAS_API_KEY=your_key_here" >> .env
+
+# Cloudflare Workers
+wrangler secret put CEREBRAS_API_KEY
+```
+
+### OpenRouter
+
+1. Sign up at [openrouter.ai](https://openrouter.ai)
+2. Create an API key
+3. Add to environment:
+
+```bash
+# Local development
+echo "OPENROUTER_API_KEY=your_key_here" >> .env
+
+# Cloudflare Workers
+wrangler secret put OPENROUTER_API_KEY
+```
+
+### Cloudflare Workers AI
+
+Cloudflare Workers AI is available automatically with your Cloudflare account:
+
+```bash
+# No additional API key needed
+# Just ensure CLOUDFLARE_ACCOUNT_ID is set
+```
+
+## Environment Configuration
+
+### Development Environment
+
+Create a `.env` file in the project root:
+
+```bash
+# Cloudflare
+CLOUDFLARE_ACCOUNT_ID=your_account_id
+CLOUDFLARE_API_TOKEN=your_api_token
+
+# AI Providers (at least one required)
+GROQ_API_KEY=your_groq_key
+CEREBRAS_API_KEY=your_cerebras_key
+OPENROUTER_API_KEY=your_openrouter_key
+
+# Optional: Vector Database
+PINECONE_API_KEY=your_pinecone_key
+WEAVIATE_URL=your_weaviate_url
+
+# Optional: Monitoring
+SENTRY_DSN=your_sentry_dsn
+```
+
+<Callout type="warning">
+  **Never commit `.env` files to version control!**
+  Add `.env` to your `.gitignore` file.
+</Callout>
+
+### Production Environment
+
+For production, use Cloudflare secrets:
+
+```bash
+# Set secrets securely
+wrangler secret put GROQ_API_KEY
+wrangler secret put CEREBRAS_API_KEY
+wrangler secret put CLOUDFLARE_API_TOKEN
+```
+
+## Verification
+
+### Local Development
+
+```bash
+# Start dev server
+npm run dev
+
+# Test health endpoint (another terminal)
+curl http://localhost:8787/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "healthy",
+  "version": "0.1.0",
+  "timestamp": 1234567890
+}
+```
+
+### Cloudflare Workers
+
+```bash
+# Deploy to Cloudflare
+npm run deploy:dev
+
+# Test deployment
+curl https://your-worker.workers.dev/health
+```
+
+## Docker Installation (Optional)
+
+For containerized deployments:
+
+```dockerfile
+# Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy source
+COPY . .
+
+# Build
+RUN npm run build
+
+# Expose port
+EXPOSE 8787
+
+# Run
+CMD ["npm", "start"]
+```
+
+Build and run:
+
+```bash
+docker build -t claudeflare .
+docker run -p 8787:8787 \
+  -e CLOUDFLARE_ACCOUNT_ID=$CLOUDFLARE_ACCOUNT_ID \
+  -e GROQ_API_KEY=$GROQ_API_KEY \
+  claudeflare
+```
+
+## Troubleshooting
+
+### Issue: "wrangler: command not found"
+
+**Solution:**
+```bash
+npm install -g wrangler
+# or
+npx wrangler <command>
+```
+
+### Issue: "Authentication failed"
+
+**Solution:**
+```bash
+# Re-authenticate
+wrangler logout
+wrangler login
+```
+
+### Issue: "Module not found" after installation
+
+**Solution:**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Issue: KV namespace not found
+
+**Solution:**
+```bash
+# Verify namespace exists
+wrangler kv:namespace list
+
+# Create if missing
+wrangler kv:namespace create "CACHE_KV"
+```
+
+<Callout type="success">
+  Installation complete! Proceed to [Configuration](/docs/getting-started/configuration) to customize your setup.
+</Callout>

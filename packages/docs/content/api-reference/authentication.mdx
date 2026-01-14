@@ -1,0 +1,477 @@
+---
+title: Authentication
+description: How to authenticate with ClaudeFlare API
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Authentication
+
+Learn how to authenticate your requests to the ClaudeFlare API.
+
+## Overview
+
+ClaudeFlare supports multiple authentication methods:
+
+1. **API Key Authentication** (Recommended for production)
+2. **JWT Token Authentication** (For enterprise)
+3. **OAuth 2.0** (For third-party integrations)
+
+## API Key Authentication
+
+### Generating an API Key
+
+1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
+2. Navigate to your ClaudeFlare Worker
+3. Click "Settings" → "API Keys"
+4. Click "Generate API Key"
+5. Copy the key (you won't see it again!)
+
+### Using API Keys
+
+Include your API key in the `X-API-Key` header:
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/chat \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: cf-your-api-key-here" \
+  -d '{
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+<Callout type="warning">
+  **Security Best Practice**: Never expose API keys in client-side code or public repositories. Use environment variables or secret management.
+</Callout>
+
+### API Key Formats
+
+ClaudeFlare API keys follow this format:
+
+```
+cf-{prefix}-{random-string}
+```
+
+Example: `cf-prod-1a2b3c4d5e6f7g8h9i0j`
+
+### Key Prefixes
+
+| Prefix | Type | Usage |
+|--------|------|-------|
+| `cf-prod-` | Production | Production applications |
+| `cf-dev-` | Development | Development and testing |
+| `cf-test-` | Test | Automated testing |
+| `cf-temp-` | Temporary | Short-term access (24h expiry) |
+
+## SDK Authentication
+
+### JavaScript/TypeScript
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+const client = new ClaudeFlare({
+  apiKey: process.env.CLAUDEFLARE_API_KEY,
+  baseURL: 'https://api.claudeflare.com'
+})
+
+// Use the client
+const response = await client.chat.completions.create({
+  messages: [{ role: 'user', content: 'Hello!' }]
+})
+```
+
+### Python
+
+```python
+import claudeflare
+import os
+
+client = claudeflare.Client(
+    api_key=os.getenv('CLAUDEFLARE_API_KEY'),
+    base_url='https://api.claudeflare.com'
+)
+
+# Use the client
+response = client.chat.completions.create(
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+```
+
+### Go
+
+```go
+package main
+
+import (
+    "os"
+    "github.com/your-org/claudeflare-go"
+)
+
+func main() {
+    client := claudeflare.NewClient(
+        os.Getenv("CLAUDEFLARE_API_KEY"),
+        claudeflare.WithBaseURL("https://api.claudeflare.com"),
+    )
+
+    // Use the client
+    resp, err := client.Chat.Create(claudeflare.ChatRequest{
+        Messages: []claudeflare.Message{
+            {Role: "user", Content: "Hello!"},
+        },
+    })
+}
+```
+
+## Environment Variables
+
+Store API keys in environment variables:
+
+### Development (.env)
+
+```bash
+# .env file
+CLAUDEFLARE_API_KEY=cf-prod-your-key-here
+```
+
+Load in your application:
+
+<Tabs>
+  <Tab label="JavaScript/Node.js">
+    ```javascript
+    import dotenv from 'dotenv'
+    dotenv.config()
+
+    const apiKey = process.env.CLAUDEFLARE_API_KEY
+    ```
+  </Tab>
+  <Tab label="Python">
+    ```python
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    api_key = os.getenv('CLAUDEFLARE_API_KEY')
+    ```
+  </Tab>
+  <Tab label="Go">
+    ```go
+    package main
+
+    import (
+        "os"
+        "github.com/joho/godotenv"
+    )
+
+    func main() {
+        godotenv.Load()
+        apiKey := os.Getenv("CLAUDEFLARE_API_KEY")
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Production (Cloudflare Secrets)
+
+For Cloudflare Workers deployment:
+
+```bash
+wrangler secret put CLAUDEFLARE_API_KEY
+```
+
+## API Key Management
+
+### Rotating API Keys
+
+Regularly rotate your API keys for security:
+
+```bash
+# Generate new key
+# (via Cloudflare Dashboard)
+
+# Update your application
+export CLAUDEFLARE_API_KEY=new-key-here
+
+# Re-deploy
+npm run deploy
+
+# Revoke old key
+# (via Cloudflare Dashboard)
+```
+
+### Key Scoping
+
+You can create scoped API keys with specific permissions:
+
+```typescript
+const scopedKey = await createScopedKey({
+  permissions: ['chat:read', 'chat:write'],
+  rateLimit: 1000,
+  expiry: '2024-12-31'
+})
+```
+
+### Key Revocation
+
+Revoke compromised or unused keys immediately:
+
+```bash
+# Via Dashboard
+# Or programmatically:
+await revokeKey('cf-prod-compromised-key')
+```
+
+## JWT Authentication (Enterprise)
+
+For enterprise customers, ClaudeFlare supports JWT authentication:
+
+### Obtaining a JWT
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_id": "your-client-id",
+    "client_secret": "your-client-secret",
+    "grant_type": "client_credentials"
+  }'
+```
+
+Response:
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Using JWT
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/chat \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+### JWT Refresh
+
+Refresh tokens before expiry:
+
+```typescript
+async function refreshAccessToken(refreshToken: string) {
+  const response = await fetch('/v1/auth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    })
+  })
+
+  const { access_token, refresh_token: newRefreshToken } = await response.json()
+
+  // Update stored tokens
+  return { access_token, refresh_token: newRefreshToken }
+}
+```
+
+## OAuth 2.0 (Third-Party Integrations)
+
+For integrating ClaudeFlare into third-party applications:
+
+### Authorization Code Flow
+
+1. **Redirect user to authorization page:**
+   ```
+   https://api.claudeflare.com/v1/oauth/authorize?
+     response_type=code&
+     client_id=your-client-id&
+     redirect_uri=https://your-app.com/callback&
+     scope=chat:write&
+     state=random-state-string
+   ```
+
+2. **User authorizes, receives callback:**
+   ```
+   https://your-app.com/callback?
+     code=authorization-code&
+     state=random-state-string
+   ```
+
+3. **Exchange code for access token:**
+   ```bash
+   curl -X POST https://api.claudeflare.com/v1/oauth/token \
+     -H "Content-Type: application/json" \
+     -d '{
+       "grant_type": "authorization_code",
+       "code": "authorization-code",
+       "redirect_uri": "https://your-app.com/callback",
+       "client_id": "your-client-id",
+       "client_secret": "your-client-secret"
+     }'
+   ```
+
+## Security Best Practices
+
+### 1. Never Expose Keys in Client-Side Code
+
+```javascript
+// ❌ BAD - Exposed in frontend
+const apiKey = 'cf-prod-public-key'
+
+// ✅ GOOD - Use backend proxy
+async function proxyRequest(messages) {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages })
+  })
+  return response.json()
+}
+```
+
+### 2. Use Environment Variables
+
+```javascript
+// ❌ BAD - Hardcoded
+const apiKey = 'cf-prod-hardcoded-key'
+
+// ✅ GOOD - Environment variable
+const apiKey = process.env.CLAUDEFLARE_API_KEY
+```
+
+### 3. Implement Rate Limiting
+
+```typescript
+const rateLimiter = new Map<string, number[]>()
+
+async function checkRateLimit(apiKey: string): Promise<boolean> {
+  const now = Date.now()
+  const requests = rateLimiter.get(apiKey) || []
+
+  // Remove old requests (> 1 minute)
+  const recent = requests.filter(t => now - t < 60000)
+
+  if (recent.length >= 100) {
+    return false // Rate limit exceeded
+  }
+
+  recent.push(now)
+  rateLimiter.set(apiKey, recent)
+  return true
+}
+```
+
+### 4. Log and Monitor
+
+```typescript
+async function authenticatedRequest(
+  apiKey: string,
+  endpoint: string,
+  body: any
+) {
+  // Log authentication attempt
+  console.log(`API call from key: ${apiKey.slice(0, 10)}...`)
+
+  try {
+    const response = await fetch(endpoint, {
+      headers: {
+        'X-API-Key': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+
+    // Log success/failure
+    await logApiCall({
+      apiKey: apiKey.slice(0, 10),
+      endpoint,
+      status: response.status,
+      timestamp: Date.now()
+    })
+
+    return response
+  } catch (error) {
+    // Log errors
+    await logError({
+      apiKey: apiKey.slice(0, 10),
+      error: error.message,
+      timestamp: Date.now()
+    })
+    throw error
+  }
+}
+```
+
+### 5. Use Short-Lived Tokens
+
+```typescript
+// Generate temporary token
+const tempToken = await generateTempToken({
+  apiKey: process.env.MASTER_API_KEY,
+  ttl: 3600, // 1 hour
+  scopes: ['chat:write']
+})
+```
+
+## Troubleshooting
+
+### Invalid API Key
+
+**Error:**
+```json
+{
+  "error": {
+    "code": "INVALID_API_KEY",
+    "message": "The provided API key is invalid"
+  }
+}
+```
+
+**Solutions:**
+- Verify the key is copied correctly
+- Check if the key is revoked
+- Ensure you're using the correct environment key
+
+### Rate Limit Exceeded
+
+**Error:**
+```json
+{
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Rate limit exceeded. Try again in 60 seconds."
+  }
+}
+```
+
+**Solutions:**
+- Implement exponential backoff
+- Upgrade your plan for higher limits
+- Use caching to reduce requests
+
+### Expired Token
+
+**Error:**
+```json
+{
+  "error": {
+    "code": "TOKEN_EXPIRED",
+    "message": "The access token has expired"
+  }
+}
+```
+
+**Solutions:**
+- Refresh the token using the refresh token
+- Re-authenticate to get a new token
+
+<Callout type="success">
+  **Authentication Working?** Great! Now explore the [Chat API](/docs/api-reference/chat-api) to start making requests.
+</Callout>

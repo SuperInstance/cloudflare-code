@@ -1,0 +1,57 @@
+# Cloudflare Workers Configuration for ClaudeFlare Audit Service
+name = "claudeflare-audit"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+node_compat = true
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "."
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+AUDIT_LOG_RETENTION_DAYS = "2555"  # 7 years for compliance
+AUDIT_STREAM_ENABLED = "true"
+COMPLIANCE_REPORTING_ENABLED = "true"
+
+# R2 Buckets - Immutable Audit Log Storage
+[[r2_buckets]]
+binding = "AUDIT_LOGS"
+bucket_name = "claudeflare-audit-logs"
+
+# R2 Bucket - Compliance Reports
+[[r2_buckets]]
+binding = "COMPLIANCE_REPORTS"
+bucket_name = "claudeflare-compliance-reports"
+
+# D1 Database - Audit Index and Metadata
+[[d1_databases]]
+binding = "AUDIT_DB"
+database_name = "claudeflare-audit-db"
+
+# Queue Producers - Real-time Audit Streaming
+[[queues.producers]]
+binding = "AUDIT_QUEUE_PRODUCER"
+queue = "audit-log-stream"
+
+# Queue Consumers - Process audit logs for analysis
+[[queues.consumers]]
+queue = "audit-log-stream"
+max_batch_size = 100
+max_wait_time = 10
+
+# Cron Triggers - Compliance Report Generation
+[triggers]
+crons = [
+  "0 0 * * *",      # Daily - Daily compliance summary
+  "0 0 * * 0",      # Weekly - Weekly compliance report
+  "0 0 1 * *",      # Monthly - Monthly compliance report
+  "0 0 1 1 *",      # Yearly - Annual compliance report
+  "0 */6 * * *"     # Every 6 hours - Audit log processing
+]
+
+# Limits
+[limits]
+cpu_ms = 180  # Higher limit for compliance report generation

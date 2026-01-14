@@ -1,0 +1,519 @@
+---
+title: Contributing Guide
+description: How to contribute to ClaudeFlare
+---
+
+# Contributing to ClaudeFlare
+
+Thank you for your interest in contributing to ClaudeFlare! This guide will help you get started.
+
+## Table of Contents
+
+- [Code of Conduct](#code-of-conduct)
+- [Getting Started](#getting-started)
+- [Development Workflow](#development-workflow)
+- [Coding Standards](#coding-standards)
+- [Testing](#testing)
+- [Documentation](#documentation)
+- [Pull Requests](#pull-requests)
+- [Release Process](#release-process)
+
+## Code of Conduct
+
+- Be respectful and inclusive
+- Provide constructive feedback
+- Focus on what is best for the community
+- Show empathy towards other community members
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- npm 10+
+- Git
+- Cloudflare account (free tier)
+
+### Setup Development Environment
+
+```bash
+# Fork the repository
+git clone https://github.com/your-username/claudeflare.git
+cd claudeflare
+
+# Install dependencies
+npm install
+
+# Set up development environment
+cp .env.example .env
+
+# Run development server
+npm run dev
+```
+
+### Project Structure
+
+```
+claudeflare/
+├── packages/
+│   ├── edge/              # Cloudflare Workers API
+│   │   ├── src/
+│   │   │   ├── routes/    # API routes
+│   │   │   ├── lib/       # Libraries and utilities
+│   │   │   ├── do/        # Durable Objects
+│   │   │   └── types/     # TypeScript types
+│   │   └── tests/
+│   ├── sdk-ts/            # TypeScript SDK
+│   ├── sdk-python/        # Python SDK
+│   ├── sdk-go/            # Go SDK
+│   ├── docs/              # Documentation
+│   └── dashboard/         # Dashboard UI
+├── scripts/               # Build and deployment scripts
+└── .github/               # GitHub workflows
+```
+
+## Development Workflow
+
+### 1. Create an Issue
+
+Before starting work, create an issue or claim an existing one:
+
+- Describe the problem or feature
+- Discuss approach with maintainers
+- Get approval before starting work
+
+### 2. Create a Branch
+
+```bash
+git checkout -b feature/your-feature-name
+# or
+git checkout -b fix/your-bug-fix
+```
+
+### Branch Naming
+
+- `feature/` - New features
+- `fix/` - Bug fixes
+- `docs/` - Documentation changes
+- `refactor/` - Code refactoring
+- `test/` - Test additions or changes
+- `chore/` - Maintenance tasks
+
+### 3. Make Changes
+
+```bash
+# Write code
+# Write tests
+# Update documentation
+
+# Run linter
+npm run lint
+
+# Run type check
+npm run typecheck
+
+# Run tests
+npm test
+```
+
+### 4. Commit Changes
+
+```bash
+git add .
+git commit -m "feat: add user authentication"
+```
+
+#### Commit Message Format
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
+- `perf`: Performance improvements
+- `ci`: CI/CD changes
+
+**Example:**
+
+```
+feat(auth): add JWT token refresh mechanism
+
+Implement automatic token refresh using refresh tokens stored
+in secure HTTP-only cookies.
+
+- Add refresh token endpoint
+- Implement token rotation
+- Add refresh token validation
+
+Closes #123
+```
+
+### 5. Push and Create PR
+
+```bash
+git push origin feature/your-feature-name
+```
+
+Create a pull request on GitHub with:
+
+- Clear title and description
+- Reference related issues
+- Add screenshots for UI changes
+- List breaking changes
+
+## Coding Standards
+
+### TypeScript
+
+- Use strict TypeScript settings
+- Define explicit types (no `any`)
+- Use interfaces for public APIs
+- Use type aliases for unions
+- Document complex types
+
+```typescript
+// Good
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+}
+
+async function getUser(id: string): Promise<User> {
+  // ...
+}
+
+// Bad
+async function getUser(id: any): any {
+  // ...
+}
+```
+
+### Code Style
+
+- Use 2 spaces for indentation
+- Use single quotes for strings
+- Use trailing commas
+- No unused variables
+- Prefer `const` over `let`
+- Use arrow functions for callbacks
+
+```typescript
+// Good
+const users = data.map(user => ({
+  id: user.id,
+  name: user.name,
+}));
+
+// Bad
+var users = data.map(function(user) {
+  return {
+    id: user.id,
+    name: user.name
+  };
+});
+```
+
+### Error Handling
+
+- Always handle errors
+- Use specific error types
+- Provide meaningful error messages
+- Log errors appropriately
+
+```typescript
+// Good
+try {
+  const result = await apiCall();
+  return result;
+} catch (error) {
+  if (error instanceof NetworkError) {
+    logger.error('Network error', { error });
+    throw new ApiError('Service unavailable', error);
+  }
+  throw error;
+}
+
+// Bad
+const result = await apiCall();
+return result;
+```
+
+### Async/Await
+
+- Prefer async/await over promises
+- Handle promise rejections
+- Use Promise.all for parallel operations
+
+```typescript
+// Good
+async function fetchUsers() {
+  try {
+    const [users, posts] = await Promise.all([
+      fetch('/users'),
+      fetch('/posts')
+    ]);
+    return { users, posts };
+  } catch (error) {
+    logger.error('Fetch failed', { error });
+    throw error;
+  }
+}
+
+// Bad
+function fetchUsers() {
+  return Promise.all([
+    fetch('/users'),
+    fetch('/posts')
+  ]);
+}
+```
+
+### Naming Conventions
+
+- **Variables**: camelCase
+- **Constants**: UPPER_SNAKE_CASE
+- **Classes**: PascalCase
+- **Functions**: camelCase
+- **Files**: kebab-case
+- **Types/Interfaces**: PascalCase
+
+```typescript
+const MAX_RETRIES = 3;
+
+class UserService {
+  private readonly apiClient: ApiClient;
+
+  async getUserById(id: string): Promise<User> {
+    // ...
+  }
+}
+```
+
+## Testing
+
+### Test Structure
+
+```
+packages/edge/src/
+├── lib/
+│   ├── cache.ts
+│   └── cache.test.ts
+├── routes/
+│   ├── chat.ts
+│   └── chat.test.ts
+```
+
+### Writing Tests
+
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+
+describe('Cache', () => {
+  describe('get', () => {
+    it('should return cached value', async () => {
+      const cache = new Cache();
+      await cache.set('key', 'value');
+      const result = await cache.get('key');
+      expect(result).toBe('value');
+    });
+
+    it('should return null for missing key', async () => {
+      const cache = new Cache();
+      const result = await cache.get('missing');
+      expect(result).toBeNull();
+    });
+  });
+});
+```
+
+### Test Coverage
+
+- Maintain 80%+ coverage
+- Test edge cases
+- Test error conditions
+- Use mocks for external dependencies
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests for specific package
+npm test --workspace=packages/edge
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+## Documentation
+
+### Code Comments
+
+- Document public APIs
+- Explain complex logic
+- Use JSDoc for functions
+
+```typescript
+/**
+ * Caches a response with semantic hashing
+ * @param key - Cache key (will be hashed)
+ * @param value - Value to cache
+ * @param ttl - Time to live in seconds
+ * @returns Promise that resolves when cached
+ */
+async function set(key: string, value: unknown, ttl?: number): Promise<void> {
+  // ...
+}
+```
+
+### README Files
+
+Each package should have a README with:
+
+- Purpose and overview
+- Installation instructions
+- Usage examples
+- API reference
+- Contributing guidelines
+
+### Documentation Site
+
+Update documentation in `/packages/docs/content/`:
+
+- Add new pages for features
+- Update API reference
+- Add examples and guides
+- Review for accuracy
+
+## Pull Requests
+
+### PR Title Format
+
+Use the same format as commit messages:
+
+```
+feat: add user authentication
+fix: resolve race condition in cache
+docs: update API documentation
+```
+
+### PR Description
+
+```markdown
+## Summary
+Brief description of changes
+
+## Changes
+- Change 1
+- Change 2
+- Change 3
+
+## Testing
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Manual testing completed
+
+## Breaking Changes
+List any breaking changes
+
+## Checklist
+- [ ] Code follows style guidelines
+- [ ] Self-review completed
+- [ ] Comments added to complex code
+- [ ] Documentation updated
+- [ ] No new warnings generated
+- [ ] Tests added/updated
+- [ ] All tests passing
+```
+
+### Review Process
+
+1. Automated checks run (CI/CD)
+2. Code review by maintainers
+3. Address review feedback
+4. Approval required from at least one maintainer
+5. Squash and merge when approved
+
+## Release Process
+
+### Versioning
+
+ClaudeFlare follows [Semantic Versioning](https://semver.org/):
+
+- **MAJOR**: Breaking changes
+- **MINOR**: New features (backwards compatible)
+- **PATCH**: Bug fixes (backwards compatible)
+
+### Release Checklist
+
+- [ ] All tests passing
+- [ ] Documentation updated
+- [ ] CHANGELOG.md updated
+- [ ] Version bumped
+- [ ] Git tag created
+- [ ] Release published to npm
+- [ ] GitHub release created
+
+### Creating a Release
+
+```bash
+# Update version
+npm version major|minor|patch
+
+# Generate changelog
+npm run changelog
+
+# Push to main
+git push origin main --tags
+
+# Publish to npm (for team members)
+npm publish
+```
+
+## Getting Help
+
+- **GitHub Issues**: Bug reports and feature requests
+- **Discussions**: Questions and ideas
+- **Discord**: Real-time chat
+- **Email**: support@claudeflare.com
+
+## Recognition
+
+Contributors are recognized in:
+
+- CONTRIBUTORS.md file
+- Release notes
+- Project website
+- Annual community highlights
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the MIT License.
+
+## Resources
+
+- [Project Board](https://github.com/your-org/claudeflare/projects)
+- [Good First Issues](https://github.com/your-org/claudeflare/labels/good%20first%20issue)
+- [Documentation](https://docs.claudeflare.com)
+- [API Reference](https://api.claudeflare.com)
+
+Thank you for contributing to ClaudeFlare!

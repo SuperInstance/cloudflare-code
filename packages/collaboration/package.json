@@ -1,0 +1,91 @@
+{
+  "name": "@claudeflare/collaboration",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Advanced collaboration features for ClaudeFlare platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./realtime": {
+      "types": "./dist/realtime/index.d.ts",
+      "import": "./dist/realtime/index.js"
+    },
+    "./pair": {
+      "types": "./dist/pair/index.d.ts",
+      "import": "./dist/pair/index.js"
+    },
+    "./review": {
+      "types": "./dist/review/index.d.ts",
+      "import": "./dist/review/index.js"
+    },
+    "./knowledge": {
+      "types": "./dist/knowledge/index.d.ts",
+      "import": "./dist/knowledge/index.js"
+    },
+    "./teams": {
+      "types": "./dist/teams/index.d.ts",
+      "import": "./dist/teams/index.js"
+    },
+    "./activity": {
+      "types": "./dist/activity/index.d.ts",
+      "import": "./dist/activity/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "collaboration",
+    "crdt",
+    "realtime",
+    "pair-programming",
+    "code-review",
+    "knowledge-sharing",
+    "claudeflare"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "yjs": "^13.6.10",
+    "y-protocols": "^1.0.6",
+    "y-websocket": "^1.5.0",
+    "lib0": "^0.2.2",
+    "ws": "^8.16.0",
+    "uuid": "^9.0.1",
+    "nanoid": "^5.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.7",
+    "@types/ws": "^8.5.10",
+    "@vitest/ui": "^1.1.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.1.0"
+  },
+  "peerDependencies": {
+    "@claudeflare/shared": "^1.0.0",
+    "zod": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

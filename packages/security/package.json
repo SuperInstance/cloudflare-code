@@ -1,0 +1,55 @@
+{
+  "name": "@claudeflare/security",
+  "version": "1.0.0",
+  "description": "Comprehensive security middleware and vulnerability scanning for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "audit": "node dist/scanning/dependencies.js",
+    "scan-secrets": "node dist/scanning/secrets.js",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "security",
+    "cloudflare",
+    "workers",
+    "middleware",
+    "vulnerability-scanning",
+    "owasp"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "hono": "^4.0.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "validator": "^13.11.0",
+    "xss": "^1.0.14",
+    "csrf-csrf": "^3.0.5",
+    "rate-limiter-flexible": "^5.0.0",
+    "helmet": "^7.1.0",
+    "sanitize-html": "^2.11.0",
+    "dompurify": "^3.0.6",
+    "jsrsasign": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/validator": "^13.11.7",
+    "@types/dompurify": "^3.0.5",
+    "@types/jsrsasign": "^10.0.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0",
+    "@vitest/coverage-v8": "^1.1.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1"
+  },
+  "peerDependencies": {
+    "hono": "^4.0.0"
+  }
+}

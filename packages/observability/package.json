@@ -1,0 +1,89 @@
+{
+  "name": "@claudeflare/observability",
+  "version": "0.1.0",
+  "description": "Advanced debugging and observability tools for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "observability",
+    "tracing",
+    "logging",
+    "profiling",
+    "debugging",
+    "opentelemetry"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@opentelemetry/api": "^1.8.0",
+    "@opentelemetry/sdk-trace-base": "^1.22.0",
+    "@opentelemetry/sdk-trace-web": "^1.22.0",
+    "@opentelemetry/resources": "^1.22.0",
+    "@opentelemetry/semantic-conventions": "^1.22.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.49.1",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.49.1",
+    "@opentelemetry/instrumentation": "^0.49.1",
+    "@opentelemetry/instrumentation-fetch": "^0.49.1",
+    "@opentelemetry/context-zone": "^1.22.0",
+    "@opentelemetry/context-zone-peer-dep": "^1.22.0",
+    "@opentelemetry/propagator-b3": "^1.22.0",
+    "@opentelemetry/propagator-jaeger": "^1.22.0",
+    "uuid": "^9.0.1",
+    "pino": "^8.17.2",
+    "pino-pretty": "^10.3.1",
+    "flamegraph": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/uuid": "^9.0.7",
+    "typescript": "^5.3.3",
+    "tsup": "^8.0.1",
+    "vitest": "^1.2.1",
+    "@vitest/coverage-v8": "^1.2.1"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./tracing": {
+      "import": "./dist/tracing.mjs",
+      "require": "./dist/tracing.js",
+      "types": "./dist/tracing.d.ts"
+    },
+    "./logging": {
+      "import": "./dist/logging.mjs",
+      "require": "./dist/logging.js",
+      "types": "./dist/logging.d.ts"
+    },
+    "./profiling": {
+      "import": "./dist/profiling.mjs",
+      "require": "./dist/profiling.js",
+      "types": "./dist/profiling.d.ts"
+    },
+    "./memory": {
+      "import": "./dist/memory.mjs",
+      "require": "./dist/memory.js",
+      "types": "./dist/memory.d.ts"
+    },
+    "./inspection": {
+      "import": "./dist/inspection.mjs",
+      "require": "./dist/inspection.js",
+      "types": "./dist/inspection.d.ts"
+    },
+    "./recording": {
+      "import": "./dist/recording.mjs",
+      "require": "./dist/recording.js",
+      "types": "./dist/recording.d.ts"
+    }
+  }
+}

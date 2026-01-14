@@ -1,0 +1,364 @@
+---
+title: API Overview
+description: Overview of ClaudeFlare REST API
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# API Reference Overview
+
+Complete reference documentation for the ClaudeFlare REST API.
+
+## Base URL
+
+```
+Production: https://api.claudeflare.com/v1
+Development: https://your-worker.workers.dev/v1
+Local: http://localhost:8787/v1
+```
+
+## Authentication
+
+ClaudeFlare uses API key authentication for production use. Include your API key in the request header:
+
+```bash
+curl -H "X-API-Key: your-api-key" \
+  https://api.claudeflare.com/v1/chat
+```
+
+<Callout type="info">
+  For development and testing, authentication can be disabled. See [Configuration](/docs/getting-started/configuration) for details.
+</Callout>
+
+## Available APIs
+
+### Core APIs
+
+| API | Description | Endpoint |
+|-----|-------------|----------|
+| **Chat API** | Generate completions with multi-provider routing | `POST /v1/chat` |
+| **Streaming Chat** | Real-time streaming completions | `POST /v1/chat/stream` |
+| **Models API** | List and query available models | `GET /v1/models` |
+| **Embeddings API** | Generate text embeddings | `POST /v1/embeddings` |
+
+### Agent APIs
+
+| API | Description | Endpoint |
+|-----|-------------|----------|
+| **Agent Orchestration** | Execute multi-agent workflows | `POST /v1/agents/orchestrate` |
+| **Agent Status** | Query agent registry status | `GET /v1/agents/status` |
+| **Available Agents** | List available agent types | `GET /v1/agents/available` |
+
+### Codebase APIs
+
+| API | Description | Endpoint |
+|-----|-------------|----------|
+| **Upload Codebase** | Upload project for RAG | `POST /v1/codebase/upload` |
+| **Batch Upload** | Upload multiple files | `POST /v1/codebase/batch` |
+| **Search Codebase** | Semantic code search | `GET /v1/codebase/search` |
+| **Get File** | Retrieve file content | `GET /v1/codebase/file` |
+| **Codebase Stats** | Get indexing statistics | `GET /v1/codebase/stats` |
+| **Clear Codebase** | Remove indexed code | `DELETE /v1/codebase` |
+| **Reindex** | Rebuild vector index | `POST /v1/codebase/reindex` |
+
+### System APIs
+
+| API | Description | Endpoint |
+|-----|-------------|----------|
+| **Health Check** | System health status | `GET /health` |
+| **Status** | System status and info | `GET /v1/status` |
+| **Metrics** | Prometheus metrics | `GET /metrics` |
+| **Metrics Dashboard** | Visual metrics dashboard | `GET /v1/metrics/dashboard` |
+
+## Request/Response Format
+
+### Request Format
+
+All `POST` requests should include `Content-Type: application/json` header:
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/chat \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-api-key" \
+  -d '{
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```
+
+### Response Format
+
+Successful responses return HTTP 200 with JSON body:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "llama-2-70b-chat",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Hello! How can I help you today?"
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 10,
+    "completion_tokens": 20,
+    "total_tokens": 30
+  }
+}
+```
+
+### Error Responses
+
+Errors return appropriate HTTP status codes with detailed error information:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "messages field is required and must be a non-empty array",
+    "details": {
+      "field": "messages",
+      "constraint": "non-empty array"
+    },
+    "timestamp": 1234567890
+  }
+}
+```
+
+## HTTP Status Codes
+
+| Code | Description |
+|------|-------------|
+| **200** | Success |
+| **400** | Bad Request - Invalid parameters |
+| **401** | Unauthorized - Invalid or missing API key |
+| **403** | Forbidden - Insufficient permissions |
+| **404** | Not Found - Resource doesn't exist |
+| **429** | Too Many Requests - Rate limit exceeded |
+| **500** | Internal Server Error |
+| **503** | Service Unavailable - No AI providers available |
+
+## Rate Limiting
+
+API requests are rate limited based on your plan:
+
+<Tabs>
+  <Tab label="Free Tier">
+    - **100 requests per minute**
+    - **1,000 requests per hour**
+    - **10,000 requests per day**
+  </Tab>
+  <Tab label="Pro Tier">
+    - **1,000 requests per minute**
+    - **50,000 requests per hour**
+    - **1,000,000 requests per day**
+  </Tab>
+  <Tab label="Enterprise">
+    - **Custom limits**
+    - **Dedicated infrastructure**
+    - **SLA guarantee**
+  </Tab>
+</Tabs>
+
+Rate limit headers are included in responses:
+
+```http
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1234567890
+```
+
+## Versioning
+
+ClaudeFlare API uses URL-based versioning. The current version is `v1`.
+
+```
+https://api.claudeflare.com/v1/chat
+                         ^^^
+                        API version
+```
+
+<Callout type="warning">
+  **Deprecated Versions**: When a version is deprecated, we provide at least 6 months notice before removing it.
+</Callup>
+
+## Streaming Responses
+
+Several endpoints support Server-Sent Events (SSE) for streaming responses:
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/chat/stream \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "Tell me a story"}]
+  }'
+```
+
+Response:
+
+```
+data: {"id":"chatcmpl-abc","choices":[{"delta":{"content":"Once"}}]}
+
+data: {"id":"chatcmpl-abc","choices":[{"delta":{"content":" upon"}}]}
+
+data: {"id":"chatcmpl-abc","choices":[{"delta":{"content":" a"}}]}
+
+data: [DONE]
+```
+
+## CORS
+
+The API supports Cross-Origin Resource Sharing (CORS) for browser-based applications:
+
+```javascript
+fetch('https://api.claudeflare.com/v1/chat', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': 'your-api-key'
+  },
+  body: JSON.stringify({
+    messages: [{ role: 'user', content: 'Hello!' }]
+  })
+})
+```
+
+<Callout type="tip">
+  **CORS Configuration**: Configure allowed origins in your Cloudflare Worker settings for production.
+</Callout>
+
+## Best Practices
+
+### 1. Use Streaming for Long Responses
+
+For responses that might take longer to generate, use streaming endpoints:
+
+```javascript
+const response = await fetch('/v1/chat/stream', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ messages, stream: true })
+})
+
+const reader = response.body.getReader()
+while (true) {
+  const { done, value } = await reader.read()
+  if (done) break
+  // Process chunk
+}
+```
+
+### 2. Implement Retry Logic
+
+Implement exponential backoff for retries:
+
+```javascript
+async function callWithRetry(url, options, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options)
+      if (response.ok) return response
+      if (response.status < 500) throw new Error('Client error')
+    } catch (error) {
+      if (i === maxRetries - 1) throw error
+      await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000))
+    }
+  }
+}
+```
+
+### 3. Cache Responses
+
+Use appropriate caching strategies:
+
+```javascript
+// Cache identical requests
+const cache = new Map()
+
+async function cachedChat(messages) {
+  const key = JSON.stringify(messages)
+  if (cache.has(key)) return cache.get(key)
+
+  const response = await fetch('/v1/chat', {
+    method: 'POST',
+    body: JSON.stringify({ messages })
+  })
+
+  const data = await response.json()
+  cache.set(key, data)
+  return data
+}
+```
+
+### 4. Monitor Usage
+
+Track your API usage to avoid rate limits:
+
+```javascript
+let requestCount = 0
+let resetTime = Date.now() + 3600000
+
+async function rateLimitedFetch(url, options) {
+  if (Date.now() > resetTime) {
+    requestCount = 0
+    resetTime = Date.now() + 3600000
+  }
+
+  if (requestCount >= 1000) {
+    throw new Error('Rate limit exceeded')
+  }
+
+  requestCount++
+  return fetch(url, options)
+}
+```
+
+## SDKs
+
+While you can use the REST API directly, we recommend using our official SDKs:
+
+<Tabs>
+  <Tab label="JavaScript/TypeScript">
+    ```bash
+    npm install @claudeflare/sdk
+    ```
+    ```javascript
+    import { ClaudeFlare } from '@claudeflare/sdk'
+    const client = new ClaudeFlare({ apiKey })
+    ```
+  </Tab>
+  <Tab label="Python">
+    ```bash
+    pip install claudeflare
+    ```
+    ```python
+    import claudeflare
+    client = claudeflare.Client(api_key=api_key)
+    ```
+  </Tab>
+  <Tab label="Go">
+    ```bash
+    go get github.com/your-org/claudeflare-go
+    ```
+    ```go
+    import "github.com/your-org/claudeflare-go"
+    client := claudeflare.NewClient(apiKey)
+    ```
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+- [Chat API](/docs/api-reference/chat-api) - Detailed chat API documentation
+- [Authentication](/docs/api-reference/authentication) - Authentication guide
+- [Code Generation](/docs/api-reference/code-generation) - Code-specific APIs
+- [Agents API](/docs/api-reference/agents-api) - Multi-agent orchestration
+- [Webhooks](/docs/api-reference/webhooks) - Webhook configuration
+
+<Callout type="success">
+  **Ready to integrate?** Check out our [quick start guide](/docs/getting-started/quick-start) to get started in minutes.
+</Callout>

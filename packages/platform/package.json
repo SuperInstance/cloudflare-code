@@ -1,0 +1,45 @@
+{
+  "name": "@claudeflare/platform",
+  "version": "0.1.0",
+  "description": "Unified platform integration layer for ClaudeFlare - Service composition, orchestration, and dependency injection",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "platform",
+    "integration",
+    "dependency-injection",
+    "service-registry",
+    "orchestration",
+    "cloudflare",
+    "workers",
+    "durable-objects"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "dependencies": {
+    "@claudeflare/events": "workspace:*",
+    "@claudeflare/shared": "workspace:*",
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0"
+  }
+}

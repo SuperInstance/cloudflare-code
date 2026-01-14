@@ -1,0 +1,669 @@
+---
+title: First Project
+description: Build your first AI-powered application with ClaudeFlare
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Build Your First Project
+
+Let's build an AI-powered code completion tool using ClaudeFlare. This project will demonstrate the core features of the platform.
+
+## What We'll Build
+
+We'll create a code completion service that:
+- Accepts partial code snippets
+- Returns intelligent completions
+- Caches results for performance
+- Handles streaming responses
+
+## Project Setup
+
+### Step 1: Initialize the Project
+
+```bash
+# Create a new directory
+mkdir code-completion-app
+cd code-completion-app
+
+# Initialize npm project
+npm init -y
+
+# Install dependencies
+npm install @claudeflare/sdk
+
+# Create project structure
+mkdir -p src tests
+```
+
+### Step 2: Create the Main Application
+
+Create `src/index.js`:
+
+<Tabs>
+  <Tab label="JavaScript">
+    ```javascript
+    import { ClaudeFlare } from '@claudeflare/sdk'
+
+    // Initialize the client
+    const client = new ClaudeFlare({
+      apiKey: process.env.CLAUDEFLARE_API_KEY,
+      baseURL: process.env.CLAUDEFLARE_URL || 'http://localhost:8787'
+    })
+
+    /**
+     * Get code completion
+     * @param {string} code - Partial code snippet
+     * @param {string} language - Programming language
+     * @returns {Promise<string>} - Completed code
+     */
+    async function getCodeCompletion(code, language = 'javascript') {
+      try {
+        const systemPrompt = `You are an expert ${language} programmer.
+        Complete the given code snippet with only the necessary code.
+        Return only the completion, no explanations.`
+
+        const response = await client.chat.completions.create({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Complete this code:\n\`\`\`${language}\n${code}\n\`\`\`` }
+          ],
+          model: 'auto',
+          temperature: 0.2, // Lower temperature for more deterministic completions
+          max_tokens: 500
+        })
+
+        return response.choices[0].message.content
+      } catch (error) {
+        console.error('Error getting completion:', error)
+        throw error
+      }
+    }
+
+    /**
+     * Get streaming code completion
+     * @param {string} code - Partial code snippet
+     * @param {string} language - Programming language
+     * @returns {AsyncGenerator<string>} - Streaming completion
+     */
+    async function* getStreamingCompletion(code, language = 'javascript') {
+      try {
+        const systemPrompt = `You are an expert ${language} programmer.
+        Complete the given code snippet with only the necessary code.
+        Return only the completion, no explanations.`
+
+        const stream = await client.chat.completions.stream({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Complete this code:\n\`\`\`${language}\n${code}\n\`\`\`` }
+          ],
+          model: 'auto',
+          temperature: 0.2,
+          stream: true
+        })
+
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content
+          if (content) {
+            yield content
+          }
+        }
+      } catch (error) {
+        console.error('Error in streaming completion:', error)
+        throw error
+      }
+    }
+
+    // Export functions
+    export { getCodeCompletion, getStreamingCompletion }
+
+    // Example usage
+    if (import.meta.url === `file://${process.argv[1]}`) {
+      const code = 'function add(a, b) {\n  return'
+
+      console.log('Non-streaming completion:')
+      const completion = await getCodeCompletion(code)
+      console.log(completion)
+
+      console.log('\nStreaming completion:')
+      for await (const chunk of getStreamingCompletion(code)) {
+        process.stdout.write(chunk)
+      }
+      console.log('\n')
+    }
+    ```
+  </Tab>
+  <Tab label="TypeScript">
+    ```typescript
+    import { ClaudeFlare } from '@claudeflare/sdk'
+
+    interface CompletionOptions {
+      temperature?: number
+      maxTokens?: number
+    }
+
+    interface ChatMessage {
+      role: 'system' | 'user' | 'assistant'
+      content: string
+    }
+
+    // Initialize the client
+    const client = new ClaudeFlare({
+      apiKey: process.env.CLAUDEFLARE_API_KEY!,
+      baseURL: process.env.CLAUDEFLARE_URL || 'http://localhost:8787'
+    })
+
+    /**
+     * Get code completion
+     */
+    async function getCodeCompletion(
+      code: string,
+      language: string = 'javascript',
+      options: CompletionOptions = {}
+    ): Promise<string> {
+      try {
+        const systemPrompt = `You are an expert ${language} programmer.
+        Complete the given code snippet with only the necessary code.
+        Return only the completion, no explanations.`
+
+        const response = await client.chat.completions.create({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            {
+              role: 'user',
+              content: `Complete this code:\n\`\`\`${language}\n${code}\n\`\`\``
+            }
+          ],
+          model: 'auto',
+          temperature: options.temperature ?? 0.2,
+          max_tokens: options.maxTokens ?? 500
+        })
+
+        return response.choices[0].message.content
+      } catch (error) {
+        console.error('Error getting completion:', error)
+        throw error
+      }
+    }
+
+    /**
+     * Get streaming code completion
+     */
+    async function* getStreamingCompletion(
+      code: string,
+      language: string = 'javascript',
+      options: CompletionOptions = {}
+    ): AsyncGenerator<string> {
+      try {
+        const systemPrompt = `You are an expert ${language} programmer.
+        Complete the given code snippet with only the necessary code.
+        Return only the completion, no explanations.`
+
+        const stream = await client.chat.completions.stream({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            {
+              role: 'user',
+              content: `Complete this code:\n\`\`\`${language}\n${code}\n\`\`\``
+            }
+          ],
+          model: 'auto',
+          temperature: options.temperature ?? 0.2,
+          stream: true
+        })
+
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content
+          if (content) {
+            yield content
+          }
+        }
+      } catch (error) {
+        console.error('Error in streaming completion:', error)
+        throw error
+      }
+    }
+
+    export { getCodeCompletion, getStreamingCompletion, CompletionOptions }
+    ```
+  </Tab>
+</Tabs>
+
+### Step 3: Create a Web Server
+
+Create `src/server.js`:
+
+```javascript
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { getCodeCompletion, getStreamingCompletion } from './index.js'
+
+const app = new Hono()
+
+// Enable CORS
+app.use('*', cors())
+
+// Health check
+app.get('/', (c) => {
+  return c.json({ status: 'ok', service: 'code-completion' })
+})
+
+// Code completion endpoint
+app.post('/complete', async (c) => {
+  try {
+    const { code, language, options } = await c.req.json()
+
+    if (!code) {
+      return c.json({ error: 'Code is required' }, 400)
+    }
+
+    const completion = await getCodeCompletion(
+      code,
+      language || 'javascript',
+      options
+    )
+
+    return c.json({
+      code,
+      completion,
+      full: code + completion
+    })
+  } catch (error) {
+    return c.json(
+      { error: error.message },
+      500
+    )
+  }
+})
+
+// Streaming completion endpoint
+app.post('/complete/stream', async (c) => {
+  try {
+    const { code, language, options } = await c.req.json()
+
+    if (!code) {
+      return c.json({ error: 'Code is required' }, 400)
+    }
+
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of getStreamingCompletion(
+            code,
+            language || 'javascript',
+            options
+          )) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`))
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+          controller.close()
+        } catch (error) {
+          controller.error(error)
+        }
+      }
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    })
+  } catch (error) {
+    return c.json(
+      { error: error.message },
+      500
+    )
+  }
+})
+
+export default app
+```
+
+### Step 4: Create a Frontend
+
+Create `index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Code Completion</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 14px;
+      resize: vertical;
+    }
+    button {
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #0284c7;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .output {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 4px;
+      border-left: 4px solid #0ea5e9;
+    }
+    .output h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    select {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Code Completion</h1>
+
+    <textarea id="codeInput" placeholder="Enter your code here..."></textarea>
+
+    <select id="languageSelect">
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+      <option value="typescript">TypeScript</option>
+      <option value="go">Go</option>
+    </select>
+
+    <button id="completeBtn" onclick="completeCode()">Get Completion</button>
+    <button id="streamBtn" onclick="streamCompletion()">Stream Completion</button>
+
+    <div id="output" class="output" style="display: none;">
+      <h3>Completion:</h3>
+      <pre id="completion"></pre>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000';
+
+    async function completeCode() {
+      const code = document.getElementById('codeInput').value;
+      const language = document.getElementById('languageSelect').value;
+      const output = document.getElementById('output');
+      const completion = document.getElementById('completion');
+      const btn = document.getElementById('completeBtn');
+
+      if (!code.trim()) {
+        alert('Please enter some code');
+        return;
+      }
+
+      btn.disabled = true;
+      output.style.display = 'block';
+      completion.textContent = 'Loading...';
+
+      try {
+        const response = await fetch(`${API_URL}/complete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, language })
+        });
+
+        const data = await response.json();
+        completion.textContent = data.completion || 'No completion available';
+      } catch (error) {
+        completion.textContent = 'Error: ' + error.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function streamCompletion() {
+      const code = document.getElementById('codeInput').value;
+      const language = document.getElementById('languageSelect').value;
+      const output = document.getElementById('output');
+      const completion = document.getElementById('completion');
+      const btn = document.getElementById('streamBtn');
+
+      if (!code.trim()) {
+        alert('Please enter some code');
+        return;
+      }
+
+      btn.disabled = true;
+      output.style.display = 'block';
+      completion.textContent = '';
+
+      try {
+        const response = await fetch(`${API_URL}/complete/stream`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, language })
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const text = decoder.decode(value);
+          const lines = text.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+
+              try {
+                const parsed = JSON.parse(data);
+                completion.textContent += parsed.chunk || '';
+              } catch (e) {
+                // Skip invalid JSON
+              }
+            }
+          }
+        }
+      } catch (error) {
+        completion.textContent = 'Error: ' + error.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
+```
+
+### Step 5: Add Testing
+
+Create `tests/completion.test.js`:
+
+```javascript
+import { describe, it, expect } from 'vitest'
+import { getCodeCompletion } from '../src/index.js'
+
+describe('Code Completion', () => {
+  it('should complete a simple function', async () => {
+    const code = 'function greet(name) {\n  return'
+    const completion = await getCodeCompletion(code, 'javascript')
+
+    expect(completion).toBeTruthy()
+    expect(completion.length).toBeGreaterThan(0)
+    expect(completion.toLowerCase()).toContain('hello')
+  })
+
+  it('should handle different languages', async () => {
+    const tests = [
+      { code: 'def add(a, b):', language: 'python' },
+      { code: 'func add(a, b int)', language: 'go' },
+      { code: 'interface User', language: 'typescript' }
+    ]
+
+    for (const test of tests) {
+      const completion = await getCodeCompletion(test.code, test.language)
+      expect(completion).toBeTruthy()
+    }
+  })
+
+  it('should respect temperature option', async () => {
+    const code = 'const data ='
+
+    const lowTemp = await getCodeCompletion(code, 'javascript', { temperature: 0.1 })
+    const highTemp = await getCodeCompletion(code, 'javascript', { temperature: 1.0 })
+
+    expect(lowTemp).toBeTruthy()
+    expect(highTemp).toBeTruthy()
+  })
+})
+```
+
+### Step 6: Deploy to Cloudflare
+
+Create `wrangler.toml`:
+
+```toml
+name = "code-completion-app"
+main = "src/server.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+[[kv_namespaces]]
+binding = "CACHE_KV"
+id = "your_kv_namespace_id"
+```
+
+Deploy:
+
+```bash
+npm run deploy
+```
+
+## Next Steps
+
+Congratulations! You've built your first AI-powered application with ClaudeFlare. Here's what to explore next:
+
+<Callout type="success">
+  **Project Complete!** You now have a working code completion service.
+</Callout>
+
+### Enhancements to Try
+
+1. **Add Caching**
+   ```javascript
+   async function getCachedCompletion(code, language) {
+     const cacheKey = `${language}:${hash(code)}`
+
+     // Check cache
+     const cached = await cache.get(cacheKey)
+     if (cached) return cached
+
+     // Get completion
+     const completion = await getCodeCompletion(code, language)
+
+     // Store in cache
+     await cache.set(cacheKey, completion, { ttl: 3600 })
+
+     return completion
+   }
+   ```
+
+2. **Add Multi-Agent Workflow**
+   ```javascript
+   async function completeWithReview(code, language) {
+     // Get completion
+     const completion = await getCodeCompletion(code, language)
+
+     // Review completion
+     const review = await client.agents.orchestrate({
+       task: 'Review this code',
+       agents: ['reviewer'],
+       input: { code: code + completion }
+     })
+
+     return { completion, review }
+   }
+   ```
+
+3. **Add Metrics**
+   ```javascript
+   async function trackCompletion(code, language) {
+     const start = Date.now()
+
+     try {
+       const completion = await getCodeCompletion(code, language)
+       const latency = Date.now() - start
+
+       await metrics.track('completion_success', {
+         language,
+         latency,
+         length: completion.length
+       })
+
+       return completion
+     } catch (error) {
+       await metrics.track('completion_error', {
+         language,
+         error: error.message
+       })
+       throw error
+     }
+   }
+   ```
+
+### Learn More
+
+- [API Reference](/docs/api-reference/overview) - Explore all available APIs
+- [Agent Workflows](/docs/guides/multi-agent-workflows) - Build complex multi-agent systems
+- [Code Completion Guide](/docs/guides/code-completion) - Advanced completion techniques
+- [Best Practices](/docs/guides/rate-limiting) - Optimize your application
+
+<Callout type="info">
+  **Show your work!** Share your project on Discord or GitHub. We'd love to see what you build!
+</Callout>

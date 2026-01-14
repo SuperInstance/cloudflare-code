@@ -1,0 +1,592 @@
+---
+title: Webhooks
+description: Configure webhooks for real-time event notifications
+---
+
+# Webhooks
+
+Webhooks enable real-time notifications for events in your ClaudeFlare integration. Configure endpoints to receive asynchronous updates about agent workflows, code generation, and system events.
+
+## Overview
+
+ClaudeFlare can send webhook notifications for:
+
+- **Agent Workflow Events**: Status changes, completions, failures
+- **Code Generation Events**: Completion, errors
+- **System Events**: Health checks, quota alerts
+- **Rate Limit Events**: Threshold breaches, quota exceeded
+
+## Configuration
+
+### Create Webhook
+
+**Endpoint:** `POST /v1/webhooks`
+
+#### Request
+
+```typescript
+interface CreateWebhookRequest {
+  url: string;                   // HTTPS endpoint URL
+  events: string[];              // Event types to subscribe to
+  secret?: string;               // HMAC secret for verification
+  description?: string;          // Webhook description
+  active?: boolean;              // Enable/disable (default: true)
+  headers?: Record<string, string>; // Custom headers
+  retryConfig?: {
+    maxRetries?: number;         // Maximum retry attempts (default: 3)
+    timeout?: number;            // Request timeout in seconds (default: 10)
+    backoff?: 'linear' | 'exponential'; // Retry strategy (default: exponential)
+  };
+}
+```
+
+#### Event Types
+
+| Event | Description |
+|-------|-------------|
+| `agent.workflow.started` | Agent workflow started |
+| `agent.workflow.completed` | Agent workflow completed successfully |
+| `agent.workflow.failed` | Agent workflow failed |
+| `agent.workflow.step_completed` | Workflow step completed |
+| `code.generation.completed` | Code generation completed |
+| `code.generation.failed` | Code generation failed |
+| `system.health.changed` | System health status changed |
+| `quota.threshold_exceeded` | Quota threshold exceeded |
+| `rate.limit.exceeded` | Rate limit exceeded |
+
+#### Example Request
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/webhooks \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/webhooks/claudeflare",
+    "events": [
+      "agent.workflow.completed",
+      "agent.workflow.failed",
+      "code.generation.completed"
+    ],
+    "secret": "your-webhook-secret",
+    "description": "Production webhooks",
+    "retryConfig": {
+      "maxRetries": 5,
+      "timeout": 15,
+      "backoff": "exponential"
+    }
+  }'
+```
+
+#### Response
+
+```typescript
+interface WebhookResponse {
+  webhook: {
+    id: string;                  // Webhook ID
+    url: string;
+    events: string[];
+    active: boolean;
+    description?: string;
+    createdAt: number;
+    updatedAt: number;
+  };
+  secret?: string;              // Only returned on creation
+}
+```
+
+#### Example Response
+
+```json
+{
+  "webhook": {
+    "id": "wh_abc123",
+    "url": "https://your-app.com/webhooks/claudeflare",
+    "events": [
+      "agent.workflow.completed",
+      "agent.workflow.failed",
+      "code.generation.completed"
+    ],
+    "active": true,
+    "description": "Production webhooks",
+    "createdAt": 1234567890,
+    "updatedAt": 1234567890
+  },
+  "secret": "whsec_xxx...yyy"
+}
+```
+
+### List Webhooks
+
+**Endpoint:** `GET /v1/webhooks`
+
+#### Response
+
+```typescript
+interface ListWebhooksResponse {
+  webhooks: Array<{
+    id: string;
+    url: string;
+    events: string[];
+    active: boolean;
+    description?: string;
+    createdAt: number;
+    lastTriggered?: number;
+    successRate?: number;
+  }>;
+}
+```
+
+### Get Webhook
+
+**Endpoint:** `GET /v1/webhooks/:webhookId`
+
+#### Response
+
+```typescript
+interface WebhookDetailResponse {
+  webhook: {
+    id: string;
+    url: string;
+    events: string[];
+    active: boolean;
+    description?: string;
+    headers?: Record<string, string>;
+    retryConfig: {
+      maxRetries: number;
+      timeout: number;
+      backoff: string;
+    };
+    createdAt: number;
+    updatedAt: number;
+    lastTriggered?: number;
+    stats: {
+      totalDeliveries: number;
+      successfulDeliveries: number;
+      failedDeliveries: number;
+      avgLatency: number;
+    };
+  };
+}
+```
+
+### Update Webhook
+
+**Endpoint:** `PATCH /v1/webhooks/:webhookId`
+
+#### Request
+
+```typescript
+interface UpdateWebhookRequest {
+  url?: string;
+  events?: string[];
+  active?: boolean;
+  description?: string;
+  headers?: Record<string, string>;
+  retryConfig?: {
+    maxRetries?: number;
+    timeout?: number;
+    backoff?: 'linear' | 'exponential';
+  };
+}
+```
+
+### Delete Webhook
+
+**Endpoint:** `DELETE /v1/webhooks/:webhookId`
+
+#### Response
+
+```typescript
+interface DeleteWebhookResponse {
+  deleted: boolean;
+  id: string;
+}
+```
+
+### Test Webhook
+
+**Endpoint:** `POST /v1/webhooks/:webhookId/test`
+
+Sends a test event to verify webhook configuration.
+
+#### Response
+
+```typescript
+interface TestWebhookResponse {
+  success: boolean;
+  deliveryId: string;
+  status: 'pending' | 'delivered' | 'failed';
+  latency?: number;
+  error?: string;
+}
+```
+
+## Webhook Payloads
+
+### Agent Workflow Completed
+
+```json
+{
+  "id": "evt_abc123",
+  "event": "agent.workflow.completed",
+  "timestamp": 1234567890,
+  "data": {
+    "sessionId": "sess_xyz",
+    "userId": "user_456",
+    "workflow": "feature-add",
+    "results": {
+      "message": {
+        "role": "assistant",
+        "content": "Feature implementation completed"
+      },
+      "artifacts": [...]
+    },
+    "metrics": {
+      "latency": 15432,
+      "agentCalls": 8
+    }
+  },
+  "webhookId": "wh_abc123"
+}
+```
+
+### Agent Workflow Failed
+
+```json
+{
+  "id": "evt_def456",
+  "event": "agent.workflow.failed",
+  "timestamp": 1234567891,
+  "data": {
+    "sessionId": "sess_xyz",
+    "userId": "user_456",
+    "error": {
+      "code": "WORKFLOW_TIMEOUT",
+      "message": "Workflow exceeded timeout of 300 seconds",
+      "step": "step_5"
+    }
+  },
+  "webhookId": "wh_abc123"
+}
+```
+
+### Code Generation Completed
+
+```json
+{
+  "id": "evt_ghi789",
+  "event": "code.generation.completed",
+  "timestamp": 1234567892,
+  "data": {
+    "requestId": "req_123",
+    "prompt": "Create a debounce function",
+    "language": "typescript",
+    "result": {
+      "code": "export function debounce(...",
+      "tokens": 156
+    },
+    "provider": "cloudflare",
+    "latency": 234
+  },
+  "webhookId": "wh_abc123"
+}
+```
+
+## Security
+
+### HMAC Signature Verification
+
+Each webhook includes an HMAC signature in the `X-Webhook-Signature` header:
+
+```
+X-Webhook-Signature: t=1234567890,v1=abc123...
+```
+
+#### Verification (Node.js)
+
+```typescript
+import crypto from 'crypto';
+
+function verifyWebhook(payload: string, signature: string, secret: string): boolean {
+  const [timestamp, signatureValue] = signature.split(',');
+
+  // Check timestamp (prevent replay attacks)
+  const now = Math.floor(Date.now() / 1000);
+  const timestampValue = parseInt(timestamp.split('=')[1]);
+  if (now - timestampValue > 300) { // 5 minutes
+    return false;
+  }
+
+  // Verify signature
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(`${timestamp}.${payload}`)
+    .digest('hex');
+
+  const receivedSignature = signature.split('=')[1];
+  return crypto.timingSafeEqual(
+    Buffer.from(expectedSignature),
+    Buffer.from(receivedSignature)
+  );
+}
+```
+
+#### Verification (Python)
+
+```python
+import hmac
+import hashlib
+import time
+
+def verify_webhook(payload, signature, secret):
+    parts = signature.split(',')
+    timestamp = int(parts[0].split('=')[1])
+    received_signature = parts[1].split('=')[1]
+
+    # Check timestamp (prevent replay attacks)
+    if time.time() - timestamp > 300:  # 5 minutes
+        return False
+
+    # Verify signature
+    expected_signature = hmac.new(
+        secret.encode(),
+        f'{timestamp}.{payload}'.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+    return hmac.compare_digest(expected_signature, received_signature)
+```
+
+### IP Whitelisting
+
+Webhooks are sent from these IP ranges:
+
+- Cloudflare: See [Cloudflare IPs](https://www.cloudflare.com/ips/)
+- Updated regularly, check for changes
+
+## Best Practices
+
+1. **Use HTTPS**: Always use HTTPS endpoints
+2. **Verify Signatures**: Always verify webhook signatures
+3. **Check Timestamps**: Prevent replay attacks
+4. **Return Quick**: Respond within 5 seconds
+5. **Handle Retries**: Implement idempotent handlers
+6. **Monitor Health**: Track webhook delivery success rates
+
+## Retry Behavior
+
+### Exponential Backoff
+
+Webhooks are retried with exponential backoff:
+
+| Attempt | Delay |
+|---------|-------|
+| 1 | Immediate |
+| 2 | 1 minute |
+| 3 | 5 minutes |
+| 4 | 30 minutes |
+| 5 | 2 hours |
+
+### Retry Conditions
+
+- Connection timeout
+- Connection error
+- 5xx server errors
+- 429 rate limit errors
+
+### Non-Retryable Errors
+
+- 4xx client errors (except 429)
+- Signature verification failures
+- Invalid endpoint URL
+
+## Handling Webhooks
+
+### Express.js (Node.js)
+
+```typescript
+import express from 'express';
+import crypto from 'crypto';
+
+const app = express();
+app.use(express.raw({ type: 'application/json' }));
+
+app.post('/webhooks/claudeflare', (req, res) => {
+  const signature = req.headers['x-webhook-signature'] as string;
+  const payload = req.body.toString();
+
+  // Verify signature
+  if (!verifyWebhook(payload, signature, process.env.WEBHOOK_SECRET)) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  // Parse event
+  const event = JSON.parse(payload);
+
+  // Handle event
+  switch (event.event) {
+    case 'agent.workflow.completed':
+      await handleWorkflowCompleted(event.data);
+      break;
+    case 'agent.workflow.failed':
+      await handleWorkflowFailed(event.data);
+      break;
+    default:
+      console.log('Unknown event:', event.event);
+  }
+
+  // Return 200 quickly
+  res.status(200).json({ received: true });
+});
+
+app.listen(3000);
+```
+
+### Flask (Python)
+
+```python
+from flask import Flask, request, jsonify
+import hmac
+import hashlib
+
+app = Flask(__name__)
+
+@app.route('/webhooks/claudeflare', methods=['POST'])
+def handle_webhook():
+    signature = request.headers.get('X-Webhook-Signature')
+    payload = request.get_data(as_text=True)
+
+    # Verify signature
+    if not verify_webhook(payload, signature, app.config['WEBHOOK_SECRET']):
+        return jsonify({'error': 'Invalid signature'}), 401
+
+    # Parse event
+    event = request.get_json()
+
+    # Handle event
+    if event['event'] == 'agent.workflow.completed':
+        handle_workflow_completed(event['data'])
+    elif event['event'] == 'agent.workflow.failed':
+        handle_workflow_failed(event['data'])
+
+    return jsonify({'received': True}), 200
+
+if __name__ == '__main__':
+    app.run(port=3000)
+```
+
+### Go
+
+```go
+package main
+
+import (
+    "crypto/hmac"
+    "crypto/sha256"
+    "encoding/hex"
+    "encoding/json"
+    "io"
+    "log"
+    "net/http"
+    "strings"
+)
+
+func verifyWebhook(payload, signature, secret string) bool {
+    parts := strings.Split(signature, ",")
+
+    // Create expected signature
+    h := hmac.New(sha256.New, []byte(secret))
+    h.Write([]byte(parts[0] + "." + payload))
+    expected := hex.EncodeToString(h.Sum(nil))
+
+    received := strings.Split(parts[1], "=")[1]
+    return hmac.Equal([]byte(expected), []byte(received))
+}
+
+func handleWebhook(w http.ResponseWriter, r *http.Request) {
+    payload, _ := io.ReadAll(r.Body)
+    signature := r.Header.Get("X-Webhook-Signature")
+
+    if !verifyWebhook(string(payload), signature, webhookSecret) {
+        http.Error(w, "Invalid signature", http.StatusUnauthorized)
+        return
+    }
+
+    var event map[string]interface{}
+    json.Unmarshal(payload, &event)
+
+    // Handle event
+    switch event["event"] {
+    case "agent.workflow.completed":
+        go handleWorkflowCompleted(event["data"])
+    case "agent.workflow.failed":
+        go handleWorkflowFailed(event["data"])
+    }
+
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]bool{"received": true})
+}
+
+func main() {
+    http.HandleFunc("/webhooks/claudeflare", handleWebhook)
+    log.Fatal(http.ListenAndServe(":3000", nil))
+}
+```
+
+## Monitoring
+
+### Delivery Status
+
+Monitor webhook delivery via the API:
+
+```bash
+curl https://api.claudeflare.com/v1/webhooks/wh_abc123/deliveries \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Response
+
+```typescript
+interface DeliveriesResponse {
+  deliveries: Array<{
+    id: string;
+    eventId: string;
+    status: 'pending' | 'delivered' | 'failed';
+    statusCode?: number;
+    latency?: number;
+    attempts: number;
+    timestamp: number;
+    error?: string;
+  }>;
+}
+```
+
+## Troubleshooting
+
+### Webhook Not Received
+
+1. Check webhook is active
+2. Verify URL is accessible
+3. Check signature verification
+4. Review delivery logs
+5. Test webhook endpoint
+
+### Signature Verification Failing
+
+1. Ensure secret matches
+2. Check timestamp is recent
+3. Verify payload parsing
+4. Check encoding (UTF-8)
+
+### Retries Exhausted
+
+1. Check endpoint response time
+2. Verify 200 status returned
+3. Check rate limiting
+4. Review error logs
+
+## Related Endpoints
+
+- [Agents API](/api-reference/agents-api) - Workflow events
+- [Code Generation](/api-reference/code-generation) - Code generation events
+- [Authentication](/api-reference/authentication) - API key management

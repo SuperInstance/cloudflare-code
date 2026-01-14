@@ -1,0 +1,585 @@
+---
+title: Agents API
+description: Multi-agent orchestration for complex coding tasks
+---
+
+# Agents API
+
+The Agents API enables sophisticated multi-agent workflows where specialized AI agents collaborate to complete complex coding tasks. Built on Cloudflare Durable Objects for stateful, real-time agent coordination.
+
+## Overview
+
+ClaudeFlare's agent system consists of specialized agents:
+
+- **Director Agent**: Orchestrates workflows and delegates tasks
+- **Planner Agent**: Breaks down complex tasks into steps
+- **Executor Agent**: Executes code generation and modifications
+- **Reviewer Agent**: Reviews code for quality and security
+- **Analyzer Agent**: Analyzes codebases and provides insights
+- **Messenger Agent**: Handles multi-party communication
+
+## Endpoints
+
+### Orchestrate Agents
+
+Execute multi-agent workflows for complex tasks.
+
+**Endpoint:** `POST /v1/agents/orchestrate`
+
+**Authentication:** Bearer token required
+
+#### Request
+
+```typescript
+interface AgentOrchestrationRequest {
+  // Required
+  sessionId: string;         // Unique session identifier
+  userId: string;            // User identifier
+  messages: Array<{
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    timestamp?: number;
+  }>;
+
+  // Optional
+  context?: {
+    codebaseId?: string;     // Codebase context
+    files?: string[];        // Specific files to analyze
+    language?: string;       // Programming language
+    framework?: string;      // Framework being used
+  };
+
+  preferences?: {
+    agentStyle?: 'concise' | 'detailed' | 'tutorial';
+    includeTests?: boolean;
+    includeDocs?: boolean;
+    verifySecurity?: boolean;
+  };
+
+  // Workflow configuration
+  workflow?: 'auto' | 'code-review' | 'refactor' | 'debug' | 'feature-add';
+  maxSteps?: number;         // Maximum workflow steps (default: 10)
+  timeout?: number;          // Timeout in seconds (default: 300)
+}
+```
+
+#### Example Request
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/agents/orchestrate \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "sess_abc123",
+    "userId": "user_456",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I need to add user authentication to my Express.js API. Include JWT tokens, password hashing, and refresh token rotation."
+      }
+    ],
+    "context": {
+      "codebaseId": "cb_789",
+      "language": "typescript",
+      "framework": "express"
+    },
+    "preferences": {
+      "agentStyle": "detailed",
+      "includeTests": true,
+      "includeDocs": true,
+      "verifySecurity": true
+    },
+    "workflow": "feature-add"
+  }'
+```
+
+#### Response
+
+```typescript
+interface AgentOrchestrationResponse {
+  sessionId: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+
+  // Agent workflow
+  workflow: {
+    steps: Array<{
+      stepId: string;
+      agent: string;         // Agent type (planner, executor, reviewer, etc.)
+      action: string;        // Action performed
+      status: 'pending' | 'running' | 'completed' | 'failed';
+      input: any;            // Input to this step
+      output?: any;          // Output from this step
+      timestamp: number;
+      duration?: number;     // Duration in ms
+    }>;
+    currentStep: number;
+    totalSteps: number;
+  };
+
+  // Results (available when status is 'completed')
+  results?: {
+    message: {
+      role: 'assistant';
+      content: string;
+    };
+    artifacts?: Array<{
+      type: 'file' | 'code' | 'test' | 'documentation';
+      path?: string;
+      content: string;
+      language?: string;
+    }>;
+    changes?: Array<{
+      type: 'create' | 'update' | 'delete';
+      path: string;
+      diff?: string;
+    }>;
+  };
+
+  // Metrics
+  metrics: {
+    latency: number;         // Total orchestration time
+    agentCalls: number;      // Number of agent invocations
+    tokensUsed: number;
+    providers: string[];     // Providers used
+  };
+
+  // Errors
+  error?: {
+    code: string;
+    message: string;
+    step?: string;
+  };
+
+  timestamp: number;
+}
+```
+
+#### Example Response
+
+```json
+{
+  "sessionId": "sess_abc123",
+  "status": "completed",
+  "workflow": {
+    "steps": [
+      {
+        "stepId": "step_1",
+        "agent": "planner",
+        "action": "create_implementation_plan",
+        "status": "completed",
+        "input": { "task": "Add authentication" },
+        "output": {
+          "plan": [
+            "Create user model",
+            "Implement password hashing",
+            "Create JWT utilities",
+            "Add auth middleware",
+            "Create refresh token endpoint",
+            "Write tests"
+          ]
+        },
+        "timestamp": 1234567890,
+        "duration": 1234
+      },
+      {
+        "stepId": "step_2",
+        "agent": "executor",
+        "action": "generate_user_model",
+        "status": "completed",
+        "output": {
+          "file": "src/models/User.ts",
+          "code": "export interface User { ... }"
+        },
+        "timestamp": 1234567891,
+        "duration": 2345
+      }
+    ],
+    "currentStep": 6,
+    "totalSteps": 6
+  },
+  "results": {
+    "message": {
+      "role": "assistant",
+      "content": "I've successfully added user authentication to your Express.js API..."
+    },
+    "artifacts": [
+      {
+        "type": "file",
+        "path": "src/models/User.ts",
+        "content": "export interface User { ... }",
+        "language": "typescript"
+      },
+      {
+        "type": "file",
+        "path": "src/middleware/auth.ts",
+        "content": "export function authMiddleware(...",
+        "language": "typescript"
+      },
+      {
+        "type": "test",
+        "path": "tests/auth.test.ts",
+        "content": "describe('Authentication', () => { ... })",
+        "language": "typescript"
+      }
+    ],
+    "changes": [
+      {
+        "type": "create",
+        "path": "src/models/User.ts"
+      },
+      {
+        "type": "create",
+        "path": "src/middleware/auth.ts"
+      }
+    ]
+  },
+  "metrics": {
+    "latency": 15432,
+    "agentCalls": 8,
+    "tokensUsed": 4532,
+    "providers": ["cloudflare", "groq"]
+  },
+  "timestamp": 1234567905
+}
+```
+
+### Get Agent Status
+
+Check the status of available agents and their health.
+
+**Endpoint:** `GET /v1/agents/status`
+
+#### Response
+
+```typescript
+interface AgentStatusResponse {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  agents: {
+    [agentType: string]: {
+      count: number;         // Number of active instances
+      healthy: boolean;
+      load: number;          // Current load (0-1)
+      capabilities: string[];
+      stats: {
+        totalRequests: number;
+        activeRequests: number;
+        avgLatency: number;
+        successRate: number;
+      };
+    };
+  };
+  timestamp: number;
+}
+```
+
+#### Example Response
+
+```json
+{
+  "status": "healthy",
+  "agents": {
+    "director": {
+      "count": 5,
+      "healthy": true,
+      "load": 0.3,
+      "capabilities": ["orchestration", "task-delegation", "workflow-management"],
+      "stats": {
+        "totalRequests": 1523,
+        "activeRequests": 3,
+        "avgLatency": 45,
+        "successRate": 0.998
+      }
+    },
+    "planner": {
+      "count": 10,
+      "healthy": true,
+      "load": 0.5,
+      "capabilities": ["task-planning", "step-breakdown", "dependency-analysis"],
+      "stats": {
+        "totalRequests": 3421,
+        "activeRequests": 8,
+        "avgLatency": 234,
+        "successRate": 0.995
+      }
+    },
+    "executor": {
+      "count": 20,
+      "healthy": true,
+      "load": 0.6,
+      "capabilities": ["code-generation", "file-modification", "test-generation"],
+      "stats": {
+        "totalRequests": 12453,
+        "activeRequests": 15,
+        "avgLatency": 1234,
+        "successRate": 0.992
+      }
+    },
+    "reviewer": {
+      "count": 8,
+      "healthy": true,
+      "load": 0.4,
+      "capabilities": ["code-review", "security-audit", "quality-analysis"],
+      "stats": {
+        "totalRequests": 5432,
+        "activeRequests": 5,
+        "avgLatency": 567,
+        "successRate": 0.997
+      }
+    }
+  },
+  "timestamp": 1234567890
+}
+```
+
+### List Available Agents
+
+Get list of available agents by type.
+
+**Endpoint:** `GET /v1/agents/available/:type?`
+
+#### Parameters
+
+- `type` (optional): Agent type filter (`director`, `planner`, `executor`, `reviewer`, `analyzer`, `messenger`)
+
+#### Response
+
+```typescript
+interface AvailableAgentsResponse {
+  type: string;
+  agents: Array<{
+    id: string;
+    name: string;
+    type: string;
+    capabilities: string[];
+    available: boolean;
+    load: number;
+  }>;
+  count: number;
+  timestamp: number;
+}
+```
+
+## Workflows
+
+### Auto Workflow
+
+Automatically determines the best workflow based on the task.
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/agents/orchestrate \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "sess_auto",
+    "userId": "user_123",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Help me understand why my API is slow and optimize it"
+      }
+    ],
+    "workflow": "auto"
+  }'
+```
+
+### Code Review Workflow
+
+Comprehensive code review with multiple agents.
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/agents/orchestrate \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "sess_review",
+    "userId": "user_123",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Review this file for security issues and best practices: /src/api/auth.ts"
+      }
+    ],
+    "context": {
+      "files": ["src/api/auth.ts"]
+    },
+    "workflow": "code-review"
+  }'
+```
+
+### Debug Workflow
+
+Interactive debugging with code analysis.
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/agents/orchestrate \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "sess_debug",
+    "userId": "user_123",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I\\'m getting a 500 error when POSTing to /api/users. The error is \\\"Cannot read property \\\"id\\\" of undefined\\\""
+      }
+    ],
+    "context": {
+      "codebaseId": "cb_myapp"
+    },
+    "workflow": "debug"
+  }'
+```
+
+### Refactor Workflow
+
+Code refactoring with planning and verification.
+
+```bash
+curl -X POST https://api.claudeflare.com/v1/agents/orchestrate \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "sess_refactor",
+    "userId": "user_123",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Refactor this code to use modern TypeScript patterns and improve performance"
+      }
+    ],
+    "context": {
+      "files": ["src/services/user.ts"]
+    },
+    "workflow": "refactor"
+  }'
+```
+
+## Agent Communication
+
+Agents communicate through a messaging system with:
+
+- **Direct Messages**: Point-to-point communication
+- **Broadcast**: One-to-many communication
+- **Request/Response**: Synchronous communication patterns
+- **Pub/Sub**: Asynchronous event handling
+
+## State Management
+
+Agent state is managed through Cloudflare Durable Objects:
+
+- **Session State**: Maintained across agent interactions
+- **Context Window**: Shared context for all agents in workflow
+- **Checkpointing**: Progress saved at each step
+- **Recovery**: Automatic recovery from failures
+
+## Error Handling
+
+### Error Codes
+
+| Code | Description |
+|------|-------------|
+| `WORKFLOW_TIMEOUT` | Workflow exceeded timeout |
+| `AGENT_UNAVAILABLE` | Required agent not available |
+| `STEP_FAILED` | Workflow step failed |
+| `CONTEXT_TOO_LARGE` | Context exceeds agent capacity |
+| `RATE_LIMITED` | Too many agent requests |
+
+### Error Response
+
+```typescript
+interface AgentErrorResponse {
+  error: {
+    code: string;
+    message: string;
+    step?: string;          // Failed step
+    agent?: string;         // Failed agent
+    recoverable: boolean;   // Can workflow continue?
+    retryAfter?: number;    // Seconds before retry
+  };
+  sessionId: string;
+  timestamp: number;
+}
+```
+
+## Best Practices
+
+1. **Set Appropriate Timeouts**: Complex workflows may take time
+2. **Provide Context**: Include relevant files and codebase info
+3. **Use Specific Workflows**: Better than auto for known tasks
+4. **Monitor Progress**: Check status for long-running workflows
+5. **Handle Errors Gracefully**: Implement retry logic for recoverable errors
+
+## Rate Limits
+
+- Free tier: 10 orchestration requests/hour
+- Pro tier: 100 orchestration requests/hour
+- Enterprise: Custom limits
+
+## SDK Examples
+
+### TypeScript
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk';
+
+const client = new ClaudeFlare({ apiKey: 'your-api-key' });
+
+// Orchestrate agents
+const result = await client.agents.orchestrate({
+  sessionId: 'sess_123',
+  userId: 'user_456',
+  messages: [
+    {
+      role: 'user',
+      content: 'Add user authentication'
+    }
+  ],
+  workflow: 'feature-add'
+});
+
+// Monitor progress
+while (result.status === 'running') {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const status = await client.agents.getStatus(result.sessionId);
+  console.log('Progress:', status.workflow.currentStep, '/', status.workflow.totalSteps);
+}
+
+// Get results
+console.log(result.results);
+```
+
+### Python
+
+```python
+import asyncio
+from claudeflare import ClaudeFlare
+
+client = ClaudeFlare(api_key='your-api-key')
+
+async def orchestrate_workflow():
+    result = await client.agents.orchestrate(
+        session_id='sess_123',
+        user_id='user_456',
+        messages=[{
+            'role': 'user',
+            'content': 'Add user authentication'
+        }],
+        workflow='feature-add'
+    )
+
+    # Monitor progress
+    while result.status == 'running':
+        await asyncio.sleep(1)
+        status = await client.agents.get_status(result.session_id)
+        print(f"Progress: {status.workflow.current_step}/{status.workflow.total_steps}")
+
+    return result
+
+result = asyncio.run(orchestrate_workflow())
+```
+
+## Related Endpoints
+
+- [Chat API](/api-reference/chat-api) - Simple chat completions
+- [Code Generation](/api-reference/code-generation) - Direct code generation
+- [Webhooks](/api-reference/webhooks) - Async workflow notifications

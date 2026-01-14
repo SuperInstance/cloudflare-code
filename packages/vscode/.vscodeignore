@@ -1,0 +1,14 @@
+.vscode/**
+.vscode-test/**
+src/**
+.gitignore**
+.eslintrc.json
+**/*.ts
+**/*.map
+.gitignore
+tsconfig.json
+**/test/**
+node_modules/**
+resources/icons/**/*.svg
+resources/icons/**/*.ai
+resources/icons/**/*.psd

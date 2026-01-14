@@ -1,0 +1,352 @@
+---
+title: System Overview
+description: High-level architecture of ClaudeFlare
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# System Architecture Overview
+
+Learn about ClaudeFlare's distributed architecture and design principles.
+
+## High-Level Architecture
+
+ClaudeFlare is built on a multi-layer architecture that maximizes performance, reliability, and cost efficiency.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Client Applications                        │
+│                    (Web, Mobile, CLI)                         │
+└────────────────────────┬────────────────────────────────────┘
+                         │ REST / WebSocket
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│              Cloudflare Workers Edge Layer                   │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         Hono Framework + Middleware                   │  │
+│  │  • CORS                                              │  │
+│  │  • Authentication                                    │  │
+│  │  • Rate Limiting                                     │  │
+│  │  • Error Handling                                    │  │
+│  │  • Request Logging                                   │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                                                             │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │         Multi-Provider AI Router                     │  │
+│  │  • Automatic failover                                │  │
+│  │  • Quota tracking                                    │  │
+│  │  • Health monitoring                                 │  │
+│  │  • Load balancing                                    │  │
+│  └──────────────────────────────────────────────────────┘  │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│              Durable Objects Layer                          │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │Session DO    │  │Vector Index  │  │Rate Limit    │     │
+│  │              │  │DO            │  │DO            │     │
+│  │• 10K+        │  │              │  │              │     │
+│  │ concurrent   │  │• HNSW        │  │• Token       │     │
+│  │ sessions     │  │  indexes     │  │  bucket      │     │
+│  │• 128MB each  │  │• Semantic    │  │• Sliding     │     │
+│  │              │  │  cache       │  │  window      │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │Director DO   │  │Planner DO    │  │Executor DO   │     │
+│  │              │  │              │  │              │     │
+│  │• Workflow    │  │• Task        │  │• Code        │     │
+│  │  orchestration│  │  breakdown  │  │  generation  │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│              Storage Layer                                  │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │KV Store      │  │R2 Storage    │  │D1 Database   │     │
+│  │              │  │              │  │              │     │
+│  │• Hot cache   │  │• Files       │  │• Metadata    │     │
+│  │• Sessions    │  │• Models      │  │• Logs        │     │
+│  │• Rate limits │  │• Vectors     │  │• Metrics     │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│              AI Provider Layer                              │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │Cloudflare    │  │Groq          │  │Cerebras      │     │
+│  │Workers AI    │  │              │  │              │     │
+│  │              │  │• Fastest     │  │• Ultra-fast  │     │
+│  │• Native      │  │  (840 TPS)   │  │  (2600 TPS)  │     │
+│  │• 100K/day    │  │• Llama 2     │  │• Latest      │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│                                                             │
+│  ┌──────────────┐                                         │
+│  │OpenRouter    │                                         │
+│  │              │                                         │
+│  │• 300+ models │                                         │
+│  │• Fallback    │                                         │
+│  └──────────────┘                                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Core Components
+
+### 1. Edge Layer (Cloudflare Workers)
+
+**Technology**: Hono Framework
+
+The edge layer handles all incoming requests with sub-millisecond cold starts:
+
+```typescript
+// Main entry point
+const app = new Hono<{ Bindings: Env }>()
+
+// Middleware pipeline
+app.use('*', cors())
+app.use('*', auth())
+app.use('*', rateLimit())
+app.use('*', errorHandler())
+
+// Route handlers
+app.post('/v1/chat', createChatCompletion)
+app.post('/v1/agents/orchestrate', createAgentOrchestration)
+```
+
+**Performance Optimizations**:
+- Lazy initialization
+- Code splitting
+- Edge caching
+- Request coalescing
+
+### 2. Durable Objects Layer
+
+**Technology**: Cloudflare Durable Objects
+
+Stateful compute for sessions and workflows:
+
+```typescript
+export class SessionDurableObject {
+  private state: DurableObjectState
+  private env: Env
+  private sessions: Map<string, Session>
+
+  constructor(state: DurableObjectState, env: Env) {
+    this.state = state
+    this.env = env
+    this.sessions = new Map()
+  }
+
+  async fetch(request: Request) {
+    // Handle session logic
+    const session = await this.getSession(request)
+    return session.handle(request)
+  }
+}
+```
+
+**Capabilities**:
+- 10,000+ concurrent sessions
+- 128MB memory per object
+- Automatic scaling
+- Strong consistency
+
+### 3. Storage Layer
+
+**Multi-tier storage strategy**:
+
+<Tabs>
+  <Tab label="KV Store">
+    **Use Case**: Hot cache, rate limits
+    - Latency: <10ms
+    - Capacity: 1GB per namespace
+    - TTL: Up to 86400 seconds
+  </Tab>
+  <Tab label="R2 Storage">
+    **Use Case**: Files, models, vectors
+    - Latency: <100ms
+    - Capacity: Unlimited
+    - Cost: Zero egress fees
+  </Tab>
+  <Tab label="D1 Database">
+    **Use Case**: Metadata, logs, metrics
+    - Latency: <50ms
+    - Capacity: 5GB per database
+    - Query: SQL-compatible
+  </Tab>
+</Tabs>
+
+### 4. AI Provider Layer
+
+**Multi-provider routing**:
+
+```typescript
+const providerRegistry = createProviderRegistry({
+  healthCheckInterval: 60000,
+  minSuccessRate: 0.9,
+  maxLatency: 5000
+})
+
+providerRegistry.register(cloudflareAI, { priority: 10 })
+providerRegistry.register(groq, { priority: 8 })
+providerRegistry.register(cerebras, { priority: 7 })
+providerRegistry.register(openrouter, { priority: 5 })
+```
+
+**Routing Strategies**:
+- Free tier first
+- Lowest latency
+- Cost optimized
+- Round robin
+
+## Data Flow
+
+### Chat Completion Flow
+
+```
+1. Client Request
+   ↓
+2. Edge Layer (Authentication, Rate Limit)
+   ↓
+3. Semantic Cache Check (KV → DO Memory)
+   ↓ (if miss)
+4. AI Provider Router
+   ↓
+5. Provider Selection (Health, Quota, Latency)
+   ↓
+6. AI Provider Call
+   ↓
+7. Response Processing
+   ↓
+8. Cache Update
+   ↓
+9. Client Response
+```
+
+### Agent Orchestration Flow
+
+```
+1. Agent Request
+   ↓
+2. Director DO (Workflow Planning)
+   ↓
+3. Task Decomposition (Planner DO)
+   ↓
+4. Parallel Execution (Multiple Executor DOs)
+   ↓
+5. Result Aggregation
+   ↓
+6. Review (Reviewer DO)
+   ↓
+7. Final Response
+```
+
+## Performance Characteristics
+
+### Latency Breakdown
+
+| Component | Latency | Notes |
+|-----------|---------|-------|
+| **Edge Processing** | 5-10ms | Authentication, routing |
+| **Cache Hit (KV)** | 10-20ms | Hot data retrieval |
+| **Cache Hit (DO Memory)** | <5ms | Vector index lookup |
+| **Cache Miss** | 100-500ms | AI provider call |
+| **Total (Cached)** | 20-35ms | 90%+ of requests |
+| **Total (Uncached)** | 150-550ms | With AI provider |
+
+### Throughput
+
+| Metric | Value |
+|--------|-------|
+| **Concurrent Sessions** | 10,000+ |
+| **Requests/Second** | 1,000+ |
+| **Cache Hit Rate** | 90%+ |
+| **P99 Latency** | <500ms |
+
+## Scalability
+
+### Horizontal Scaling
+
+Durable Objects scale horizontally:
+
+```typescript
+// Each session = separate Durable Object
+// Automatic scaling based on load
+const sessionId = generateSessionId()
+const sessionDO = env.SESSIONS.get(sessionId)
+```
+
+### Vertical Scaling
+
+Memory allocation per object:
+
+```typescript
+const DO_MEMORY_LIMIT = 128 * 1024 * 1024 // 128MB
+const VECTOR_INDEX_SIZE = 50 * 1024 * 1024 // 50MB
+const SESSION_DATA_SIZE = 10 * 1024 * 1024 // 10MB
+```
+
+## Reliability
+
+### Fault Tolerance
+
+<Tabs>
+  <Tab label="Circuit Breaker">
+    ```typescript
+    const circuitBreaker = {
+      failureThreshold: 5,
+      timeout: 60000,
+      halfOpenRequests: 3
+    }
+    ```
+  </Tab>
+  <Tab label="Retry Logic">
+    ```typescript
+    const retryPolicy = {
+      maxRetries: 3,
+      backoffMultiplier: 2,
+      initialDelay: 1000
+    }
+    ```
+  </Tab>
+  <Tab label="Fallback">
+    ```typescript
+    const fallbackChain = [
+      'cloudflare',
+      'groq',
+      'cerebras',
+      'openrouter'
+    ]
+    ```
+  </Tab>
+</Tabs>
+
+### Data Durability
+
+- **Durable Objects**: Automatic persistence
+- **R2 Storage**: 99.999999999% durability
+- **D1 Database**: ACID transactions
+
+## Security
+
+### Authentication Layers
+
+1. **API Key Authentication**
+2. **JWT Token Validation**
+3. **Rate Limiting by Key**
+4. **IP Whitelisting** (optional)
+
+### Data Protection
+
+- Encryption at rest (R2, D1)
+- TLS in transit
+- No data logging (configurable)
+- GDPR compliant
+
+<Callout type="success">
+  **Architecture overview complete!** Dive deeper into [Durable Objects](/docs/architecture/durable-objects) and the [Vector Database](/docs/architecture/vector-database).
+</Callout>

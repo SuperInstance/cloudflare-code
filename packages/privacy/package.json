@@ -1,0 +1,82 @@
+{
+  "name": "@claudeflare/privacy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GDPR compliance and data privacy management for ClaudeFlare platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./consent": {
+      "types": "./dist/consent/index.d.ts",
+      "import": "./dist/consent/index.js"
+    },
+    "./rights": {
+      "types": "./dist/rights/index.d.ts",
+      "import": "./dist/rights/index.js"
+    },
+    "./retention": {
+      "types": "./dist/retention/index.d.ts",
+      "import": "./dist/retention/index.js"
+    },
+    "./policy": {
+      "types": "./dist/policy/index.d.ts",
+      "import": "./dist/policy/index.js"
+    },
+    "./export": {
+      "types": "./dist/export/index.d.ts",
+      "import": "./dist/export/index.js"
+    },
+    "./workflows": {
+      "types": "./dist/workflows/index.d.ts",
+      "import": "./dist/workflows/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "gdpr",
+    "privacy",
+    "compliance",
+    "data-protection",
+    "consent",
+    "data-export",
+    "data-deletion",
+    "retention",
+    "claudeflare"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "zod": "^3.22.4"
+  },
+  "peerDependencies": {
+    "@claudeflare/shared": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

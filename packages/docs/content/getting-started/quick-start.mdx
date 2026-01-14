@@ -1,0 +1,286 @@
+---
+title: Quick Start
+description: Get up and running with ClaudeFlare in 5 minutes
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# Quick Start Guide
+
+Get ClaudeFlare up and running on your local machine in just 5 minutes.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **Node.js 20+** installed ([Download](https://nodejs.org/))
+- **npm 10+** (comes with Node.js)
+- **Cloudflare account** ([Sign up free](https://dash.cloudflare.com/sign-up))
+- **Git** installed ([Download](https://git-scm.com/))
+
+<Callout type="info">
+  ClaudeFlare is designed to work entirely with free tier services. No credit card required!
+</Callout>
+
+## Step 1: Clone and Install
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/claudeflare.git
+cd claudeflare
+
+# Install dependencies
+npm install
+```
+
+## Step 2: Configure Environment
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit with your configuration
+nano .env
+```
+
+Add your API keys to `.env`:
+
+```bash
+# Cloudflare (Required)
+CLOUDFLARE_ACCOUNT_ID=your_account_id
+CLOUDFLARE_API_TOKEN=your_api_token
+
+# AI Providers (At least one required)
+GROQ_API_KEY=your_groq_key
+CEREBRAS_API_KEY=your_cerebras_key
+OPENROUTER_API_KEY=your_openrouter_key
+```
+
+<Callout type="tip">
+  **Getting Cloudflare Credentials:**
+  1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
+  2. Navigate to Workers & Pages → Overview
+  3. Copy your Account ID
+  4. Create an API token with Workers, KV, R2, D1 permissions
+</Callout>
+
+## Step 3: Start Development Server
+
+```bash
+# Start the local development server
+npm run dev
+```
+
+You should see:
+
+```
+ ⛅️ wrangler 3.x.x
+-------------------
+Your worker has access to the following bindings:
+⬡ KV:
+   📌 CACHE_KV
+⬡ R2:
+   📌 claudeflare-storage
+⬡ D1:
+   📌 claudeflare-db
+
+⎔ Starting local server...
+[wrangler:inf] Ready on http://localhost:8787
+```
+
+## Step 4: Test Your API
+
+Open a new terminal and test the API:
+
+```bash
+# Health check
+curl http://localhost:8787/health
+
+# Chat completion
+curl -X POST http://localhost:8787/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "Hello, ClaudeFlare!"}
+    ],
+    "model": "auto"
+  }'
+```
+
+Expected response:
+
+```json
+{
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "llama-2-70b-chat",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Hello! I'm ClaudeFlare, your AI coding assistant..."
+    },
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 10,
+    "completion_tokens": 20,
+    "total_tokens": 30
+  }
+}
+```
+
+## Step 5: Deploy to Cloudflare
+
+<Callout type="warning">
+  Make sure you've completed Step 2 and added your Cloudflare credentials
+</Callout>
+
+```bash
+# Deploy to Cloudflare Workers
+npm run deploy:dev
+
+# Verify deployment
+curl https://your-worker.workers.dev/health
+```
+
+## Next Steps
+
+Congratulations! You now have ClaudeFlare running. Here's what to explore next:
+
+### 1. Explore the API
+
+<Tabs>
+  <Tab label="Chat Completions">
+    ```bash
+    curl -X POST https://your-worker.workers.dev/v1/chat \
+      -H "Content-Type: application/json" \
+      -d '{
+        "messages": [
+          {"role": "system", "content": "You are a helpful coding assistant"},
+          {"role": "user", "content": "Write a function to sort an array in JavaScript"}
+        ]
+      }'
+    ```
+  </Tab>
+  <Tab label="Streaming Chat">
+    ```bash
+    curl -X POST https://your-worker.workers.dev/v1/chat/stream \
+      -H "Content-Type: application/json" \
+      -d '{
+        "messages": [
+          {"role": "user", "content": "Explain recursion"}
+        ]
+      }'
+    ```
+  </Tab>
+  <Tab label="Agent Orchestration">
+    ```bash
+    curl -X POST https://your-worker.workers.dev/v1/agents/orchestrate \
+      -H "Content-Type: application/json" \
+      -d '{
+        "task": "Create a REST API with user authentication",
+        "agents": ["planner", "executor", "reviewer"]
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+### 2. Use the SDKs
+
+<Tabs>
+  <Tab label="JavaScript/TypeScript">
+    ```bash
+    npm install @claudeflare/sdk
+    ```
+    ```javascript
+    import { ClaudeFlare } from '@claudeflare/sdk'
+
+    const client = new ClaudeFlare({
+      apiKey: process.env.CLAUDEFLARE_API_KEY,
+      baseURL: 'https://your-worker.workers.dev'
+    })
+
+    const response = await client.chat.completions.create({
+      messages: [{ role: 'user', content: 'Hello!' }]
+    })
+    ```
+  </Tab>
+  <Tab label="Python">
+    ```bash
+    pip install claudeflare
+    ```
+    ```python
+    import claudeflare
+
+    client = claudeflare.Client(
+        api_key="your-api-key",
+        base_url="https://your-worker.workers.dev"
+    )
+
+    response = client.chat.completions.create(
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+    ```
+  </Tab>
+  <Tab label="Go">
+    ```bash
+    go get github.com/your-org/claudeflare-go
+    ```
+    ```go
+    package main
+
+    import "github.com/your-org/claudeflare-go"
+
+    func main() {
+        client := claudeflare.NewClient("your-api-key")
+        resp, err := client.Chat.Create(claudeflare.ChatRequest{
+            Messages: []claudeflare.Message{
+                {Role: "user", Content: "Hello!"},
+            },
+        })
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### 3. Explore More
+
+- [Installation Guide](/docs/getting-started/installation) - Detailed setup instructions
+- [Configuration](/docs/getting-started/configuration) - Advanced configuration options
+- [First Project](/docs/getting-started/first-project) - Build your first AI-powered app
+- [API Reference](/docs/api-reference/overview) - Complete API documentation
+- [Examples](/docs/guides/code-completion) - Code examples and tutorials
+
+## Troubleshooting
+
+### "Module not found" error
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### "Authentication error" when deploying
+
+- Verify `CLOUDFLARE_API_TOKEN` in `.env`
+- Ensure token has Workers, KV, R2, D1 permissions
+
+### Port 8787 already in use
+
+```bash
+# Use a different port
+npm run dev -- --port 3001
+```
+
+### No AI providers configured
+
+Add at least one AI provider API key to your `.env`:
+- `GROQ_API_KEY` - Get from [console.groq.com](https://console.groq.com)
+- `CEREBRAS_API_KEY` - Get from [cerebras.ai](https://cerebras.ai)
+- `OPENROUTER_API_KEY` - Get from [openrouter.ai](https://openrouter.ai)
+
+<Callout type="success">
+  Need help? Join our [Discord community](https://discord.gg/claudeflare) or open an issue on [GitHub](https://github.com/your-org/claudeflare/issues)
+</Callout>

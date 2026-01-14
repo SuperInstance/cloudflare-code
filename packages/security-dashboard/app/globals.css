@@ -1,0 +1,389 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Chart tooltip styles */
+.recharts-tooltip-wrapper {
+  z-index: 50;
+}
+
+.recharts-tooltip-content {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Custom focus styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Transition utilities */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Table styles */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-shadow duration-200 hover:shadow-lg;
+}
+
+/* Badge styles */
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+}
+
+/* Status indicator */
+.status-indicator {
+  @apply inline-flex h-2 w-2 rounded-full;
+}
+
+.status-indicator-online {
+  @apply bg-green-500;
+}
+
+.status-indicator-offline {
+  @apply bg-gray-400;
+}
+
+.status-indicator-error {
+  @apply bg-red-500;
+}
+
+.status-indicator-warning {
+  @apply bg-yellow-500;
+}
+
+/* Priority indicators */
+.priority-critical {
+  @apply bg-red-500;
+}
+
+.priority-high {
+  @apply bg-orange-500;
+}
+
+.priority-medium {
+  @apply bg-yellow-500;
+}
+
+.priority-low {
+  @apply bg-blue-500;
+}
+
+/* Metric card gradients */
+.metric-gradient-critical {
+  @apply bg-gradient-to-br from-red-50 to-red-100 border-red-200;
+}
+
+.metric-gradient-warning {
+  @apply bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200;
+}
+
+.metric-gradient-success {
+  @apply bg-gradient-to-br from-green-50 to-green-100 border-green-200;
+}
+
+.metric-gradient-info {
+  @apply bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200;
+}
+
+/* Alert styles */
+.alert {
+  @apply rounded-lg border p-4;
+}
+
+.alert-info {
+  @apply border-blue-200 bg-blue-50 text-blue-800;
+}
+
+.alert-warning {
+  @apply border-yellow-200 bg-yellow-50 text-yellow-800;
+}
+
+.alert-error {
+  @apply border-red-200 bg-red-50 text-red-800;
+}
+
+.alert-success {
+  @apply border-green-200 bg-green-50 text-green-800;
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply h-2 w-full rounded-full bg-gray-200;
+}
+
+.progress-bar-fill {
+  @apply h-2 rounded-full transition-all duration-300;
+}
+
+/* Skeleton loader */
+.skeleton {
+  @apply animate-pulse rounded bg-gray-200;
+}
+
+/* Code block */
+.code-block {
+  @apply rounded-md bg-gray-900 p-4 font-mono text-sm text-gray-100;
+}
+
+/* Link styles */
+.link {
+  @apply text-blue-600 hover:text-blue-800 underline;
+}
+
+/* Button variants */
+.btn-primary {
+  @apply rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.btn-secondary {
+  @apply rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.btn-danger {
+  @apply rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+}
+
+/* Input styles */
+.input {
+  @apply rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.input-error {
+  @apply border-red-300 focus:border-red-500 focus:ring-red-500;
+}
+
+/* Select styles */
+.select {
+  @apply rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Textarea styles */
+.textarea {
+  @apply rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Checkbox styles */
+.checkbox {
+  @apply h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500;
+}
+
+/* Radio styles */
+.radio {
+  @apply h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500;
+}
+
+/* File upload */
+.file-upload {
+  @apply flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-10 hover:bg-gray-100;
+}
+
+/* Toast styles */
+.toast {
+  @apply fixed bottom-4 right-4 z-50 rounded-lg border p-4 shadow-lg;
+}
+
+.toast-success {
+  @apply border-green-200 bg-green-50 text-green-800;
+}
+
+.toast-error {
+  @apply border-red-200 bg-red-50 text-red-800;
+}
+
+.toast-warning {
+  @apply border-yellow-200 bg-yellow-50 text-yellow-800;
+}
+
+.toast-info {
+  @apply border-blue-200 bg-blue-50 text-blue-800;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  @apply fixed inset-0 z-50 bg-black/50;
+}
+
+/* Modal content */
+.modal-content {
+  @apply relative z-50 rounded-lg border border-gray-200 bg-white p-6 shadow-xl;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  @apply absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md border border-gray-200 bg-white shadow-lg;
+}
+
+/* Tab styles */
+.tab-list {
+  @apply flex border-b border-gray-200;
+}
+
+.tab-trigger {
+  @apply border-b-2 border-transparent px-4 py-2 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700;
+}
+
+.tab-trigger-active {
+  @apply border-blue-500 text-blue-600;
+}
+
+/* Accordion styles */
+.accordion-item {
+  @apply border-b border-gray-200;
+}
+
+.accordion-trigger {
+  @apply flex w-full items-center justify-between py-4 text-left text-sm font-medium text-gray-900 hover:bg-gray-50;
+}
+
+.accordion-content {
+  @apply pb-4 pt-0 text-sm text-gray-600;
+}
+
+/* Tooltip styles */
+.tooltip {
+  @apply absolute z-50 rounded-md border border-gray-200 bg-gray-900 px-2 py-1 text-xs text-white shadow-lg;
+}
+
+/* Responsive utilities */
+@responsive {
+  .container-custom {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}

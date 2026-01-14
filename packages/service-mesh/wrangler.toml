@@ -1,0 +1,37 @@
+name = "claudeflare-service-mesh"
+main = "dist/index.mjs"
+compatibility_date = "2024-01-01"
+
+[env.development]
+name = "claudeflare-service-mesh-dev"
+
+[env.production]
+name = "claudeflare-service-mesh-prod"
+
+[[env.production.durable_objects.bindings]]
+name = "SERVICE_REGISTRY"
+class_name = "ServiceRegistry"
+
+[[env.production.durable_objects.bindings]]
+name = "CIRCUIT_BREAKER_STORE"
+class_name = "CircuitBreakerStore"
+
+[[env.production.durable_objects.bindings]]
+name = "METRICS_AGGREGATOR"
+class_name = "MetricsAggregator"
+
+[[env.development.durable_objects.bindings]]
+name = "SERVICE_REGISTRY"
+class_name = "ServiceRegistry"
+
+[[env.development.durable_objects.bindings]]
+name = "CIRCUIT_BREAKER_STORE"
+class_name = "CircuitBreakerStore"
+
+[[env.development.durable_objects.bindings]]
+name = "METRICS_AGGREGATOR"
+class_name = "MetricsAggregator"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["ServiceRegistry", "CircuitBreakerStore", "MetricsAggregator"]

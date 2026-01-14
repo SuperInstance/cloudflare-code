@@ -1,0 +1,148 @@
+{
+  "name": "@claudeflare/qa-final",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Comprehensive testing and quality assurance finalization for ClaudeFlare platform",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./integration": {
+      "types": "./dist/integration/index.d.ts",
+      "import": "./dist/integration/index.js"
+    },
+    "./e2e": {
+      "types": "./dist/e2e/index.d.ts",
+      "import": "./dist/e2e/index.js"
+    },
+    "./performance": {
+      "types": "./dist/performance/index.d.ts",
+      "import": "./dist/performance/index.js"
+    },
+    "./security": {
+      "types": "./dist/security/index.d.ts",
+      "import": "./dist/security/index.js"
+    },
+    "./contract": {
+      "types": "./dist/contract/index.d.ts",
+      "import": "./dist/contract/index.js"
+    },
+    "./reporting": {
+      "types": "./dist/reporting/index.d.ts",
+      "import": "./dist/reporting/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "config",
+    "contracts",
+    "scripts"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "npm run test:integration && npm run test:e2e && npm run test:performance && npm run test:security && npm run test:contract",
+    "test:integration": "vitest run --config=config/vitest.integration.config.ts",
+    "test:integration:watch": "vitest --config=config/vitest.integration.config.ts",
+    "test:integration:coverage": "vitest run --config=config/vitest.integration.config.ts --coverage",
+    "test:e2e": "playwright test --config=config/playwright.config.ts",
+    "test:e2e:headed": "playwright test --config=config/playwright.config.ts --headed",
+    "test:e2e:debug": "playwright test --config=config/playwright.config.ts --debug",
+    "test:e2e:ui": "playwright test --config=config/playwright.config.ts --ui",
+    "test:e2e:chromium": "playwright test --config=config/playwright.config.ts --project=chromium",
+    "test:e2e:firefox": "playwright test --config=config/playwright.config.ts --project=firefox",
+    "test:e2e:webkit": "playwright test --config=config/playwright.config.ts --project=webkit",
+    "test:e2e:mobile": "playwright test --config=config/playwright.config.ts --project=mobile",
+    "test:performance": "k6 run --config config/k6.config.ts src/performance/tests/load-test.js",
+    "test:performance:stress": "k6 run --config config/k6.config.ts src/performance/tests/stress-test.js",
+    "test:performance:spike": "k6 run --config config/k6.config.ts src/performance/tests/spike-test.js",
+    "test:performance:soak": "k6 run --config config/k6.config.ts src/performance/tests/soak-test.js",
+    "test:performance:benchmark": "tsx scripts/benchmark.ts",
+    "test:performance:profile": "node --prof --no-logfile-per-isolate --opt-level=0 scripts/profile.js && node --prof-process isolate-*.log > reports/performance/profile.txt",
+    "test:security": "tsx scripts/security-scan.ts",
+    "test:security:owasp": "zap-baseline.py -t http://localhost:8787 -r reports/security/owasp-report.html --config config/zap.conf",
+    "test:security:deps": "npm audit --audit-level=moderate && snyk test",
+    "test:security:secrets": "tsx scripts/secret-scan.ts",
+    "test:security:pentest": "tsx scripts/pentest.ts",
+    "test:security:compliance": "tsx scripts/compliance-check.ts",
+    "test:contract": "jest --config=config/jest.contract.config.js",
+    "test:contract:publish": "pact-broker publish ./contracts/pacts --consumer-app-version=$(git rev-parse --short HEAD)",
+    "test:contract:verify": "pact-broker verify --provider-base-url=http://localhost:8787 --provider=Claudeflare-API --pact-url=./contracts/pacts",
+    "test:smoke": "tsx scripts/smoke-tests.ts",
+    "test:ci": "npm run test:integration:coverage && npm run test:e2e && npm run test:security && npm run test:contract",
+    "report:merge": "playwright merge-reports --reporter=html",
+    "report:show": "playwright show-report",
+    "report:coverage": "nyc report --reporter=html --reporter=lcov --report-dir=reports/coverage",
+    "report:performance": "tsx scripts/performance-report.ts",
+    "report:security": "tsx scripts/security-report.ts",
+    "report:all": "npm run report:coverage && npm run report:performance && npm run report:security",
+    "dashboard": "tsx scripts/dashboard.ts",
+    "dashboard:serve": "tsx scripts/dashboard.ts serve",
+    "clean": "rm -rf dist test-results playwright-report coverage reports/coverage reports/performance reports/security contracts/pacts isolate-*.log",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@claudeflare/shared": "*",
+    "@pact-foundation/pact": "^12.1.0",
+    "axios": "^1.6.2",
+    "chai": "^4.3.10",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.1",
+    "@pact-foundation/adapter-node": "^1.0.0",
+    "@types/chai": "^4.3.11",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.5",
+    "@types/uuid": "^9.0.7",
+    "@vitest/coverage-v8": "^1.1.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "artillery": "^2.0.3",
+    "autocannon": "^7.12.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "jsdom": "^23.0.1",
+    "k6": "^0.47.0",
+    "lighthouse": "^11.3.0",
+    "nock": "^13.4.0",
+    "node-forge": "^1.3.1",
+    "nyc": "^15.1.0",
+    "pacote": "^17.0.4",
+    "playwright": "^1.40.1",
+    "prettier": "^3.1.1",
+    "puppeteer": "^21.6.1",
+    "snyk": "^1.1260.0",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0",
+    "webpack-cli": "^5.1.4",
+    "ws": "^8.16.0"
+  },
+  "keywords": [
+    "testing",
+    "qa",
+    "integration",
+    "e2e",
+    "performance",
+    "security",
+    "contract-testing",
+    "quality-assurance"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

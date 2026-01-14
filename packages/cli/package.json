@@ -1,0 +1,64 @@
+{
+  "name": "@claudeflare/cli",
+  "version": "0.1.0",
+  "description": "CLI tool for ClaudeFlare - Distributed AI coding platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "claudeflare": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "claudeflare",
+    "cloudflare",
+    "workers",
+    "cli",
+    "serverless",
+    "ai"
+  ],
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "ora": "^8.0.1",
+    "cli-progress": "^3.12.0",
+    "chokidar": "^3.5.3",
+    "express": "^4.18.2",
+    "http-proxy-middleware": "^2.0.6",
+    "dotenv": "^16.3.1",
+    "zod": "^3.22.4",
+    "table": "^6.8.1",
+    "wrap-ansi": "^8.1.0",
+    "strip-ansi": "^7.1.0",
+    "is-unicode-supported": "^2.0.0",
+    "log-update": "^6.0.0",
+    "terminal-link": "^3.0.0",
+    "figures": "^6.0.1",
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "@types/cli-progress": "^3.11.5",
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.21",
+    "@types/http-proxy-middleware": "^1.0.0",
+    "@types/table": "^6.3.5",
+    "@types/semver": "^7.5.6",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0",
+    "esbuild": "^0.19.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "name": "@claudeflare/analytics-platform",
+  "version": "1.0.0",
+  "description": "Comprehensive analytics and business intelligence platform for ClaudeFlare",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "analytics",
+    "business-intelligence",
+    "product-analytics",
+    "user-behavior",
+    "revenue-analytics",
+    "cohort-analysis",
+    "funnel-analysis",
+    "claudeflare",
+    "cloudflare"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/claudeflare/analytics-platform"
+  },
+  "bugs": {
+    "url": "https://github.com/claudeflare/analytics-platform/issues"
+  },
+  "homepage": "https://github.com/claudeflare/analytics-platform#readme",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "prettier": "^3.1.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

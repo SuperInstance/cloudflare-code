@@ -1,0 +1,425 @@
+---
+title: JavaScript/TypeScript SDK
+description: Official ClaudeFlare SDK for JavaScript and TypeScript
+---
+
+import { Callout, Tabs, Tab } from 'nextra/components'
+
+# JavaScript/TypeScript SDK
+
+Official ClaudeFlare SDK for JavaScript and TypeScript applications.
+
+## Installation
+
+<Tabs>
+  <Tab label="npm">
+    ```bash
+    npm install @claudeflare/sdk
+    ```
+  </Tab>
+  <Tab label="yarn">
+    ```bash
+    yarn add @claudeflare/sdk
+    ```
+  </Tab>
+  <Tab label="pnpm">
+    ```bash
+    pnpm add @claudeflare/sdk
+    ```
+  </Tab>
+</Tabs>
+
+## Quick Start
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+const client = new ClaudeFlare({
+  apiKey: process.env.CLAUDEFLARE_API_KEY,
+  baseURL: 'https://api.claudeflare.com'
+})
+
+const response = await client.chat.completions.create({
+  messages: [
+    { role: 'user', content: 'Hello, ClaudeFlare!' }
+  ]
+})
+
+console.log(response.choices[0].message.content)
+```
+
+## Configuration
+
+### Client Options
+
+```typescript
+const client = new ClaudeFlare({
+  apiKey: 'your-api-key',           // Required
+  baseURL: 'https://api.claudeflare.com', // Optional
+  timeout: 30000,                    // Optional: 30 seconds
+  maxRetries: 3,                     // Optional: retry attempts
+  headers: {                         // Optional: custom headers
+    'X-Custom-Header': 'value'
+  }
+})
+```
+
+### Environment Variables
+
+```bash
+# .env
+CLAUDEFLARE_API_KEY=cf-prod-your-key-here
+CLAUDEFLARE_BASE_URL=https://api.claudeflare.com
+```
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+const client = new ClaudeFlare({
+  apiKey: process.env.CLAUDEFLARE_API_KEY!,
+  baseURL: process.env.CLAUDEFLARE_BASE_URL
+})
+```
+
+## Chat Completions
+
+### Basic Completion
+
+```typescript
+const response = await client.chat.completions.create({
+  messages: [
+    { role: 'system', content: 'You are a helpful assistant.' },
+    { role: 'user', content: 'What is Cloudflare Workers?' }
+  ]
+})
+
+console.log(response.choices[0].message.content)
+```
+
+### Streaming Completion
+
+```typescript
+const stream = await client.chat.completions.stream({
+  messages: [
+    { role: 'user', content: 'Tell me a story' }
+  ]
+})
+
+for await (const chunk of stream) {
+  const content = chunk.choices[0]?.delta?.content
+  if (content) {
+    process.stdout.write(content)
+  }
+}
+```
+
+### With Parameters
+
+```typescript
+const response = await client.chat.completions.create({
+  messages: [
+    { role: 'user', content: 'Write a poem' }
+  ],
+  model: 'auto',
+  temperature: 0.8,
+  max_tokens: 1000,
+  top_p: 0.9,
+  frequency_penalty: 0.5,
+  presence_penalty: 0.5
+})
+```
+
+## Agent Orchestration
+
+### Basic Workflow
+
+```typescript
+const result = await client.agents.orchestrate({
+  task: 'Create a REST API with user authentication',
+  agents: ['planner', 'executor', 'reviewer']
+})
+
+console.log(result)
+```
+
+### Custom Workflow
+
+```typescript
+const result = await client.agents.orchestrate({
+  task: 'Debug this function',
+  agents: ['debugger', 'executor', 'reviewer'],
+  workflow: {
+    type: 'sequential',
+    steps: [
+      { agent: 'debugger', task: 'Analyze the error' },
+      { agent: 'executor', task: 'Apply fixes' },
+      { agent: 'reviewer', task: 'Verify the fix' }
+    ]
+  },
+  input: {
+    code: 'function add(a, b) { return a + b }',
+    error: 'TypeError: undefined is not a function'
+  }
+})
+```
+
+## Embeddings
+
+### Generate Embeddings
+
+```typescript
+const response = await client.embeddings.create({
+  input: 'Your text to embed',
+  model: 'text-embedding-ada-002'
+})
+
+console.log(response.data[0].embedding)
+```
+
+### Batch Embeddings
+
+```typescript
+const response = await client.embeddings.create({
+  input: [
+    'First text to embed',
+    'Second text to embed',
+    'Third text to embed'
+  ],
+  model: 'text-embedding-ada-002'
+})
+
+response.data.forEach(item => {
+  console.log(item.embedding)
+})
+```
+
+## Error Handling
+
+### Try-Catch
+
+```typescript
+try {
+  const response = await client.chat.completions.create({
+    messages: [{ role: 'user', content: 'Hello!' }]
+  })
+} catch (error) {
+  if (error instanceof ClaudeFlareError) {
+    console.error('API Error:', error.message)
+    console.error('Status:', error.status)
+    console.error('Code:', error.code)
+  } else {
+    console.error('Unknown error:', error)
+  }
+}
+```
+
+### Retry Logic
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+const client = new ClaudeFlare({
+  apiKey: process.env.CLAUDEFLARE_API_KEY!,
+  maxRetries: 3,
+  retryDelay: 1000
+})
+```
+
+### Custom Error Handler
+
+```typescript
+client.onError((error) => {
+  console.error('Request failed:', error.message)
+
+  // Send to error tracking service
+  Sentry.captureException(error)
+})
+```
+
+## TypeScript Types
+
+### Full Type Safety
+
+```typescript
+import { ClaudeFlare, ChatMessage, ChatCompletionParams } from '@claudeflare/sdk'
+
+const messages: ChatMessage[] = [
+  { role: 'system', content: 'You are a helpful assistant.' },
+  { role: 'user', content: 'Hello!' }
+]
+
+const params: ChatCompletionParams = {
+  messages,
+  model: 'auto',
+  temperature: 0.7
+}
+
+const response = await client.chat.completions.create(params)
+```
+
+### Custom Types
+
+```typescript
+interface CodeCompletionRequest {
+  code: string
+  language: string
+  maxTokens?: number
+}
+
+async function completeCode(request: CodeCompletionRequest): Promise<string> {
+  const response = await client.chat.completions.create({
+    messages: [
+      {
+        role: 'system',
+        content: `You are a ${request.language} expert. Complete the code.`
+      },
+      {
+        role: 'user',
+        content: request.code
+      }
+    ],
+    max_tokens: request.maxTokens || 500,
+    temperature: 0.2
+  })
+
+  return response.choices[0].message.content
+}
+```
+
+## Advanced Usage
+
+### Webhook Handler
+
+```typescript
+import { ClaudeFlare, verifyWebhookSignature } from '@claudeflare/sdk'
+
+export async function POST(request: Request) {
+  const signature = request.headers.get('X-ClaudeFlare-Signature')
+  const body = await request.text()
+
+  if (!verifyWebhookSignature(body, signature, process.env.WEBHOOK_SECRET!)) {
+    return new Response('Invalid signature', { status: 401 })
+  }
+
+  const event = JSON.parse(body)
+
+  switch (event.type) {
+    case 'completion.completed':
+      console.log('Completion:', event.data)
+      break
+    case 'agent.task_completed':
+      console.log('Agent task:', event.data)
+      break
+  }
+
+  return new Response('OK')
+}
+```
+
+### Custom Middleware
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+const client = new ClaudeFlare({
+  apiKey: process.env.CLAUDEFLARE_API_KEY!
+})
+
+// Add request interceptor
+client.use({
+  async request(config) {
+    console.log('Request:', config.method, config.url)
+    return config
+  }
+})
+
+// Add response interceptor
+client.use({
+  async response(response) {
+    console.log('Response:', response.status)
+    return response
+  }
+})
+```
+
+## Examples
+
+### Express.js Integration
+
+```typescript
+import express from 'express'
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+const app = express()
+const client = new ClaudeFlare({
+  apiKey: process.env.CLAUDEFLARE_API_KEY!
+})
+
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { messages } = req.body
+
+    const response = await client.chat.completions.create({
+      messages
+    })
+
+    res.json(response)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+app.listen(3000)
+```
+
+### Next.js Integration
+
+```typescript
+// app/api/chat/route.ts
+import { ClaudeFlare } from '@claudeflare/sdk'
+import { NextResponse } from 'next/server'
+
+const client = new ClaudeFlare({
+  apiKey: process.env.CLAUDEFLARE_API_KEY!
+})
+
+export async function POST(request: Request) {
+  const { messages } = await request.json()
+
+  const response = await client.chat.completions.create({
+    messages
+  })
+
+  return NextResponse.json(response)
+}
+```
+
+### Cloudflare Workers Integration
+
+```typescript
+import { ClaudeFlare } from '@claudeflare/sdk'
+
+export interface Env {
+  CLAUDEFLARE_API_KEY: string
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const client = new ClaudeFlare({
+      apiKey: env.CLAUDEFLARE_API_KEY
+    })
+
+    const { messages } = await request.json()
+
+    const response = await client.chat.completions.create({
+      messages
+    })
+
+    return Response.json(response)
+  }
+}
+```
+
+<Callout type="success">
+  **SDK mastered!** Explore more [examples](https://github.com/your-org/claudeflare/tree/main/examples) on GitHub.
+</Callout>

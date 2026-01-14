@@ -1,0 +1,388 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "ClaudeFlare - AI Provider Metrics",
+    "tags": ["claudeflare", "providers", "ai"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h"],
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Provider Availability",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "avg(claudeflare_provider_up)",
+            "legendFormat": "Availability",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "decimals": 2,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.5, "color": "yellow"},
+                {"value": 0.95, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Requests",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(increase(claudeflare_provider_requests_total[1h]))",
+            "legendFormat": "Total Requests",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Avg Token Usage",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 0},
+        "targets": [
+          {
+            "expr": "sum(increase(claudeflare_provider_tokens_total[1h])) / sum(increase(claudeflare_provider_requests_total[1h]))",
+            "legendFormat": "Tokens/Request",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Provider Request Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "sum by (provider) (increase(claudeflare_provider_requests_total[1h]))",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+          "pieType": "donut",
+          "tooltip": {"mode": "single", "sort": "none"}
+        }
+      },
+      {
+        "id": 5,
+        "title": "Provider Response Times",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_provider_latency_seconds_bucket{provider=\"anthropic\"}[5m])) by (le))",
+            "legendFormat": "Anthropic p95",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_provider_latency_seconds_bucket{provider=\"openai\"}[5m])) by (le))",
+            "legendFormat": "OpenAI p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(claudeflare_provider_latency_seconds_bucket{provider=\"groq\"}[5m])) by (le))",
+            "legendFormat": "Groq p95",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Model Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "sum by (model) (increase(claudeflare_provider_requests_total[1h]))",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "right", "values": ["value", "percent"]},
+          "pieType": "donut",
+          "tooltip": {"mode": "single", "sort": "none"}
+        }
+      },
+      {
+        "id": 7,
+        "title": "Token Usage Rates",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_provider_tokens_total{provider=\"anthropic\"}[5m])",
+            "legendFormat": "Anthropic",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(claudeflare_provider_tokens_total{provider=\"openai\"}[5m])",
+            "legendFormat": "OpenAI",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(claudeflare_provider_tokens_total{provider=\"groq\"}[5m])",
+            "legendFormat": "Groq",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Rate Limit Utilization",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "(claudeflare_provider_quota_used / claudeflare_provider_quota_total) * 100",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 70, "color": "yellow"},
+                {"value": 90, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Cost per 1K Tokens by Provider",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+        "targets": [
+          {
+            "expr": "claudeflare_provider_cost_per_1k_tokens",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient",
+          "showUnfilled": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 4,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 0.01, "color": "yellow"},
+                {"value": 0.03, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Provider Success Rates",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_provider_success_total{provider=\"anthropic\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"anthropic\"}[5m])",
+            "legendFormat": "Anthropic",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(claudeflare_provider_success_total{provider=\"openai\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"openai\"}[5m])",
+            "legendFormat": "OpenAI",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(claudeflare_provider_success_total{provider=\"groq\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"groq\"}[5m])",
+            "legendFormat": "Groq",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "custom": {"lineWidth": 2, "fillOpacity": 10},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 0.95, "color": "yellow"},
+                {"value": 0.99, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Provider Error Rates",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28},
+        "targets": [
+          {
+            "expr": "rate(claudeflare_provider_errors_total{provider=\"anthropic\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"anthropic\"}[5m])",
+            "legendFormat": "Anthropic",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(claudeflare_provider_errors_total{provider=\"openai\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"openai\"}[5m])",
+            "legendFormat": "OpenAI",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(claudeflare_provider_errors_total{provider=\"groq\"}[5m]) / rate(claudeflare_provider_requests_total{provider=\"groq\"}[5m])",
+            "legendFormat": "Groq",
+            "refId": "C"
+          }
+        ],
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "last"]},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Provider Performance Score",
+        "type": "table",
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 36},
+        "targets": [
+          {
+            "expr": "claudeflare_provider_performance_score",
+            "legendFormat": "{{provider}}",
+            "refId": "A",
+            "format": "table"
+          }
+        ],
+        "options": {
+          "showHeader": true
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {"Time": true, "__name__": true},
+              "indexByName": {},
+              "renameByName": {
+                "Value": "Score",
+                "latency_rank": "Latency Rank",
+                "cost_rank": "Cost Rank",
+                "quality_rank": "Quality Rank",
+                "provider": "Provider"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

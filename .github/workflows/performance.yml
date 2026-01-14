@@ -1,0 +1,414 @@
+name: Performance Testing
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run performance tests daily at 4 AM UTC
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of performance test'
+        required: false
+        type: choice
+        options:
+          - all
+          - load
+          - stress
+          - benchmark
+      duration:
+        description: 'Test duration in minutes'
+        required: false
+        type: number
+        default: 5
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ============================================
+  # Load Testing
+  # ============================================
+  load-test:
+    name: Load Testing
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        scenario: [basic, peak, sustained]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Worker
+        run: npm run build
+
+      - name: Run load test - ${{ matrix.scenario }} scenario
+        run: npm run test:load -- --scenario=${{ matrix.scenario }} --duration=300
+        env:
+          LOAD_TEST_CONCURRENCY: ${{ matrix.scenario == 'peak' && '1000' || matrix.scenario == 'sustained' && '500' || '100' }}
+
+      - name: Upload load test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-results-${{ matrix.scenario }}
+          path: test-results/load/
+          retention-days: 30
+
+  # ============================================
+  # Stress Testing
+  # ============================================
+  stress-test:
+    name: Stress Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Worker
+        run: npm run build
+
+      - name: Run stress test
+        run: npm run test:stress -- --duration=600 --ramp-up=60
+        env:
+          STRESS_TEST_MAX_CONCURRENCY: 2000
+          STRESS_TEST_TIMEOUT: 30000
+
+      - name: Upload stress test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stress-test-results
+          path: test-results/stress/
+          retention-days: 30
+
+  # ============================================
+  # Benchmark Testing
+  # ============================================
+  benchmark:
+    name: Benchmark Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Worker
+        run: npm run build
+
+      - name: Run benchmarks
+        run: npm run test:benchmark -- --json
+        env:
+          BENCHMARK_ITERATIONS: 1000
+          BENCHMARK_WARMUP: 100
+
+      - name: Download previous benchmarks
+        uses: actions/cache@v4
+        with:
+          path: benchmarks/
+          key: benchmarks-${{ github.ref }}
+          restore-keys: |
+            benchmarks-main
+
+      - name: Compare with previous benchmarks
+        run: |
+          node scripts/compare-benchmarks.js \
+            --current test-results/benchmark/current.json \
+            --previous benchmarks/baseline.json \
+            --output benchmark-comparison.json
+
+      - name: Upload benchmark results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: |
+            test-results/benchmark/
+            benchmark-comparison.json
+          retention-days: 90
+
+      - name: Store benchmarks
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p benchmarks/
+          cp test-results/benchmark/current.json benchmarks/baseline.json
+
+      - name: Upload benchmarks cache
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache@v4
+        with:
+          path: benchmarks/
+          key: benchmarks-${{ github.ref }}-${{ github.sha }}
+
+  # ============================================
+  # Latency & Response Time Analysis
+  # ============================================
+  latency-test:
+    name: Latency Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Worker
+        run: npm run build
+
+      - name: Measure cold start latency
+        run: |
+          node scripts/measure-latency.js \
+            --type cold-start \
+            --samples 100 \
+            --output latency-cold-start.json
+
+      - name: Measure warm latency
+        run: |
+          node scripts/measure-latency.js \
+            --type warm \
+            --samples 1000 \
+            --output latency-warm.json
+
+      - name: Analyze latency percentiles
+        run: |
+          node scripts/analyze-latency.js \
+            --input latency-warm.json \
+            --output latency-analysis.json
+
+      - name: Upload latency results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: latency-results
+          path: |
+            latency-cold-start.json
+            latency-warm.json
+            latency-analysis.json
+          retention-days: 30
+
+  # ============================================
+  # Memory & Resource Profiling
+  # ============================================
+  memory-profile:
+    name: Memory Profiling
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Worker
+        run: npm run build
+
+      - name: Profile memory usage
+        run: |
+          node scripts/profile-memory.js \
+            --duration 300 \
+            --output memory-profile.json
+
+      - name: Check memory limits
+        run: |
+          node scripts/check-memory-limits.js \
+            --profile memory-profile.json \
+            --max-heap 128 \
+            --max-rss 256
+
+      - name: Upload memory profiles
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-profile-results
+          path: |
+            memory-profile.json
+            memory-heap-snapshot.heapsnapshot
+          retention-days: 30
+
+  # ============================================
+  # CPU Time Analysis
+  # ============================================
+  cpu-analysis:
+    name: CPU Time Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Worker
+        run: npm run build
+
+      - name: Measure CPU time
+        run: |
+          node scripts/measure-cpu.js \
+            --requests 1000 \
+            --output cpu-time.json
+
+      - name: Check CPU limits
+        run: |
+          node scripts/check-cpu-limits.js \
+            --profile cpu-time.json \
+            --max-cpu-ms 50 \
+            --max-cpu-p99 45
+
+      - name: Upload CPU analysis results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpu-analysis-results
+          path: cpu-time.json
+          retention-days: 30
+
+  # ============================================
+  # Performance Regression Detection
+  # ============================================
+  regression-check:
+    name: Performance Regression Check
+    runs-on: ubuntu-latest
+    needs: [load-test, benchmark, latency-test]
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results/
+
+      - name: Detect performance regressions
+        run: |
+          node scripts/detect-regressions.js \
+            --current test-results/ \
+            --baseline benchmarks/ \
+            --threshold 10 \
+            --output regression-report.json
+
+      - name: Comment PR with regression results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('regression-report.json', 'utf8'));
+
+            let comment = '## Performance Test Results\n\n';
+
+            if (report.regressions.length > 0) {
+              comment += '⚠️ **Performance Regressions Detected**\n\n';
+              report.regressions.forEach(reg => {
+                comment += `- ${reg.metric}: ${reg.change}%\n`;
+              });
+            } else {
+              comment += '✅ No performance regressions detected\n\n';
+            }
+
+            comment += '\n### Metrics\n';
+            report.metrics.forEach(metric => {
+              comment += `- ${metric.name}: ${metric.value} ${metric.unit}\n`;
+            });
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # ============================================
+  # Performance Metrics Dashboard
+  # ============================================
+  performance-dashboard:
+    name: Performance Metrics
+    runs-on: ubuntu-latest
+    needs: [load-test, stress-test, benchmark, latency-test, memory-profile, cpu-analysis]
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all performance results
+        uses: actions/download-artifact@v4
+        with:
+          path: performance-results/
+
+      - name: Generate performance summary
+        run: |
+          echo "## Performance Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Status | Key Metrics |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Load Test | ${{ needs.load-test.result == 'success' && '✅' || '❌' }} | See artifacts |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stress Test | ${{ needs.stress-test.result == 'success' && '✅' || '❌' }} | See artifacts |" >> $GITHUB_STEP_SUMMARY
+          echo "| Benchmark | ${{ needs.benchmark.result == 'success' && '✅' || '❌' }} | See artifacts |" >> $GITHUB_STEP_SUMMARY
+          echo "| Latency | ${{ needs.latency-test.result == 'success' && '✅' || '❌' }} | See artifacts |" >> $GITHUB_STEP_SUMMARY
+          echo "| Memory | ${{ needs.memory-profile.result == 'success' && '✅' || '❌' }} | See artifacts |" >> $GITHUB_STEP_SUMMARY
+          echo "| CPU | ${{ needs.cpu-analysis.result == 'success' && '✅' || '❌' }} | See artifacts |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload performance metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics-summary
+          path: performance-results/
+          retention-days: 90

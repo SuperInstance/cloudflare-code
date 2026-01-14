@@ -1,0 +1,54 @@
+name = "claudeflare-privacy"
+main = "dist/worker.js"
+compatibility_date = "2024-01-01"
+
+# Durable Objects
+[[durable_objects.bindings]]
+name = "PRIVACY_CONSENT"
+class_name = "ConsentManager"
+
+[[durable_objects.bindings]]
+name = "PRIVACY_ACCESS"
+class_name = "RightToAccess"
+
+[[durable_objects.bindings]]
+name = "PRIVACY_ERASURE"
+class_name = "RightToErasure"
+
+[[durable_objects.bindings]]
+name = "PRIVACY_RETENTION"
+class_name = "RetentionPolicyManager"
+
+[[durable_objects.bindings]]
+name = "PRIVACY_POLICY"
+class_name = "PrivacyPolicyGenerator"
+
+# KV Namespace
+[[kv_namespaces]]
+binding = "PRIVACY_KV"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+# D1 Database
+[[d1_databases]]
+binding = "PRIVACY_DB"
+database_name = "privacy-database"
+database_id = "your-database-id"
+
+# Scheduled Events (for automated retention)
+[triggers]
+crons = ["0 2 * * *"]  # Run daily at 2 AM UTC
+
+# Build configuration
+[build]
+command = "npm run build"
+
+# Development
+[dev]
+port = 8788
+local_protocol = "http"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production"
+LOG_LEVEL = "info"
