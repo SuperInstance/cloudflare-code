@@ -144,6 +144,7 @@ export class CloudflareAIProvider implements ProviderClient {
 
       if (this.env && this.env.AI) {
         // Use binding
+        // @ts-ignore - Cloudflare Workers AI types may not be up to date
         response = await this.env.AI.run(model, {
           messages,
           stream: false,
@@ -195,6 +196,7 @@ export class CloudflareAIProvider implements ProviderClient {
 
       if (this.env && this.env.AI) {
         // Use binding
+        // @ts-ignore - Cloudflare Workers AI types may not be up to date
         response = await this.env.AI.run(model, {
           messages,
           stream: true,

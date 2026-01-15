@@ -282,9 +282,9 @@ export class RequestMetricsCollector {
    * Get aggregated metrics from WARM tier
    */
   private async getFromWarm(
-    startTime: number,
-    endTime: number,
-    options?: MetricsQueryOptions
+    _startTime: number,
+    _endTime: number,
+    _options?: MetricsQueryOptions
   ): Promise<RequestMetrics[]> {
     const results: RequestMetrics[] = [];
 
@@ -455,12 +455,17 @@ export class RequestMetricsCollector {
     const match = key.match(/(\d{4})-(\d{2})-(\d{2})\/(\d{2})\.json$/);
     if (!match) return 0;
 
-    const [, year, month, day, hour] = match;
+    const year = match[1];
+    const month = match[2];
+    const day = match[3];
+    const hour = match[4];
+    if (!year || !month || !day || !hour) return 0;
+
     return Date.UTC(
-      parseInt(year),
-      parseInt(month) - 1,
-      parseInt(day),
-      parseInt(hour),
+      parseInt(year, 10),
+      parseInt(month, 10) - 1,
+      parseInt(day, 10),
+      parseInt(hour, 10),
       0,
       0,
       0
