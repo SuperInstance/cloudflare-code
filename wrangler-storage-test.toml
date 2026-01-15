@@ -1,0 +1,23 @@
+name = "claudeflare-storage-test"
+main = "test-storage-worker.ts"
+compatibility_date = "2024-01-01"
+
+# Development environment
+[env.development]
+name = "claudeflare-storage-test-dev"
+
+# KV Namespaces
+[[env.development.kv_namespaces]]
+binding = "CACHE_KV"
+id = "989755f5de814d7db8966d2c763891a6"
+
+# D1 Databases
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "claudeflare-dev-db"
+database_id = "52c33cef-6768-4646-b509-b607b66304ea"
+
+# R2 Buckets
+[[env.development.r2_buckets]]
+binding = "STORAGE_BUCKET"
+bucket_name = "claudeflare-dev-storage"

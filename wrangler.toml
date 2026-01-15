@@ -7,19 +7,44 @@ compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Account settings
-account_id = ""  # Set via CLOUDFLARE_ACCOUNT_ID environment variable
+account_id = "049ff5e84ecf636b53b162cbb580aae6"
 workers_dev = true
 
 # Build configuration
 [build]
 command = "npm run build"
 cwd = "."
-watch_paths = ["src/**/*.ts"]
 
 # Development environment
 [env.development]
 name = "claudeflare-dev"
 vars = { ENVIRONMENT = "development" }
+
+# KV Namespaces (development)
+[[env.development.kv_namespaces]]
+binding = "CACHE_KV"
+id = "989755f5de814d7db8966d2c763891a6"
+preview_id = ""
+
+# D1 Databases (development)
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "claudeflare-dev-db"
+database_id = "52c33cef-6768-4646-b509-b607b66304ea"
+
+# R2 Buckets (development)
+[[env.development.r2_buckets]]
+binding = "STORAGE_BUCKET"
+bucket_name = "claudeflare-dev-storage"
+
+# Durable Objects (development)
+[[env.development.durable_objects.bindings]]
+name = "AGENT_ORCHESTRATOR"
+class_name = "AgentOrchestrator"
+
+[[env.development.durable_objects.bindings]]
+name = "VECTOR_INDEX"
+class_name = "VectorIndex"
 
 # Staging environment
 [env.staging]
@@ -135,20 +160,9 @@ queue = "claudeflare-production-tasks"
 max_batch_size = 25
 max_wait_time = 10
 
-# Metrics and monitoring
-[triggers.crons]
-# Health check every 5 minutes
-"*/5 * * * *" = "cron/health-check"
-# Metrics aggregation every hour
-"0 * * * *" = "cron/aggregate-metrics"
-# Cache cleanup every 6 hours
-"0 */6 * * *" = "cron/cache-cleanup"
+# Analytics will be enabled after deployment
 
-# Analytics
-[analytics]
-enabled = true
-format = "json"
-
-# Limits
-[limits]
-cpu_ms = 50  # CPU time limit per request
+# Durable Objects migrations (for free plan)
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["AgentOrchestrator", "VectorIndex"]

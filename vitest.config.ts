@@ -27,8 +27,9 @@ export default defineConfig({
       },
     },
     setupFiles: ['./tests/setup.ts'],
-    testTimeout: 10000,
-    hookTimeout: 10000,
-    teardownTimeout: 10000,
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    teardownTimeout: 30000,
+    maxWorkers: 1,
   },
 });

@@ -56,7 +56,7 @@ export class SecurityTesting {
     this.policyEngine = new PolicyEngine(this.logger, {
       policyDir: './policies',
       enablePreCommitHooks: false,
-      enableCIDCD Gates: false,
+      enableCICD: false,
       exceptionWorkflowEnabled: true,
     });
   }

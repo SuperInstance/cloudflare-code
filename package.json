@@ -84,6 +84,7 @@
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20231218.0",
+    "happy-dom": "^20.3.0",
     "hono": "^3.11.7"
   },
   "optionalDependencies": {

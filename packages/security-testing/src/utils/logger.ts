@@ -1,98 +1,23 @@
 /**
- * Advanced logging utility for security scanning operations
- * Provides structured logging with multiple transports and severity levels
+ * Cloudflare Worker compatible logging utility for security scanning operations
  */
-
-import { createLogger, format, transports, Logger as WinstonLogger } from 'winston';
-import path from 'path';
-import fs from 'fs';
 
 export interface LoggerConfig {
   level: 'debug' | 'info' | 'warn' | 'error';
-  format: 'json' | 'text' | 'both';
-  output: 'console' | 'file' | 'both';
-  logDir?: string;
+  format: 'json' | 'text';
   enableColors: boolean;
   enableTimestamp: boolean;
   context?: Record<string, unknown>;
 }
 
 export class Logger {
-  private logger: WinstonLogger;
+  private level: string;
   private context: Record<string, unknown>;
   private scanId?: string;
 
   constructor(config: LoggerConfig) {
+    this.level = config.level;
     this.context = config.context || {};
-
-    const logFormats = [];
-
-    if (config.format === 'json' || config.format === 'both') {
-      logFormats.push(format.json());
-    }
-
-    if (config.format === 'text' || config.format === 'both') {
-      const textFormat = format.printf(
-        ({ level, message, timestamp, ...meta }) => {
-          let msg = `${timestamp} [${level.toUpperCase()}]`;
-          if (this.scanId) {
-            msg += ` [${this.scanId}]`;
-          }
-          msg += `: ${message}`;
-          if (Object.keys(meta).length > 0) {
-            msg += ` ${JSON.stringify(meta)}`;
-          }
-          return msg;
-        }
-      );
-      logFormats.push(textFormat);
-    }
-
-    const loggerTransports = [];
-
-    if (config.output === 'console' || config.output === 'both') {
-      loggerTransports.push(
-        new transports.Console({
-          format: format.combine(
-            format.colorize({ all: config.enableColors }),
-            format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-            ...logFormats
-          ),
-        })
-      );
-    }
-
-    if (config.output === 'file' || config.output === 'both') {
-      const logDir = config.logDir || path.join(process.cwd(), 'logs');
-      if (!fs.existsSync(logDir)) {
-        fs.mkdirSync(logDir, { recursive: true });
-      }
-
-      loggerTransports.push(
-        new transports.File({
-          filename: path.join(logDir, 'security-scanner.log'),
-          format: format.combine(format.timestamp(), ...logFormats),
-          maxsize: 10485760, // 10MB
-          maxFiles: 5,
-        })
-      );
-
-      loggerTransports.push(
-        new transports.File({
-          filename: path.join(logDir, 'security-scanner-error.log'),
-          level: 'error',
-          format: format.combine(format.timestamp(), ...logFormats),
-          maxsize: 10485760,
-          maxFiles: 5,
-        })
-      );
-    }
-
-    this.logger = createLogger({
-      level: config.level,
-      transports: loggerTransports,
-      exitOnError: false,
-    });
   }
 
   public withScanId(scanId: string): Logger {
@@ -106,23 +31,53 @@ export class Logger {
   }
 
   public debug(message: string, ...args: unknown[]): void {
-    this.logger.debug(message, this.buildMeta(args));
+    this.log('debug', message, ...args);
   }
 
   public info(message: string, ...args: unknown[]): void {
-    this.logger.info(message, this.buildMeta(args));
+    this.log('info', message, ...args);
   }
 
   public warn(message: string, ...args: unknown[]): void {
-    this.logger.warn(message, this.buildMeta(args));
+    this.log('warn', message, ...args);
   }
 
   public error(message: string, ...args: unknown[]): void {
-    this.logger.error(message, this.buildMeta(args));
+    this.log('error', message, ...args);
+  }
+
+  private log(level: string, message: string, ...args: unknown[]): void {
+    if (this.shouldLog(level)) {
+      const logData = {
+        level,
+        message,
+        timestamp: new Date().toISOString(),
+        context: this.context,
+        scanId: this.scanId,
+        ...(args.length > 0 && args[0] && typeof args[0] === 'object' ? args[0] : {})
+      };
+
+      if (typeof console !== 'undefined') {
+        if (level === 'error') {
+          console.error(logData);
+        } else if (level === 'warn') {
+          console.warn(logData);
+        } else if (level === 'debug') {
+          console.debug(logData);
+        } else {
+          console.log(logData);
+        }
+      }
+    }
+  }
+
+  private shouldLog(level: string): boolean {
+    const levels = { debug: 0, info: 1, warn: 2, error: 3 };
+    return levels[level as keyof typeof levels] >= levels[this.level as keyof typeof levels];
   }
 
   public metric(name: string, value: number, labels?: Record<string, string>): void {
-    this.logger.info('Metric recorded', {
+    this.info('Metric recorded', {
       metric: name,
       value,
       labels,
@@ -131,7 +86,7 @@ export class Logger {
   }
 
   public audit(action: string, details: Record<string, unknown>): void {
-    this.logger.info('Audit event', {
+    this.info('Audit event', {
       action,
       ...details,
       timestamp: new Date().toISOString(),
@@ -139,25 +94,10 @@ export class Logger {
     });
   }
 
-  private buildMeta(args: unknown[]): Record<string, unknown> {
-    const meta: Record<string, unknown> = { ...this.context };
-
-    args.forEach((arg, index) => {
-      if (typeof arg === 'object' && arg !== null) {
-        Object.assign(meta, arg);
-      } else if (arg !== undefined) {
-        meta[`arg${index}`] = arg;
-      }
-    });
-
-    return meta;
-  }
-
   public static createDefault(scanId?: string): Logger {
     return new Logger({
-      level: process.env.LOG_LEVEL as any || 'info',
+      level: 'info',
       format: 'text',
-      output: 'console',
       enableColors: true,
       enableTimestamp: true,
       context: scanId ? { scanId } : undefined,

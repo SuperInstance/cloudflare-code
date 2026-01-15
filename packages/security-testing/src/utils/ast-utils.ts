@@ -299,7 +299,7 @@ export class ASTUtils {
             owasp: 'A03:2021-Injection',
           });
         }
-      }.bind(this),
+      }.bind(this)
     });
 
     return matches;
@@ -351,7 +351,7 @@ export class ASTUtils {
             owasp: 'A03:2021-Injection',
           });
         }
-      }.bind(this),
+      }.bind(this)
     });
 
     return matches;
@@ -394,7 +394,7 @@ export class ASTUtils {
             }
           }
         }
-      }.bind(this),
+      }.bind(this)
     });
 
     return matches;
@@ -476,7 +476,7 @@ export class ASTUtils {
             }
           }
         }
-      }.bind(this),
+      }.bind(this)
     });
 
     // Track data flow to sinks
@@ -502,7 +502,7 @@ export class ASTUtils {
             }
           }
         }
-      }.bind(this),
+      }.bind(this)
     });
 
     return flows;

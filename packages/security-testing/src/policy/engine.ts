@@ -393,7 +393,7 @@ exit 0
    * Create CI/CD gate
    */
   public async createCIDCGate(config: { type: 'github' | 'gitlab' | 'jenkins'; path: string }): Promise<void> {
-    if (!this.config.enableCIDCD Gates) {
+    if (!this.config.enableCICD) {
       this.logger.info('CI/CD gates disabled');
       return;
     }
