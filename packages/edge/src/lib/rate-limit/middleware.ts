@@ -217,10 +217,15 @@ export function rateLimit(options: RateLimitMiddlewareOptions) {
       // Release concurrent request quota after response
       c.res.headers.set('X-Concurrent-Release', 'true');
       const originalJson = c.json.bind(c);
-      c.json = (data, status) => {
+      c.json = ((data: unknown, arg1?: number | ResponseInit) => {
         void quotaManager.releaseConcurrent(identifier, tier);
-        return originalJson(data, status);
-      };
+        // Handle both overload cases
+        if (typeof arg1 === 'number') {
+          return originalJson(data, arg1);
+        } else {
+          return originalJson(data, arg1);
+        }
+      }) as typeof c.json;
     }
 
     // Store decision in context for later use
@@ -261,13 +266,14 @@ export function rateLimitByUser(config: RateLimitConfig) {
  * Create hierarchical rate limit middleware (IP > User > Org > Global)
  */
 export function rateLimitHierarchical(config: {
+  kv?: KVNamespace;
   ipLimit?: RateLimitConfig;
   userLimit?: RateLimitConfig;
   orgLimit?: RateLimitConfig;
   globalLimit?: RateLimitConfig;
 }) {
   const manager = new RateLimitManager({
-    ...(config.ipLimit?.kv !== undefined ? { kv: config.ipLimit.kv } : {}),
+    ...(config.kv !== undefined ? { kv: config.kv } : {}),
   });
 
   return async (c: Context, next: Next) => {
@@ -429,7 +435,7 @@ export function rateLimitErrorHandler(
         'Retry-After': (decision.retryAfter || Math.ceil(decision.resetIn / 1000)).toString(),
       },
     }
-  );
+  ) as Response;
 }
 
 /**

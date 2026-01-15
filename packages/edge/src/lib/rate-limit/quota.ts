@@ -14,7 +14,6 @@ import type { KVNamespace } from '@cloudflare/workers-types';
 import type {
   SubscriptionTier,
   QuotaStatus,
-  RateLimitDecision,
   TierConfig,
 } from './types';
 
@@ -228,8 +227,11 @@ export class QuotaManager {
   private tierConfigs: Map<SubscriptionTier, TierConfig>;
 
   constructor(options: QuotaManagerOptions = {}) {
-    this.kv = options.kv;
+    if (options.kv !== undefined) {
+      this.kv = options.kv;
+    }
     this.options = {
+      ...(options.kv !== undefined ? { kv: options.kv } : {}),
       enableTracking: options.enableTracking ?? true,
       enableSoftLimits: options.enableSoftLimits ?? true,
       enableOverage: options.enableOverage ?? true,
@@ -286,7 +288,7 @@ export class QuotaManager {
       }
 
       // Calculate remaining quota
-      const remaining = config.limit - usage.used;
+      const _remaining = config.limit - usage.used;
       const softLimitThreshold = config.softLimit
         ? config.limit * config.softLimit
         : config.limit;
@@ -331,7 +333,7 @@ export class QuotaManager {
     return {
       allowed,
       status,
-      blockedBy,
+      ...(blockedBy !== undefined ? { blockedBy } : {}),
       softLimitExceeded,
       overageAvailable,
       overageCost: overageCost > 0 ? overageCost : undefined,
@@ -353,7 +355,7 @@ export class QuotaManager {
     }
 
     const state = await this.getState(identifier, tier);
-    const now = Date.now();
+    const _now = Date.now();
 
     // Update request quota
     await this.incrementQuota(identifier, 'requests', increment);
@@ -429,7 +431,7 @@ export class QuotaManager {
    * Reset quota for a specific type
    */
   async resetQuota(identifier: string, type: QuotaType): Promise<void> {
-    const key = this.getStorageKey(identifier);
+    const _key = this.getStorageKey(identifier);
     const cached = this.cache.get(identifier);
 
     if (cached && cached.quotas.has(type)) {
@@ -466,7 +468,7 @@ export class QuotaManager {
    */
   async changeTier(
     identifier: string,
-    oldTier: SubscriptionTier,
+    _oldTier: SubscriptionTier,
     newTier: SubscriptionTier
   ): Promise<void> {
     // Reset quotas with new tier
@@ -713,7 +715,7 @@ export class QuotaManager {
       limit: closestLimit,
       remaining: closestRemaining,
       resetTime: closestReset,
-      resetType: 'day',
+      resetType: 'daily',
       usagePercent: highestUsagePercent,
       isExhausted: closestRemaining === 0,
     };
@@ -750,10 +752,10 @@ export class QuotaManager {
   ): QuotaState {
     return {
       identifier,
-      tier: data.tier as SubscriptionTier,
-      quotas: new Map(data.quotas as [QuotaType, QuotaUsage][]),
-      concurrentRequests: data.concurrentRequests as number,
-      totalCost: data.totalCost as number,
+      tier: data['tier'] as SubscriptionTier,
+      quotas: new Map(data['quotas'] as [QuotaType, QuotaUsage][]),
+      concurrentRequests: data['concurrentRequests'] as number,
+      totalCost: data['totalCost'] as number,
     };
   }
 
