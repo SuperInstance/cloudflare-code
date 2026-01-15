@@ -165,7 +165,7 @@ describe('ContextBuilder', () => {
       const truncated = await contextBuilder.truncateToLimit(messages, 150);
 
       expect(truncated).toHaveLength(1);
-      expect(truncated[0].content).toBe('Message 1');
+      expect(truncated[0]?.content).toBe('Message 1');
     });
 
     it('should return all messages if under limit', async () => {
@@ -237,8 +237,8 @@ describe('ContextBuilder', () => {
       );
 
       expect(context.messages).toHaveLength(2); // Original + metadata message
-      expect(context.messages[0].role).toBe('system');
-      expect(context.messages[0].content).toContain('customField');
+      expect(context.messages[0]?.role).toBe('system');
+      expect(context.messages[0]?.content).toContain('customField');
     });
   });
 

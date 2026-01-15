@@ -25,7 +25,7 @@ export class VectorIndex {
 
   private async handleIndex(method: string, request: Request): Promise<Response> {
     if (method === 'POST') {
-      const data = await request.json();
+      const data = await request.json() as { id?: string; vector?: unknown; metadata?: unknown };
       const { id, vector, metadata } = data;
 
       if (!id || !vector || !Array.isArray(vector)) {
@@ -33,7 +33,7 @@ export class VectorIndex {
       }
 
       this.vectors.set(id, vector);
-      if (metadata) {
+      if (metadata !== undefined) {
         this.metadata.set(id, metadata);
       }
 
@@ -114,9 +114,11 @@ export class VectorIndex {
     let magnitudeB = 0;
 
     for (let i = 0; i < a.length; i++) {
-      dotProduct += a[i] * b[i];
-      magnitudeA += a[i] * a[i];
-      magnitudeB += b[i] * b[i];
+      const ai = a[i] ?? 0;
+      const bi = b[i] ?? 0;
+      dotProduct += ai * bi;
+      magnitudeA += ai * ai;
+      magnitudeB += bi * bi;
     }
 
     magnitudeA = Math.sqrt(magnitudeA);

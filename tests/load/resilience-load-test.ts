@@ -255,7 +255,7 @@ class LoadTester {
     const startTime = Date.now();
 
     for (let i = 0; i < totalRequests; i++) {
-      const attemptStart = Date.now();
+      Date.now();
       let attempts = 0;
 
       try {

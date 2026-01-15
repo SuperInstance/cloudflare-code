@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * Unit Tests for Request Metrics Collector
  */
@@ -54,7 +55,7 @@ describe('RequestMetricsCollector', () => {
       // Verify metric was recorded
       const recentMetrics = await collector.getRecent(1);
       expect(recentMetrics).toHaveLength(1);
-      expect(recentMetrics[0].requestId).toBe('test-req-1');
+      expect(recentMetrics[0]?.requestId).toBe('test-req-1');
     });
 
     it('should record multiple metrics', async () => {
@@ -168,11 +169,11 @@ describe('RequestMetricsCollector', () => {
       const anthropicMetrics = await collector.getByTimeRange(
         now - 60000,
         now + 60000,
-        { provider: 'anthropic' }
+        { provider: 'anthropic' } as any
       );
 
       expect(anthropicMetrics).toHaveLength(1);
-      expect(anthropicMetrics[0].provider).toBe('anthropic');
+      expect(anthropicMetrics[0]?.provider).toBe('anthropic');
     });
 
     it('should filter by feature', async () => {
@@ -211,11 +212,11 @@ describe('RequestMetricsCollector', () => {
       const codeGenMetrics = await collector.getByTimeRange(
         now - 60000,
         now + 60000,
-        { feature: 'code-gen' }
+        { feature: 'code-gen' } as any
       );
 
       expect(codeGenMetrics).toHaveLength(1);
-      expect(codeGenMetrics[0].feature).toBe('code-gen');
+      expect(codeGenMetrics[0]?.feature).toBe('code-gen');
     });
   });
 
@@ -269,7 +270,7 @@ describe('RequestMetricsCollector', () => {
           timestamp: now,
           provider: 'anthropic',
           model: 'claude-3-sonnet',
-          latency: latencies[i],
+          latency: latencies[i] ?? 500,
           tokens: { prompt: 100, completion: 50, total: 150 },
           cacheHit: false,
           cost: 0.01,

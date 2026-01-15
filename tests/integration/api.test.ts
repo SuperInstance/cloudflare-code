@@ -4,10 +4,9 @@
  * Test full request/response flows through the API
  */
 
-import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import app from '../../packages/edge/src/index';
 import type { ChatRequest, HealthResponse, StatusResponse, ModelsResponse } from '../../packages/edge/src/types';
-import { MockKVNamespace, MockR2Bucket, MockD1Database } from '../../packages/edge/tests/utils';
 
 describe('Health Endpoint Integration', () => {
   it('should return healthy status', async () => {
@@ -81,6 +80,10 @@ describe('Models Endpoint Integration', () => {
     const data: ModelsResponse = await response.json();
     const model = data.models[0];
 
+    if (!model) {
+      throw new Error('No models available');
+    }
+
     expect(model.id).toBeDefined();
     expect(model.name).toBeDefined();
     expect(model.provider).toBeDefined();
@@ -95,13 +98,17 @@ describe('Models Endpoint Integration', () => {
   it('should get specific model by ID', async () => {
     const listResponse = await app.request('/v1/models');
     const listData: ModelsResponse = await listResponse.json();
-    const modelId = listData.models[0].id;
+    const modelId = listData.models[0]?.id;
+
+    if (!modelId) {
+      throw new Error('No models available');
+    }
 
     const response = await app.request(`/v1/models/${modelId}`);
 
     expect(response.status).toBe(200);
 
-    const model = await response.json();
+    const model = await response.json() as any;
 
     expect(model.id).toBe(modelId);
     expect(model.name).toBeDefined();
@@ -135,7 +142,7 @@ describe('Chat Endpoint Integration', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.id).toBeDefined();
       expect(data.content).toBeDefined();
@@ -169,7 +176,7 @@ describe('Chat Endpoint Integration', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.content).toBeDefined();
       expect(data.content.length).toBeGreaterThan(0);
@@ -285,7 +292,7 @@ describe('Error Handling Integration', () => {
 
     expect(response.status).toBe(404);
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     expect(data.error).toBeDefined();
     expect(data.error.code).toBe('NOT_FOUND');
@@ -302,7 +309,7 @@ describe('Error Handling Integration', () => {
   it('should include request ID in error responses', async () => {
     const response = await app.request('/v1/undefined');
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     expect(data.error.requestId).toBeDefined();
     expect(data.error.timestamp).toBeDefined();

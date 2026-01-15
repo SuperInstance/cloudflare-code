@@ -318,7 +318,7 @@ export function createTestingRoutes(testingService: TestingService) {
       const suite = await testingService.createTestSuite(
         'ClaudeFlare Demo Suite',
         'A comprehensive demo test suite for ClaudeFlare platform',
-        demoTests
+        demoTests as any
       );
 
       return c.json({

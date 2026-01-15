@@ -144,7 +144,7 @@ export class TestingService {
       report.status = report.results.failed === 0 ? 'completed' : 'failed';
 
       // Update suite summary
-      suite.summary = { ...report.results };
+      suite.summary = { ...report.results, duration: report.duration };
       suite.status = report.status;
       suite.updatedAt = new Date();
 
@@ -213,7 +213,7 @@ export class TestingService {
     } catch (error) {
       test.status = 'failed';
       test.error = error instanceof Error ? error.message : 'Unknown error';
-      test.duration = Date.now() - (test.metadata?.startTime || 0);
+      test.duration = Date.now() - ((test.metadata as any)?.['startTime'] || 0);
       report.results.failed++;
       report.failures.push({
         testId: test.id,
@@ -280,7 +280,7 @@ export class TestingService {
 
   private async executePerformanceTest(test: TestCase): Promise<void> {
     // Simulate performance test execution
-    const loadLevel = test.metadata?.loadLevel || 1;
+    const loadLevel = (test.metadata as any)?.['loadLevel'] || 1;
     const duration = 500 * loadLevel + Math.random() * 1000;
 
     await new Promise(resolve => setTimeout(resolve, duration));
@@ -323,7 +323,7 @@ export class TestingService {
     };
 
     if (Math.random() < 0.02) { // 2% failure rate
-      results.vulnerabilities.push({
+      (results.vulnerabilities as any[]).push({
         type: 'xss',
         severity: 'medium',
         description: 'Potential XSS vulnerability found',
@@ -462,7 +462,7 @@ export class TestingService {
       testSuites: testSuitesCount,
       testReports: testReportsCount,
       averageExecutionTime,
-      lastExecution,
+      ...(lastExecution !== undefined ? { lastExecution } : {}),
     };
   }
 }

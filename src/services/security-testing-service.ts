@@ -75,7 +75,7 @@ export class SecurityTestingService {
 
     try {
       this.scans.set(scanId, {
-        startTime,
+        startTime: new Date(startTime),
         status: 'running'
       });
 
@@ -118,7 +118,7 @@ export class SecurityTestingService {
       const duration = Date.now() - startTime;
 
       this.scans.set(scanId, {
-        startTime,
+        startTime: new Date(startTime),
         status: 'completed',
         result: {
           findings,
@@ -147,7 +147,7 @@ export class SecurityTestingService {
       const duration = Date.now() - startTime;
 
       this.scans.set(scanId, {
-        startTime,
+        startTime: new Date(startTime),
         status: 'failed'
       });
 
@@ -309,7 +309,7 @@ export class SecurityTestingService {
   /**
    * Perform DAST (Dynamic Application Security Testing) - Simulated
    */
-  private async performDASTScan(targetUrl: string): Promise<Finding[]> {
+  private async performDASTScan(_targetUrl: string): Promise<Finding[]> {
     const findings: Finding[] = [];
 
     // Simulated DAST findings
@@ -341,7 +341,7 @@ export class SecurityTestingService {
   /**
    * Perform SCA (Software Composition Analysis) - Simulated
    */
-  private async performSCAScan(targetPath: string): Promise<Finding[]> {
+  private async performSCAScan(_targetPath: string): Promise<Finding[]> {
     const findings: Finding[] = [];
 
     // Simulated SCA findings
@@ -373,7 +373,7 @@ export class SecurityTestingService {
   /**
    * Perform Compliance Scanning - Simulated
    */
-  private async performComplianceScan(targetPath: string, frameworks: string[]): Promise<Finding[]> {
+  private async performComplianceScan(_targetPath: string, frameworks: string[]): Promise<Finding[]> {
     const findings: Finding[] = [];
 
     frameworks.forEach(framework => {
@@ -409,7 +409,7 @@ export class SecurityTestingService {
       scanId,
       status: scan.status,
       startTime: scan.startTime,
-      duration: scan.status !== 'running' ? Date.now() - scan.startTime.getTime() : undefined,
+      ...(scan.status !== 'running' ? { duration: Date.now() - scan.startTime.getTime() } : {}),
       result: scan.result
     };
   }

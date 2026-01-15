@@ -107,7 +107,7 @@ describe('Load Balancer', () => {
 
       const status = loadBalancer.getProviderStatus();
 
-      status.forEach((providerStatus, name) => {
+      status.forEach((providerStatus, _name) => {
         expect(providerStatus.healthy).toBe(true);
         expect(providerStatus.load).toBe(0); // All requests completed
       });
@@ -220,7 +220,7 @@ describe('Circuit Breaker', () => {
 
       // Wait for timeout (simulate by checking after threshold)
       // Note: In real test, we'd mock Date.now() or wait the full timeout
-      const stateBefore = circuitBreaker.getState();
+      circuitBreaker.getState();
 
       // Try executing after timeout
       try {

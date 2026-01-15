@@ -3,7 +3,6 @@
  * Provides comprehensive authentication functionality
  */
 
-import { Hono } from 'hono';
 import { SecurityError } from '../../packages/security-core/src/types';
 
 // Type definitions
@@ -187,7 +186,7 @@ export class EnterpriseAuthService {
       const user = await this.createUser({
         ...request,
         password: await this.hashPassword(request.password),
-        role: request.role || 'user',
+        role: (request.role || 'user') as 'admin' | 'developer' | 'user',
         mfaEnabled: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -195,12 +194,11 @@ export class EnterpriseAuthService {
       });
 
       // Generate tokens
-      const token = await this.generateTokens(user);
+      await this.generateTokens(user);
 
       return {
         success: true,
-        user: this.sanitizeUser(user),
-        token
+        user: this.sanitizeUser(user)
       };
 
     } catch (error) {
@@ -249,7 +247,7 @@ export class EnterpriseAuthService {
   }
 
   // OAuth 2.0 Methods (simplified for demo)
-  async getOAuth2AuthorizationUrl(provider: string): Promise<{ url: string; state: string; codeVerifier?: string }> {
+  async getOAuth2AuthorizationUrl(_provider: string): Promise<{ url: string; state: string; codeVerifier?: string }> {
     // In production, this would generate proper OAuth URLs
     return {
       url: `https://github.com/login/oauth/authorize?client_id=${this.config.jwtSecret}&redirect_uri=${encodeURIComponent('https://your-domain.com/api/v1/auth/oauth2/github/callback')}&scope=user:email`,
@@ -258,7 +256,7 @@ export class EnterpriseAuthService {
     };
   }
 
-  async handleOAuth2Callback(provider: string, request: { code: string; state: string }): Promise<any> {
+  async handleOAuth2Callback(_provider: string, _request: { code: string; state: string }): Promise<any> {
     // In production, this would exchange code for tokens and get user info
     const user = await this.findUserByEmail('admin@claudeflare.com');
 
@@ -276,12 +274,12 @@ export class EnterpriseAuthService {
   }
 
   // SAML 2.0 Methods (simplified for demo)
-  async getSAML2AuthorizationUrl(provider: string): Promise<string> {
+  async getSAML2AuthorizationUrl(_provider: string): Promise<string> {
     // In production, this would generate proper SAML URLs
-    return `https://your-saml-provider.com/saml2/idp/SSOService.php?RelayState=${encodeURIComponent('https://your-domain.com/api/v1/auth/saml2/' + provider + '/callback')}`;
+    return `https://your-saml-provider.com/saml2/idp/SSOService.php?RelayState=${encodeURIComponent('https://your-domain.com/api/v1/auth/saml2/callback')}`;
   }
 
-  async handleSAML2Callback(provider: string, assertion: any): Promise<any> {
+  async handleSAML2Callback(_provider: string, _assertion: any): Promise<any> {
     // In production, this would validate SAML assertion and get user info
     const user = await this.findUserByEmail('admin@claudeflare.com');
 
@@ -299,7 +297,7 @@ export class EnterpriseAuthService {
   }
 
   // MFA Methods (simplified for demo)
-  async setupMFA(userId: string, method: 'totp' | 'sms' | 'email'): Promise<any> {
+  async setupMFA(_userId: string, _method: 'totp' | 'sms' | 'email'): Promise<any> {
     // In production, this would generate MFA secrets and setup codes
     return {
       success: true,
@@ -309,7 +307,7 @@ export class EnterpriseAuthService {
     };
   }
 
-  async verifyMFA(userId: string, code: string): Promise<any> {
+  async verifyMFA(_userId: string, _code: string): Promise<any> {
     // In production, this would verify the MFA code
     return {
       success: true,
@@ -493,7 +491,7 @@ export class EnterpriseAuthService {
     return newUser;
   }
 
-  protected async updateUserLoginInfo(userId: string, rememberMe?: boolean): Promise<void> {
+  protected async updateUserLoginInfo(userId: string, _rememberMe?: boolean): Promise<void> {
     const user = await this.findUserById(userId);
     if (user) {
       user.updatedAt = new Date();
@@ -520,7 +518,7 @@ export class EnterpriseAuthService {
   }
 
   // Session management methods
-  async getSession(sessionId: string): Promise<any> {
+  async getSession(_sessionId: string): Promise<any> {
     // In production, this would fetch from a session store
     // For demo, return a dummy session
     return {

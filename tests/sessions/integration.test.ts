@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * Integration Tests for Session Management
  *
@@ -89,7 +90,7 @@ describe('Session Management Integration', () => {
         userId,
         createdAt: Date.now(),
         lastActivity: Date.now(),
-        messages: [],
+        messages: [] as any,
         metadata: {
           language: 'typescript',
           framework: 'react',
@@ -157,14 +158,14 @@ describe('Session Management Integration', () => {
       mockSession.metadata.messageCount = 2;
       mockSession.metadata.totalTokens = 12;
 
-      const context = await contextBuilder.buildContext(mockSession, 'recent');
+      const context = await contextBuilder.buildContext(mockSession as any, 'recent');
       expect(context.messages).toHaveLength(2);
       expect(context.totalTokens).toBe(12);
 
       // 4. Archive session
       await sessionManager.archiveSession(sessionId);
 
-      expect(mockR2Storage.archiveSession).toHaveBeenCalledWith(mockSession);
+      expect(mockR2Storage.archiveSession).toHaveBeenCalledWith(mockSession as any);
     });
 
     it('should restore archived session', async () => {
@@ -235,7 +236,7 @@ describe('Session Management Integration', () => {
         userId,
         createdAt: Date.now(),
         lastActivity: Date.now(),
-        messages: [],
+        messages: [] as any,
         metadata: {
           language: 'typescript',
           framework: 'react',
@@ -266,7 +267,7 @@ describe('Session Management Integration', () => {
       };
       (mockEnv.SESSIONS.get as any).mockReturnValue(hotStub);
 
-      await sessionStorage.save(mockSession, 'hot');
+      await sessionStorage.save(mockSession as any, 'hot');
       let tier = await sessionStorage.getTier(sessionId);
       expect(tier).toBe('hot');
 
@@ -293,7 +294,7 @@ describe('Session Management Integration', () => {
         userId,
         createdAt: Date.now() - 2 * 60 * 60 * 1000, // 2 hours ago
         lastActivity: Date.now() - 2 * 60 * 60 * 1000,
-        messages: [],
+        messages: [] as any,
         metadata: {
           language: 'typescript',
           framework: 'react',
@@ -340,7 +341,7 @@ describe('Session Management Integration', () => {
         userId: 'user-111',
         createdAt: Date.now(),
         lastActivity: Date.now(),
-        messages: [],
+        messages: [] as any,
         metadata: {
           language: 'typescript',
           framework: 'react',
@@ -378,17 +379,17 @@ describe('Session Management Integration', () => {
       mockSession.metadata.totalTokens = 10000;
 
       // Test recent strategy
-      const recentContext = await contextBuilder.buildContext(mockSession, 'recent');
+      const recentContext = await contextBuilder.buildContext(mockSession as any, 'recent');
       expect(recentContext.messages.length).toBeGreaterThan(0);
       expect(recentContext.truncated).toBeDefined();
 
       // Test summary strategy
-      const summaryContext = await contextBuilder.buildContext(mockSession, 'summary');
+      const summaryContext = await contextBuilder.buildContext(mockSession as any, 'summary');
       expect(summaryContext.summary).toBeDefined();
       expect(summaryContext.messages.length).toBeGreaterThan(0);
 
       // Test all strategy
-      const allContext = await contextBuilder.buildContext(mockSession, 'all');
+      const allContext = await contextBuilder.buildContext(mockSession as any, 'all');
       expect(allContext.messages).toHaveLength(100);
       expect(allContext.totalTokens).toBe(10000);
     });
@@ -401,7 +402,7 @@ describe('Session Management Integration', () => {
         userId: 'user-old',
         createdAt: Date.now() - 2 * 60 * 60 * 1000, // 2 hours ago
         lastActivity: Date.now() - 2 * 60 * 60 * 1000,
-        messages: [],
+        messages: [] as any,
         metadata: {
           language: 'typescript',
           framework: 'react',
@@ -476,7 +477,7 @@ describe('Session Management Integration', () => {
         userId: 'user-large',
         createdAt: Date.now(),
         lastActivity: Date.now(),
-        messages: [],
+        messages: [] as any,
         metadata: {
           language: 'typescript',
           framework: 'react',
@@ -514,7 +515,7 @@ describe('Session Management Integration', () => {
       mockSession.metadata.totalTokens = 10000;
 
       const startTime = performance.now();
-      const context = await contextBuilder.buildContext(mockSession, 'recent');
+      const context = await contextBuilder.buildContext(mockSession as any, 'recent');
       const duration = performance.now() - startTime;
 
       expect(duration).toBeLessThan(100); // Should complete in < 100ms

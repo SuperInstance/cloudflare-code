@@ -11,13 +11,9 @@ import { RetryPolicy } from '../../packages/edge/src/lib/retry';
 import { QuotaTracker } from '../../packages/edge/src/lib/quota';
 
 // Mock KV namespace
-class MockKVNamespace implements KVNamespace {
+class MockKVNamespace {
   private store = new Map<string, string>();
 
-  async get(key: string): Promise<string | null>;
-  async get(key: string, type: 'text'): Promise<string | null>;
-  async get(key: string, type: 'json'): Promise<any>;
-  async get(key: string, type: 'stream'): Promise<ReadableStream | null>;
   async get(key: string, type?: string): Promise<any> {
     const value = this.store.get(key);
     if (!value) return null;
@@ -28,7 +24,7 @@ class MockKVNamespace implements KVNamespace {
     return value;
   }
 
-  async put(key: string, value: any, options?: any): Promise<void> {
+  async put(key: string, value: any, _options?: any): Promise<void> {
     this.store.set(key, typeof value === 'string' ? value : JSON.stringify(value));
   }
 
@@ -36,7 +32,7 @@ class MockKVNamespace implements KVNamespace {
     this.store.delete(key);
   }
 
-  async list(options?: KVNamespaceListOptions): Promise<KVNamespaceListResult<any>> {
+  async list(options?: KVNamespaceListOptions): Promise<any> {
     const prefix = options?.prefix || '';
     const keys = Array.from(this.store.keys())
       .filter(key => key.startsWith(prefix))
@@ -45,7 +41,6 @@ class MockKVNamespace implements KVNamespace {
     return {
       keys,
       list_complete: true,
-      cursor: '',
     };
   }
 }
@@ -384,7 +379,7 @@ describe('Load Testing Scenarios', () => {
     }
 
     // Each user should have 10 allowed requests
-    for (const [user, count] of results.entries()) {
+    for (const [_user, count] of results.entries()) {
       expect(count).toBe(10);
     }
   });

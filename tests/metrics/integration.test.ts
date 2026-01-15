@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 /**
  * Integration Tests for Metrics System
  */
@@ -7,7 +8,7 @@ import { RequestMetricsCollector } from '../../packages/edge/src/lib/metrics/req
 import { ProviderMetricsCollector } from '../../packages/edge/src/lib/metrics/provider';
 import { CacheMetricsCollector } from '../../packages/edge/src/lib/metrics/cache';
 import { MetricsAggregator } from '../../packages/edge/src/lib/metrics/aggregator';
-import type { RequestMetrics, ProviderMetrics, CacheMetrics } from '../../packages/edge/src/lib/metrics/types';
+import type { RequestMetrics } from '../../packages/edge/src/lib/metrics/types';
 
 describe('Metrics System Integration', () => {
   let requestCollector: RequestMetricsCollector;
@@ -73,7 +74,7 @@ describe('Metrics System Integration', () => {
       // Verify request was recorded
       const recentMetrics = await requestCollector.getRecent(1);
       expect(recentMetrics).toHaveLength(1);
-      expect(recentMetrics[0].requestId).toBe('integration-test-1');
+      expect(recentMetrics[0]?.requestId).toBe('integration-test-1');
 
       // Verify cache metrics
       const cacheMetrics = await cacheCollector.getOverallMetrics();
@@ -437,10 +438,10 @@ describe('Metrics System Integration', () => {
 
       const ranking = await providerCollector.getCostRanking();
 
-      expect(ranking[0].provider).toBe('groq');
-      expect(ranking[0].rank).toBe(1);
-      expect(ranking[2].provider).toBe('anthropic');
-      expect(ranking[2].rank).toBe(3);
+      expect(ranking[0]?.provider).toBe('groq');
+      expect(ranking[0]?.rank).toBe(1);
+      expect(ranking[2]?.provider).toBe('anthropic');
+      expect(ranking[2]?.rank).toBe(3);
     });
   });
 });

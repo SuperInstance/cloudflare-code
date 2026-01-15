@@ -3,7 +3,6 @@
  * Provides authentication and authorization for protected endpoints
  */
 
-import { Hono } from 'hono';
 import { EnterpriseAuthService } from '../services/auth-service';
 import { SecurityError } from '../../packages/security-core/src/types';
 
@@ -18,12 +17,12 @@ export interface AuthContext {
 }
 
 export function createAuthMiddleware(authService: EnterpriseAuthService) {
-  return async (c: Hono, next: () => Promise<void>, options?: {
+  return async (c: any, next: () => Promise<void>, options?: {
     requireAuth?: boolean;
     requiredRoles?: string[];
     requiredPermissions?: string[];
     allowApiKey?: boolean;
-  }): Promise<void> => {
+  }): Promise<void | Response> => {
     const requireAuth = options?.requireAuth ?? false;
     const requiredRoles = options?.requiredRoles ?? [];
     const requiredPermissions = options?.requiredPermissions ?? [];
@@ -31,9 +30,9 @@ export function createAuthMiddleware(authService: EnterpriseAuthService) {
 
     try {
       // Extract authentication from different sources
-      const authHeader = c.req.header('Authorization');
-      const apiKeyHeader = c.req.header('X-API-Key');
-      const sessionId = c.req.header('X-Session-ID');
+      const authHeader = c.req?.header('Authorization');
+      const apiKeyHeader = c.req?.header('X-API-Key');
+      const sessionId = c.req?.header('X-Session-ID');
 
       let userId: string | undefined;
       let userEmail: string | undefined;
@@ -58,16 +57,18 @@ export function createAuthMiddleware(authService: EnterpriseAuthService) {
         // For demo, validate the token and extract user info
         try {
           // In production, this would properly validate the JWT
-          const tokenData = token.split('.');
-          if (tokenData.length === 3) {
-            const payload = JSON.parse(atob(tokenData[1]));
-            userId = payload.sub || 'demo-user-id';
-            userEmail = payload.email || 'demo@claudeflare.com';
-            userRole = payload.role || 'developer';
-            permissions = ['read', 'write'];
-          } else {
-            // Fallback to demo user for invalid tokens
-            throw new Error('Invalid token format');
+          if (token !== undefined) {
+            const tokenData = token.split('.');
+            if (tokenData.length === 3 && tokenData[1] !== undefined) {
+              const payload = JSON.parse(atob(tokenData[1]));
+              userId = payload.sub || 'demo-user-id';
+              userEmail = payload.email || 'demo@claudeflare.com';
+              userRole = payload.role || 'developer';
+              permissions = ['read', 'write'];
+            } else {
+              // Fallback to demo user for invalid tokens
+              throw new Error('Invalid token format');
+            }
           }
         } catch (error) {
           // For demo, fallback to demo user if token validation fails
@@ -136,7 +137,7 @@ export function createAuthMiddleware(authService: EnterpriseAuthService) {
           success: false,
           error: error.message,
           code: error.code
-        }, error.statusCode);
+        }, error.statusCode as number);
       }
 
       return c.json({
@@ -153,10 +154,10 @@ export function requireAuth(options?: {
   requiredPermissions?: string[];
   allowApiKey?: boolean;
 }) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (c: Hono, ...args: any[]) {
+    descriptor.value = async function (c: any, ...args: any[]) {
       const authService = (c as any).auth?.authService;
       if (!authService) {
         throw new Error('AuthService not available in context');
@@ -177,10 +178,10 @@ export function withAuth(options?: {
   requiredPermissions?: string[];
   allowApiKey?: boolean;
 }) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (c: Hono, ...args: any[]) {
+    descriptor.value = async function (c: any, ...args: any[]) {
       const authService = (c as any).auth?.authService;
       if (!authService) {
         throw new Error('AuthService not available in context');

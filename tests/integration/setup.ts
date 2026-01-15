@@ -2,11 +2,11 @@
  * Integration Test Setup
  */
 
-import { vi } from 'vitest';
+import { vi, beforeEach } from 'vitest';
 
 // Mock environment
-process.env.CLOUDFLARE_ACCOUNT_ID = 'test-account-id';
-process.env.ENVIRONMENT = 'test';
+(process.env as any)['CLOUDFLARE_ACCOUNT_ID'] = 'test-account-id';
+(process.env as any)['ENVIRONMENT'] = 'test';
 
 // Setup mocks
 beforeEach(() => {

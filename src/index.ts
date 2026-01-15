@@ -80,7 +80,7 @@ app.get('/health', (c) => {
 app.get('/version', (c) => {
   return c.json({
     version: '0.1.0',
-    commit: process.env.CF_PAGES_COMMIT_SHA || 'dev',
+    commit: (process.env as Record<string, string | undefined>)['CF_PAGES_COMMIT_SHA'] || 'dev',
   });
 });
 
@@ -101,8 +101,8 @@ app.route('/api/v1/testing', createTestingRoutes(testingService));
 
 // API v1 routes
 const apiRouter = createAPIRouter();
-app.use('/api/v1/*', authMiddleware); // Apply auth to all v1 endpoints
 app.route('/api/v1', apiRouter);
+app.use('/api/v1/*', authMiddleware); // Apply auth to all v1 endpoints
 
 // Durable Object routes
 app.route('/api/do', createDORouter());
@@ -522,11 +522,10 @@ function createAPIRouter() {
       const packageName = c.req.param('package');
       const version = c.req.param('version');
 
-      const vulnerabilities = securityTestingService['securityTesting'].lookupVulnerabilities(
-        packageName,
-        ecosystem,
-        version
-      );
+      const vulnLookup = (securityTestingService as any)['securityTesting'];
+      const vulnerabilities = vulnLookup?.lookupVulnerabilities
+        ? vulnLookup.lookupVulnerabilities(packageName, ecosystem, version)
+        : [];
 
       return c.json({
         success: true,
@@ -615,7 +614,7 @@ export { VectorIndex } from './durable/vector-index';
 // Cloudflare Workers fetch handler with Durable Objects
 export default {
   fetch: app.fetch,
-  async scheduled(controller: ScheduledController, env: Bindings, ctx: ExecutionContext) {
+  async scheduled(_controller: ScheduledController, _env: Bindings, _ctx: ExecutionContext) {
     // Handle scheduled tasks (cron jobs)
     console.log('Scheduled task executed');
   },

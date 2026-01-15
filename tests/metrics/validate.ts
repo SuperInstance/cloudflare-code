@@ -255,7 +255,7 @@ async function runValidation() {
     if (!byCategory[result.category]) {
       byCategory[result.category] = [];
     }
-    byCategory[result.category].push(result);
+    byCategory[result.category]?.push(result);
   }
 
   let totalPassed = 0;

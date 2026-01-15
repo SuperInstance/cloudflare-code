@@ -3,7 +3,16 @@
  * Simplified version that works with in-memory content analysis
  */
 
-import { AnalysisResult, CodeReviewConfig, Language, Issue, ReviewOptions } from '../../packages/code-review/src/types/index.js';
+import type { AnalysisResult, Language, Issue } from '../../packages/code-review/src/types/index.js';
+
+export interface CodeReviewConfig {
+  includeQuality?: boolean;
+  includeSecurity?: boolean;
+  includePerformance?: boolean;
+  includeStyle?: boolean;
+  includePractices?: boolean;
+  includeMetrics?: boolean;
+}
 
 export interface CodeReviewRequest {
   content: string;
@@ -19,11 +28,6 @@ export interface CodeReviewResponse {
 }
 
 export class CodeReviewService {
-  private languages: Set<Language> = new Set([
-    'typescript', 'javascript', 'python', 'go', 'rust',
-    'java', 'cpp', 'csharp', 'ruby', 'php', 'swift', 'kotlin',
-    'scala', 'dart'
-  ]);
 
   /**
    * Detect language from file extension and content
@@ -68,12 +72,12 @@ export class CodeReviewService {
     if (firstLines.includes('public class ') || firstLines.includes('public interface')) return 'java';
     if (firstLines.includes('#include') && firstLines.includes('<iostream>')) return 'cpp';
     if (firstLines.includes('using System')) return 'csharp';
-    if (firstLines.includes('require ') || firstLines.include('.rb')) return 'ruby';
+    if (firstLines.includes('require ') || firstLines.includes('.rb')) return 'ruby';
     if (firstLines.includes('<?php')) return 'php';
     if (firstLines.includes('func ') && firstLines.includes('{')) return 'swift';
-    if (firstLines.includes('fun ') && firstLines.include('{')) return 'kotlin';
-    if (firstLines.includes('object ') && firstLines.include('{')) return 'scala';
-    if (firstLines.includes('import ') && firstLines.include('dart:')) return 'dart';
+    if (firstLines.includes('fun ') && firstLines.includes('{')) return 'kotlin';
+    if (firstLines.includes('object ') && firstLines.includes('{')) return 'scala';
+    if (firstLines.includes('import ') && firstLines.includes('dart:')) return 'dart';
 
     return 'javascript'; // Default fallback
   }
@@ -127,7 +131,7 @@ export class CodeReviewService {
     filePath: string,
     content: string,
     language: Language,
-    config: CodeReviewConfig
+    _config: CodeReviewConfig
   ): Promise<AnalysisResult> {
     const startTime = Date.now();
 
@@ -143,7 +147,7 @@ export class CodeReviewService {
     const issues = this.detectBasicIssues(content, language, fileInfo);
 
     // Generate review metrics
-    const metrics = this.calculateBasicMetrics(content, language);
+    this.calculateBasicMetrics(content, language);
 
     return {
       context: {
@@ -153,7 +157,7 @@ export class CodeReviewService {
         commit: 'HEAD',
         author: 'unknown',
         timestamp: new Date(),
-        environment: 'worker',
+        environment: 'local',
       },
       review: {
         success: true,
@@ -191,7 +195,7 @@ export class CodeReviewService {
         documentationCoverage: 0, // Not calculated in this simplified version
       },
       security: {
-        issues: issues.filter(i => i.category === 'security'),
+        issues: issues.filter(i => i.category === 'security') as any,
         summary: {
           critical: issues.filter(i => i.category === 'security' && i.severity === 'error').length,
           high: issues.filter(i => i.category === 'security' && i.severity === 'warning').length,
@@ -205,8 +209,8 @@ export class CodeReviewService {
         bottlenecks: [],
         recommendations: this.generatePerformanceRecommendations(content),
       },
-      style: issues.filter(i => i.category === 'style'),
-      practices: issues.filter(i => i.category === 'best-practices'),
+      style: issues.filter(i => i.category === 'style') as any,
+      practices: issues.filter(i => i.category === 'best-practices') as any,
       timestamp: new Date(),
       duration: Date.now() - startTime,
     };
@@ -221,8 +225,8 @@ export class CodeReviewService {
 
     // Check for TODO comments
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line.toLowerCase().includes('todo:') || line.toLowerCase().includes('fixme:')) {
+      const line = lines[i]?.trim();
+      if (line && (line.toLowerCase().includes('todo:') || line.toLowerCase().includes('fixme:'))) {
         issues.push({
           id: `TODO-${Date.now()}-${i}`,
           ruleId: 'todo-comment',
@@ -244,7 +248,8 @@ export class CodeReviewService {
     // Check for console.log (potential debugging code in production)
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (line.includes('console.log')) {
+      if (line && line.includes('console.log')) {
+        const consoleIndex = line.indexOf('console.log');
         issues.push({
           id: `CONSOLE-LOG-${Date.now()}-${i}`,
           ruleId: 'console-log',
@@ -255,7 +260,7 @@ export class CodeReviewService {
           location: {
             path: fileInfo.path,
             line: i + 1,
-            column: line.indexOf('console.log') + 1,
+            column: consoleIndex !== -1 ? consoleIndex + 1 : 1,
           },
           suggestion: 'Remove console.log statements in production code',
           timestamp: new Date(),
@@ -265,14 +270,15 @@ export class CodeReviewService {
 
     // Check for long lines (style issue)
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].length > 120) {
+      const line = lines[i];
+      if (line && line.length > 120) {
         issues.push({
           id: `LONG-LINE-${Date.now()}-${i}`,
           ruleId: 'long-line',
           severity: 'hint',
           category: 'style',
           title: 'Line Too Long',
-          description: `Line ${i + 1} is ${lines[i].length} characters long (recommended max: 120)`,
+          description: `Line ${i + 1} is ${line.length} characters long (recommended max: 120)`,
           location: {
             path: fileInfo.path,
             line: i + 1,
@@ -286,9 +292,12 @@ export class CodeReviewService {
 
     // Check for empty lines (style issue)
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].trim() === '' && i > 0 && i < lines.length - 1) {
+      const line = lines[i];
+      const prevLine = lines[i - 1];
+      const nextLine = lines[i + 1];
+      if (line && line.trim() === '' && i > 0 && i < lines.length - 1) {
         // Check if there are multiple empty lines
-        if (lines[i - 1].trim() === '' || lines[i + 1].trim() === '') {
+        if ((prevLine && prevLine.trim() === '') || (nextLine && nextLine.trim() === '')) {
           issues.push({
             id: `EXTRA-BLANK-${Date.now()}-${i}`,
             ruleId: 'extra-blank-line',
@@ -326,8 +335,10 @@ export class CodeReviewService {
     // Check for var usage
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+      if (!line) continue;
       const varMatch = line.match(/\bvar\s+(\w+)/);
       if (varMatch) {
+        const varIndex = line.indexOf('var');
         issues.push({
           id: `VAR-USAGE-${Date.now()}-${i}`,
           ruleId: 'var-usage',
@@ -338,7 +349,7 @@ export class CodeReviewService {
           location: {
             path: fileInfo.path,
             line: i + 1,
-            column: line.indexOf('var') + 1,
+            column: varIndex !== -1 ? varIndex + 1 : 1,
           },
           suggestion: 'Use let or const instead of var',
           timestamp: new Date(),
@@ -380,8 +391,10 @@ export class CodeReviewService {
     // Check for snake_case in functions
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+      if (!line) continue;
       const functionMatch = line.match(/def\s+([A-Z][a-zA-Z0-9_]*)\s*\(/);
       if (functionMatch) {
+        const defIndex = line.indexOf('def');
         issues.push({
           id: `SNAKE-CASE-${Date.now()}-${i}`,
           ruleId: 'snake-case',
@@ -392,7 +405,7 @@ export class CodeReviewService {
           location: {
             path: fileInfo.path,
             line: i + 1,
-            column: line.indexOf('def') + 1,
+            column: defIndex !== -1 ? defIndex + 1 : 1,
           },
           suggestion: 'Rename function to snake_case format',
           timestamp: new Date(),
@@ -526,7 +539,6 @@ export class CodeReviewService {
     // Halstead volume estimate
     const n1 = (content.match(/\b[a-zA-Z_]\w*\b/g) || []).length;
     const n2 = (content.match(/[\+\-\*\/=<>!&|]/g) || []).length;
-    const N = n1 + n2;
     const vocabulary = n1 + n2;
     const length = content.replace(/\s/g, '').length;
     const volume = length * Math.log2(vocabulary);

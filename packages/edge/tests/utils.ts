@@ -86,7 +86,7 @@ export class MockKVNamespace {
 
     this.store.set(key, {
       value: stringValue,
-      expiration: options?.expirationTtl ? Date.now() + options.expirationTtl * 1000 : undefined,
+      ...(options?.expirationTtl !== undefined ? { expiration: Date.now() + options.expirationTtl * 1000 } : {}),
     });
   }
 
@@ -192,8 +192,8 @@ export class MockR2Bucket {
 
     return {
       object: {
-        async arrayBuffer() {
-          return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+        async arrayBuffer(): Promise<ArrayBuffer> {
+          return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
         },
         async text() {
           return new TextDecoder().decode(data);
@@ -294,15 +294,13 @@ export class MockD1Database {
 class D1PreparedStatement {
   private statement: string;
   private tables: Map<string, any[]>;
-  private params: any[] = [];
 
-  constructor(statement: string, tables: Map<string, any[]>) {
-    this.statement = statement;
+  constructor(_statement: string, tables: Map<string, any[]>) {
+    this.statement = _statement;
     this.tables = tables;
   }
 
-  bind(...params: any[]): D1PreparedStatement {
-    this.params = params;
+  bind(..._params: any[]): D1PreparedStatement {
     return this;
   }
 
@@ -320,6 +318,9 @@ class D1PreparedStatement {
       const match = this.statement.match(/from\s+(\w+)/i);
       if (match) {
         const tableName = match[1];
+        if (!tableName) {
+          return { results: [], success: true, meta: {} };
+        }
         const rows = this.tables.get(tableName) || [];
         return { results: rows, success: true, meta: {} };
       }
@@ -330,6 +331,9 @@ class D1PreparedStatement {
       const match = this.statement.match(/into\s+(\w+)/i);
       if (match) {
         const tableName = match[1];
+        if (!tableName) {
+          return { results: [], success: true, meta: {} };
+        }
         const table = this.tables.get(tableName);
         if (!table) {
           this.tables.set(tableName, []);
@@ -368,7 +372,7 @@ export class MockDurableObjectNamespace {
   async get(id: any): Promise<any> {
     const key = id.name || id.id;
     if (!this.instances.has(key)) {
-      this.instances.set(key, new MockDurableObjectStub(id));
+      this.instances.set(key, new MockDurableObjectStub());
     }
     return this.instances.get(key);
   }
@@ -380,9 +384,9 @@ export class MockDurableObjectNamespace {
 }
 
 class MockDurableObjectStub {
-  constructor(private id: any) {}
+  constructor() {}
 
-  async fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  async fetch(_input: RequestInfo, _init?: RequestInit): Promise<Response> {
     return new Response(JSON.stringify({ ok: true }), {
       headers: { 'Content-Type': 'application/json' },
     });
@@ -430,7 +434,7 @@ export function mockEnv(): Env {
     STORAGE_R2: new MockR2Bucket() as any,
     DB: new MockD1Database() as any,
     QUEUE_PRODUCER: new MockQueueProducer() as any,
-    ENVIRONMENT: 'test',
+    ENVIRONMENT: 'development' as const,
     API_VERSION: '0.1.0',
   };
 }

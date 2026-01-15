@@ -15,14 +15,14 @@ describe('End-to-End Chat Flow', () => {
       const healthResponse = await app.request('/health');
 
       expect(healthResponse.status).toBe(200);
-      const health = await healthResponse.json();
+      const health = await healthResponse.json() as any;
       expect(health.status).toBe('healthy');
 
       // Step 2: User lists available models
       const modelsResponse = await app.request('/v1/models');
 
       expect(modelsResponse.status).toBe(200);
-      const modelsData = await modelsResponse.json();
+      const modelsData = await modelsResponse.json() as any;
       expect(modelsData.models.length).toBeGreaterThan(0);
 
       const selectedModel = modelsData.models[0];
@@ -46,7 +46,7 @@ describe('End-to-End Chat Flow', () => {
 
       expect(chatResponse.status).toBe(200);
 
-      const chatData = await chatResponse.json();
+      const chatData = await chatResponse.json() as any;
 
       // Verify response structure
       expect(chatData.id).toBeDefined();
@@ -90,7 +90,7 @@ describe('End-to-End Chat Flow', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.content).toBeDefined();
       expect(data.content.toLowerCase()).toContain('alice');
@@ -112,7 +112,7 @@ describe('End-to-End Chat Flow', () => {
 
       expect(response.status).toBe(400);
 
-      const error = await response.json();
+      const error = await response.json() as any;
 
       expect(error.error).toBeDefined();
       expect(error.error.code).toBeDefined();
@@ -244,7 +244,7 @@ describe('End-to-End Chat Flow', () => {
 describe('End-to-End Model Selection', () => {
   it('should handle requests for different providers', async () => {
     const modelsResponse = await app.request('/v1/models');
-    const modelsData = await modelsResponse.json();
+    const modelsData = await modelsResponse.json() as any;
 
     // Test with different providers
     const providers = [...new Set(modelsData.models.map((m: any) => m.provider))];
@@ -280,7 +280,7 @@ describe('End-to-End Error Handling', () => {
 
     expect(response.status).toBe(400);
 
-    const error = await response.json();
+    const error = await response.json() as any;
 
     expect(error.error).toBeDefined();
   });

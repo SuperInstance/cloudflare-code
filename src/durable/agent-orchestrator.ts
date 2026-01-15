@@ -10,10 +10,11 @@ export class AgentOrchestrator {
   constructor(state: DurableObjectState) {
     this.storage = state.storage;
     // Load state from storage
-    const savedCounter = this.storage.get<number>('counter');
-    if (savedCounter !== undefined) {
-      this.counter = savedCounter;
-    }
+    this.storage.get<number>('counter').then((savedCounter) => {
+      if (savedCounter !== undefined) {
+        this.counter = savedCounter;
+      }
+    });
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -36,9 +37,11 @@ export class AgentOrchestrator {
     }
   }
 
-  private async handleWebSocket(request: Request): Promise<Response> {
+  private async handleWebSocket(_request: Request): Promise<Response> {
     // Mock WebSocket implementation for testing
-    const [client, server] = Object.values(new WebSocketPair());
+    const pair = Object.values(new WebSocketPair());
+    const client = pair[0] as WebSocket;
+    const server = pair[1] as WebSocket;
 
     server.accept();
     server.send(JSON.stringify({ type: 'connected', counter: this.counter }));

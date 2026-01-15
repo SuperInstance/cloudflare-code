@@ -4,7 +4,7 @@
  * Mock LLM provider implementations for testing
  */
 
-import type { ChatRequest, ChatResponse } from '../../src/types';
+import type { ChatRequest, ChatResponse, ChatMessage } from '../../src/types';
 
 /**
  * Base mock provider interface
@@ -50,11 +50,11 @@ export class MockAnthropicProvider implements MockProvider {
 
   private generateResponse(request: ChatRequest): string {
     const lastMessage = request.messages[request.messages.length - 1];
-    return `[Anthropic] Response to: ${lastMessage.content}`;
+    return `[Anthropic] Response to: ${lastMessage?.content ?? ''}`;
   }
 
-  private estimateTokens(messages: typeof request.messages): number {
-    return messages.reduce((acc, msg) => acc + Math.ceil(msg.content.length / 4), 10);
+  private estimateTokens(messages: ChatMessage[]): number {
+    return messages.reduce((acc: number, msg: ChatMessage) => acc + Math.ceil(msg.content.length / 4), 10);
   }
 
   private async simulateLatency(): Promise<void> {
@@ -95,11 +95,11 @@ export class MockOpenAIProvider implements MockProvider {
 
   private generateResponse(request: ChatRequest): string {
     const lastMessage = request.messages[request.messages.length - 1];
-    return `[OpenAI] Response to: ${lastMessage.content}`;
+    return `[OpenAI] Response to: ${lastMessage?.content ?? ''}`;
   }
 
-  private estimateTokens(messages: typeof request.messages): number {
-    return messages.reduce((acc, msg) => acc + Math.ceil(msg.content.length / 4), 10);
+  private estimateTokens(messages: ChatMessage[]): number {
+    return messages.reduce((acc: number, msg: ChatMessage) => acc + Math.ceil(msg.content.length / 4), 10);
   }
 
   private async simulateLatency(): Promise<void> {
@@ -140,11 +140,11 @@ export class MockGroqProvider implements MockProvider {
 
   private generateResponse(request: ChatRequest): string {
     const lastMessage = request.messages[request.messages.length - 1];
-    return `[Groq] Response to: ${lastMessage.content}`;
+    return `[Groq] Response to: ${lastMessage?.content ?? ''}`;
   }
 
-  private estimateTokens(messages: typeof request.messages): number {
-    return messages.reduce((acc, msg) => acc + Math.ceil(msg.content.length / 4), 10);
+  private estimateTokens(messages: ChatMessage[]): number {
+    return messages.reduce((acc: number, msg: ChatMessage) => acc + Math.ceil(msg.content.length / 4), 10);
   }
 
   private async simulateLatency(): Promise<void> {
@@ -179,9 +179,10 @@ export class SlowMockProvider implements MockProvider {
   async chat(request: ChatRequest): Promise<ChatResponse> {
     await new Promise(resolve => setTimeout(resolve, this.latency));
 
+    const lastMessage = request.messages[request.messages.length - 1];
     return {
       id: `slow-${crypto.randomUUID()}`,
-      content: `Finally responded to: ${request.messages[request.messages.length - 1].content}`,
+      content: `Finally responded to: ${lastMessage?.content ?? ''}`,
       model: request.model || 'slow-model',
       provider: 'anthropic',
       finishReason: 'stop',
@@ -221,15 +222,21 @@ export class MockRequestRouter {
     this.providers = providers;
   }
 
-  async route(request: ChatRequest): Promise<MockProvider> {
+  async route(_request: ChatRequest): Promise<MockProvider> {
     // Simple round-robin routing
     const provider = this.providers[this.currentIndex % this.providers.length];
+    if (!provider) {
+      throw new Error('No provider available');
+    }
     this.currentIndex++;
 
     // Check if provider is healthy
     if (provider.shouldFail) {
       // Try next provider
-      return this.providers[(this.currentIndex) % this.providers.length];
+      const nextProvider = this.providers[(this.currentIndex) % this.providers.length];
+      if (nextProvider) {
+        return nextProvider;
+      }
     }
 
     return provider;
@@ -377,15 +384,25 @@ export class MockLoadBalancer {
       throw new Error('No healthy providers available');
     }
 
-    const [name, entry] = healthyProviders[0];
-    const breaker = this.circuitBreakers.get(name)!;
+    const firstProvider = healthyProviders[0];
+    if (!firstProvider) {
+      throw new Error('Invalid provider state');
+    }
+    const [name, entry] = firstProvider;
+    if (!name || !entry) {
+      throw new Error('Invalid provider state');
+    }
+    const breaker = this.circuitBreakers.get(name);
+    if (!breaker) {
+      throw new Error('Circuit breaker not found');
+    }
 
     // Increment load
     entry.load++;
 
     try {
-      const result = await breaker.execute(() => entry.provider.chat(request));
-      return result;
+      const result = await breaker.execute(async () => entry.provider.chat(request));
+      return result as ChatResponse;
     } finally {
       // Decrement load
       entry.load--;
@@ -441,9 +458,10 @@ export function createCustomProvider(config: {
 
       await new Promise(resolve => setTimeout(resolve, config.latency || 100));
 
+      const lastMessage = request.messages[request.messages.length - 1];
       return {
         id: `${config.name}-${crypto.randomUUID()}`,
-        content: `[${config.name}] Response to: ${request.messages[request.messages.length - 1].content}`,
+        content: `[${config.name}] Response to: ${lastMessage?.content ?? ''}`,
         model: request.model || 'custom-model',
         provider: config.name as any,
         finishReason: 'stop',

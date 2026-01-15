@@ -2,7 +2,7 @@
  * Unit Tests for Provider Registry
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   createProviderRegistry,
   type ProviderClient,

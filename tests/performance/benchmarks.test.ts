@@ -275,7 +275,7 @@ describe('Performance Benchmarks', () => {
         )
       );
 
-      const duration = Date.now() - start;
+      Date.now() - start;
 
       expect(responses.length).toBe(burstSize);
 
@@ -341,7 +341,7 @@ describe('Performance Benchmarks', () => {
 
       const avg = durations.reduce((a, b) => a + b, 0) / samples;
       const max = Math.max(...durations);
-      const min = Math.min(...durations);
+      Math.min(...durations);
 
       // Response times should be consistent (max < 3x avg)
       expect(max).toBeLessThan(avg * 3);

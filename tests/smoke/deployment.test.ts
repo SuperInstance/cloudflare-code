@@ -14,7 +14,7 @@ describe('Deployment Smoke Tests', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await response.json() as { status?: string; timestamp?: string; version?: string };
 
       expect(data.status).toBeDefined();
       expect(data.timestamp).toBeDefined();
@@ -26,7 +26,7 @@ describe('Deployment Smoke Tests', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.name).toBeDefined();
       expect(data.version).toBeDefined();
@@ -38,7 +38,7 @@ describe('Deployment Smoke Tests', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.status).toBeDefined();
       expect(data.services).toBeDefined();
@@ -49,7 +49,7 @@ describe('Deployment Smoke Tests', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.models).toBeDefined();
       expect(Array.isArray(data.models)).toBe(true);
@@ -61,7 +61,7 @@ describe('Deployment Smoke Tests', () => {
     it('should have all required services operational', async () => {
       const response = await app.request('/v1/status');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.services).toBeDefined();
 
@@ -72,7 +72,7 @@ describe('Deployment Smoke Tests', () => {
     it('should have healthy status indicator', async () => {
       const response = await app.request('/health');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(['healthy', 'degraded', 'unhealthy']).toContain(data.status);
     });
@@ -80,7 +80,7 @@ describe('Deployment Smoke Tests', () => {
     it('should report uptime', async () => {
       const response = await app.request('/health');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.uptime).toBeDefined();
       expect(data.uptime).toBeGreaterThanOrEqual(0);
@@ -133,7 +133,7 @@ describe('Deployment Smoke Tests', () => {
 
       expect(response.status).toBe(404);
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.error).toBeDefined();
       expect(data.error.code).toBe('NOT_FOUND');
@@ -150,7 +150,7 @@ describe('Deployment Smoke Tests', () => {
     it('should return proper error response structure', async () => {
       const response = await app.request('/v1/undefined');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.error).toBeDefined();
       expect(data.error.code).toBeDefined();
@@ -164,7 +164,7 @@ describe('Deployment Smoke Tests', () => {
     it('should have at least one model per provider', async () => {
       const response = await app.request('/v1/models');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.models.length).toBeGreaterThan(0);
 
@@ -177,7 +177,7 @@ describe('Deployment Smoke Tests', () => {
     it('should include model capabilities', async () => {
       const response = await app.request('/v1/models');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       data.models.forEach((model: any) => {
         expect(model.capabilities).toBeDefined();
@@ -190,7 +190,7 @@ describe('Deployment Smoke Tests', () => {
     it('should have valid model IDs', async () => {
       const response = await app.request('/v1/models');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       data.models.forEach((model: any) => {
         expect(model.id).toBeDefined();
@@ -213,7 +213,7 @@ describe('Deployment Smoke Tests', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.content).toBeDefined();
       expect(data.id).toBeDefined();
@@ -231,7 +231,7 @@ describe('Deployment Smoke Tests', () => {
     it('should not expose internal errors', async () => {
       const response = await app.request('/v1/undefined');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       // In production, should not include stack traces
       expect(data.error.stack).toBeUndefined();
@@ -242,7 +242,7 @@ describe('Deployment Smoke Tests', () => {
     it('should have version information', async () => {
       const response = await app.request('/');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.version).toBeDefined();
       expect(typeof data.version).toBe('string');
@@ -251,7 +251,7 @@ describe('Deployment Smoke Tests', () => {
     it('should have environment information', async () => {
       const response = await app.request('/health');
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       expect(data.environment).toBeDefined();
       expect(['development', 'staging', 'production', 'test']).toContain(data.environment);
