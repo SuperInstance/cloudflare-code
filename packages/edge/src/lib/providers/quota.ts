@@ -79,7 +79,7 @@ export interface QuotaAlert {
  * Quota Tracker class
  */
 export class QuotaTracker {
-  private config: Required<QuotaConfig>;
+  private config: QuotaConfig;
   private quotas: Map<string, QuotaInfo> = new Map();
   private usageHistory: UsageRecord[] = [];
   private alerts: QuotaAlert[] = [];

@@ -13,9 +13,6 @@ import type { ChatRequest, ChatResponse } from '../../types/index';
 import type {
   ProviderClient,
   ProviderScore,
-  QuotaInfo,
-  HealthStatus,
-  ProviderCapabilities,
 } from './base';
 import { ProviderRegistry } from './registry';
 import { ResilientWrapper, createResilientWrapper } from './circuit-breaker';
@@ -121,7 +118,7 @@ export class RequestRouter {
    * Route request to optimal provider
    */
   async route(request: ChatRequest): Promise<ChatResponse> {
-    const startTime = Date.now();
+    void Date.now(); // Reserved for future latency tracking
 
     // Select provider based on strategy
     const routingResult = await this.selectProvider(request);
@@ -317,7 +314,7 @@ export class RequestRouter {
     const capabilities = provider.capabilities;
 
     // Cost score (lower is better, invert)
-    const costScore = 1 / (capabilities.inputCostPer1K + capabilities.outputCostPer1K + 0.01);
+    const costScore = 1 / (capabilities.inputCostPer1M + capabilities.outputCostPer1M + 0.01);
 
     // Latency score (lower is better, invert)
     const latencyScore = 1 / (health.avgLatency + 0.01);

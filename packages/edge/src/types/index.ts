@@ -106,7 +106,7 @@ export interface StatusResponse {
 /**
  * LLM Provider
  */
-export type LLMProvider = 'anthropic' | 'openai' | 'groq' | 'cerebras' | 'cloudflare';
+export type LLMProvider = 'anthropic' | 'openai' | 'groq' | 'cerebras' | 'cloudflare' | 'openrouter';
 
 /**
  * Chat Message Role
