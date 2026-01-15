@@ -14,12 +14,12 @@ export interface QuotaConfig {
   /** KV namespace for persistent storage */
   kv?: KVNamespace;
   /** Alert thresholds (0-1) */
-  warningThreshold: number;
-  criticalThreshold: number;
+  warningThreshold?: number;
+  criticalThreshold?: number;
   /** Enable predictive capacity planning */
-  enablePrediction: boolean;
+  enablePrediction?: boolean;
   /** Prediction window in hours */
-  predictionWindow: number;
+  predictionWindow?: number;
 }
 
 /**

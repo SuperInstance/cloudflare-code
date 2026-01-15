@@ -63,7 +63,8 @@ export class R2Storage {
 
       if (typeof data === 'string') {
         const encoder = new TextEncoder();
-        body = encoder.encode(data).buffer;
+        const uint8Array = encoder.encode(data);
+        body = uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
       } else if (data instanceof ArrayBuffer) {
         body = data;
       } else {
@@ -80,7 +81,7 @@ export class R2Storage {
       }
 
       // Prepare metadata
-      const r2Metadata: R2ObjectMetadata = {
+      const r2Metadata: Record<string, string> = {
         ...metadata,
         timestamp: String(Date.now()),
         compressed: String(this.options.compression),
@@ -127,8 +128,9 @@ export class R2Storage {
 
       let data = await object.arrayBuffer();
 
-      // Decompress if needed
-      if (object.metadata?.compressed === 'true') {
+      // Decompress if needed - metadata is accessed via customProperties in some versions
+      const customProps = (object as unknown as { customProperties?: Record<string, string> }).customProperties;
+      if (customProps?.compressed === 'true') {
         data = await this.decompress(data);
       }
 
@@ -222,13 +224,17 @@ export class R2Storage {
    */
   async list(prefix?: string, limit?: number): Promise<R2Objects> {
     try {
-      return await this.bucket.list({
-        prefix,
-        limit,
-      });
+      const options: R2ListOptions = {};
+      if (prefix !== undefined) {
+        options.prefix = prefix;
+      }
+      if (limit !== undefined) {
+        options.limit = limit;
+      }
+      return await this.bucket.list(options);
     } catch (error) {
       console.error(`R2 list failed for prefix ${prefix}:`, error);
-      return { objects: [], truncated: false };
+      return { objects: [], delimitedPrefixes: [], truncated: false };
     }
   }
 
@@ -255,7 +261,8 @@ export class R2Storage {
       }
 
       const data = await object.arrayBuffer();
-      await this.put(destination, data, object.metadata as Record<string, string>);
+      const customProps = (object as unknown as { customProperties?: Record<string, string> }).customProperties;
+      await this.put(destination, data, customProps || {});
     } catch (error) {
       console.error(`R2 copy failed from ${source} to ${destination}:`, error);
       throw error;
@@ -356,12 +363,12 @@ export class R2Storage {
       data?: unknown;
     }>
   ): Promise<void> {
-    const date = new Date().toISOString().split('T')[0];
-    const key = `logs/${sessionId}/${date}.json`;
+    const dateStr = new Date().toISOString().split('T')[0] ?? new Date().toISOString();
+    const key = `logs/${sessionId}/${dateStr}.json`;
 
     await this.put(key, logs, {
       sessionId,
-      date,
+      date: dateStr,
       logCount: String(logs.length),
       tier: 'cold',
     });
@@ -501,7 +508,8 @@ export class R2Storage {
   private async maybeCompress(data: string): Promise<ArrayBuffer> {
     if (!this.options.compression) {
       const encoder = new TextEncoder();
-      return encoder.encode(data).buffer;
+      const uint8Array = encoder.encode(data);
+      return uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
     }
 
     try {
@@ -510,7 +518,7 @@ export class R2Storage {
 
       // Note: CompressionStream might not be available in all environments
       if (typeof CompressionStream === 'undefined') {
-        return uint8Array.buffer;
+        return uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
       }
 
       const compressed = new Response(uint8Array).body!

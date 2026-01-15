@@ -14,21 +14,6 @@ import type {
 } from './types';
 
 /**
- * Convert time unit to milliseconds
- */
-function timeUnitToMs(unit: string, value: number): number {
-  const units: Record<string, number> = {
-    second: 1000,
-    minute: 60000,
-    hour: 3600000,
-    day: 86400000,
-    week: 604800000,
-    month: 2592000000, // 30 days
-  };
-  return value * (units[unit] || 1000);
-}
-
-/**
  * Token Bucket Algorithm
  *
  * Tokens are added at a fixed rate until the bucket is full.
@@ -38,7 +23,6 @@ function timeUnitToMs(unit: string, value: number): number {
 export class TokenBucketAlgorithm {
   private capacity: number;
   private refillRate: number; // tokens per second
-  private burst?: number;
   private state: Map<string, TokenBucketState>;
   private storage?: DurableObjectStorage;
 
@@ -50,9 +34,10 @@ export class TokenBucketAlgorithm {
   ) {
     this.capacity = capacity;
     this.refillRate = refillRate;
-    this.burst = burst;
     this.state = new Map();
-    this.storage = storage;
+    if (storage !== undefined) {
+      this.storage = storage;
+    }
   }
 
   /**
@@ -88,13 +73,18 @@ export class TokenBucketAlgorithm {
         lastRefill: now,
         capacity: this.capacity,
         refillRate: this.refillRate,
-        burst: burstConfig?.burstSize,
+        ...(burstConfig?.burstSize !== undefined ? { burst: burstConfig.burstSize } : {}),
       };
       this.state.set(identifier, state);
     }
 
     // Refill tokens based on elapsed time
     this.refill(state);
+
+    // Verify state is still valid after refill
+    if (!state) {
+      throw new Error('State became undefined after refill');
+    }
 
     // Check if in burst recovery
     if (burstConfig?.enabled && state.burst) {
@@ -125,15 +115,21 @@ export class TokenBucketAlgorithm {
     const tokensNeeded = this.capacity - state.tokens;
     const resetMs = (tokensNeeded / this.refillRate) * 1000;
 
-    return {
+    const result: RateLimitDecision = {
       allowed,
       remaining: Math.floor(remaining),
       limit: state.capacity,
       resetTime: now + resetMs,
       resetIn: Math.floor(resetMs),
       currentUsage: Math.floor(state.capacity - state.tokens),
-      retryAfter: allowed ? undefined : Math.ceil(resetMs / 1000),
     };
+
+    // Conditionally add retryAfter
+    if (!allowed) {
+      result.retryAfter = Math.ceil(resetMs / 1000);
+    }
+
+    return result;
   }
 
   /**
