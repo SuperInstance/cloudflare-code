@@ -77,7 +77,9 @@ export class RateLimitAnalytics {
   private currentWindow: AnalyticsDataPoint;
 
   constructor(options: AnalyticsOptions = {}) {
-    this.kv = options.kv;
+    if (options.kv !== undefined) {
+      this.kv = options.kv;
+    }
     this.options = {
       enablePersistence: options.enablePersistence ?? true,
       retention: options.retention ?? 7 * 24 * 60 * 60, // 7 days
@@ -96,12 +98,12 @@ export class RateLimitAnalytics {
       timestamp: event.timestamp,
       identifier: event.identifier,
       scope: event.scope,
-      tier: event.tier,
-      endpoint: event.endpoint,
+      ...(event.tier !== undefined ? { tier: event.tier } : {}),
+      ...(event.endpoint !== undefined ? { endpoint: event.endpoint } : {}),
       allowed: event.type === 'allow',
       remaining: event.decision?.remaining ?? 0,
       limit: event.decision?.limit ?? 0,
-      metadata: event.metadata,
+      ...(event.metadata !== undefined ? { metadata: event.metadata } : {}),
     };
 
     this.events.push(entry);
@@ -126,7 +128,7 @@ export class RateLimitAnalytics {
   async getAnalytics(
     windowStart: number,
     windowEnd: number = Date.now()
-  ): Promise<RateLimitAnalytics> {
+  ): Promise<RateLimitAnalyticsType> {
     const filteredEvents = this.events.filter(
       (e) => e.timestamp >= windowStart && e.timestamp <= windowEnd
     );
@@ -174,8 +176,8 @@ export class RateLimitAnalytics {
       requestsByTier,
       requestsByScope,
       requestsByEndpoint,
-      peakUsageTime: peakTime,
-      peakRPS: peakRPS,
+      peakUsageTime: peakTime ?? 0,
+      peakRPS,
     };
   }
 
@@ -194,11 +196,15 @@ export class RateLimitAnalytics {
     const allowedRequests = identifierEvents.filter((e) => e.allowed).length;
     const blockedRequests = identifierEvents.filter((e) => !e.allowed).length;
 
-    const firstRequest = sortedEvents[0].timestamp;
-    const lastRequest = sortedEvents[sortedEvents.length - 1].timestamp;
+    const firstEvent = sortedEvents[0];
+    if (!firstEvent) return null;
+    const firstRequest = firstEvent.timestamp;
 
-    const currentUsage = sortedEvents[sortedEvents.length - 1].limit -
-      sortedEvents[sortedEvents.length - 1].remaining;
+    const lastEvent = sortedEvents[sortedEvents.length - 1];
+    if (!lastEvent) return null;
+    const lastRequest = lastEvent.timestamp;
+
+    const currentUsage = lastEvent.limit - lastEvent.remaining;
 
     const peakUsage = Math.max(
       ...identifierEvents.map((e) => e.limit - e.remaining)

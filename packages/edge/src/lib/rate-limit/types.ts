@@ -511,6 +511,11 @@ export interface RateLimitMiddlewareOptions {
   config: RateLimitConfig;
 
   /**
+   * KV namespace for persistence (optional)
+   */
+  kv?: KVNamespace;
+
+  /**
    * Extract identifier from request
    */
   identifierGenerator: (c: import('hono').Context) => string | Promise<string>;

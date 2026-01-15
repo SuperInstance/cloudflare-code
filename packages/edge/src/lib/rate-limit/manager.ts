@@ -23,6 +23,7 @@ import type {
   RateLimitManagerOptions,
   BurstConfig,
   RateLimitEvent,
+  RateLimitAlgorithm,
 } from './types';
 
 /**
@@ -152,7 +153,13 @@ const DEFAULT_ENDPOINT_LIMITS: EndpointRateLimitConfig[] = [
  * Manages rate limiting across multiple scopes and tiers.
  */
 export class RateLimitManager {
-  private options: Required<Omit<RateLimitManagerOptions, 'doNamespace'>>;
+  private options: Omit<RateLimitManagerOptions, 'doNamespace'> & {
+    defaultAlgorithm: RateLimitAlgorithm;
+    enableAnalytics: boolean;
+    enableDistributed: boolean;
+    gracefulDegradation: boolean;
+    ttl: number;
+  };
   private tiers: Map<SubscriptionTier, TierConfig>;
   private endpointLimits: EndpointRateLimitConfig[];
   private customRules: Map<string, RateLimitRule>;
@@ -169,10 +176,12 @@ export class RateLimitManager {
       enableDistributed: options.enableDistributed ?? true,
       gracefulDegradation: options.gracefulDegradation ?? true,
       ttl: options.ttl ?? 3600,
-      kv: options.kv,
+      ...(options.kv !== undefined ? { kv: options.kv } : {}),
     };
 
-    this.doNamespace = options.doNamespace;
+    if (options.doNamespace !== undefined) {
+      this.doNamespace = options.doNamespace;
+    }
     this.tiers = new Map(Object.entries(DEFAULT_TIERS) as [SubscriptionTier, TierConfig][]);
     this.endpointLimits = DEFAULT_ENDPOINT_LIMITS;
     this.customRules = new Map();
@@ -247,14 +256,14 @@ export class RateLimitManager {
       type: finalDecision.allowed ? 'allow' : 'block',
       scope,
       identifier,
-      endpoint,
+      ...(endpoint !== undefined ? { endpoint } : {}),
       tier,
       decision: finalDecision,
     });
 
     return {
       decision: finalDecision,
-      rule: appliedRule,
+      ...(appliedRule !== undefined ? { rule: appliedRule } : {}),
       checkedRules,
     };
   }
@@ -376,7 +385,7 @@ export class RateLimitManager {
    * Reset all rate limits
    */
   async resetAll(): Promise<void> {
-    for (const limiter of this.limiters.values()) {
+    for (const _limiter of this.limiters.values()) {
       // Reset each limiter (implementation specific)
     }
 
@@ -441,9 +450,7 @@ export class RateLimitManager {
 
     // Create limiter if not exists
     if (!limiter) {
-      const algorithm =
-        rule.config.algorithm || this.options.defaultAlgorithm;
-
+      // Algorithm will be determined by the limiter creation methods
       if (this.options.enableDistributed && this.doNamespace) {
         // Use distributed DO-based limiter
         limiter = await this.createDistributedLimiter(
@@ -471,7 +478,7 @@ export class RateLimitManager {
    * Create local rate limiter
    */
   private createLocalLimiter(
-    key: string,
+    _key: string,
     config: RateLimitConfig,
     tierConfig: TierConfig
   ): TokenBucketAlgorithm | SlidingWindowAlgorithm {
@@ -506,7 +513,7 @@ export class RateLimitManager {
 
     try {
       const stub = this.doNamespace.get(
-        this.getDOId(key)
+        this.doNamespace.idFromName(this.getDOId(key))
       );
 
       const response = await stub.fetch(
@@ -521,9 +528,11 @@ export class RateLimitManager {
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { decision?: TokenBucketAlgorithm | SlidingWindowAlgorithm };
         // Return decision from DO
-        return data.decision;
+        if (data.decision) {
+          return data.decision;
+        }
       }
     } catch (error) {
       console.error('Distributed limiter error:', error);
@@ -563,9 +572,9 @@ export class RateLimitManager {
    */
   private async updateStats(
     identifier: string,
-    scope: RateLimitScope,
-    tier: SubscriptionTier,
-    endpoint: string | undefined,
+    _scope: RateLimitScope,
+    _tier: SubscriptionTier,
+    _endpoint: string | undefined,
     decision: RateLimitDecision
   ): Promise<void> {
     let stats = this.stats.get(identifier);
@@ -625,7 +634,7 @@ export class RateLimitManager {
   private matchEndpoint(
     endpoint: string,
     pattern: string | RegExp,
-    method: string
+    _method: string
   ): boolean {
     if (pattern instanceof RegExp) {
       return pattern.test(endpoint);

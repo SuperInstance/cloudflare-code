@@ -11,7 +11,6 @@ import { QuotaManager } from './quota';
 import type {
   RateLimitDecision,
   RateLimitConfig,
-  RateLimitScope,
   SubscriptionTier,
   RateLimitMiddlewareOptions,
   RateLimitResult,
@@ -101,12 +100,12 @@ function extractTier(c: Context): SubscriptionTier {
  */
 export function rateLimit(options: RateLimitMiddlewareOptions) {
   const manager = new RateLimitManager({
-    kv: options.config.kv as KVNamespace,
-    defaultAlgorithm: options.config.algorithm,
+    ...(options.kv !== undefined ? { kv: options.kv } : {}),
+    ...(options.config.algorithm !== undefined ? { defaultAlgorithm: options.config.algorithm } : {}),
   });
 
   const quotaManager = new QuotaManager({
-    kv: options.config.kv as KVNamespace,
+    ...(options.kv !== undefined ? { kv: options.kv } : {}),
   });
 
   return async (c: Context, next: Next) => {
@@ -218,8 +217,8 @@ export function rateLimit(options: RateLimitMiddlewareOptions) {
       // Release concurrent request quota after response
       c.res.headers.set('X-Concurrent-Release', 'true');
       const originalJson = c.json.bind(c);
-      c.json = async (data, status) => {
-        await quotaManager.releaseConcurrent(identifier, tier);
+      c.json = (data, status) => {
+        void quotaManager.releaseConcurrent(identifier, tier);
         return originalJson(data, status);
       };
     }
@@ -268,7 +267,7 @@ export function rateLimitHierarchical(config: {
   globalLimit?: RateLimitConfig;
 }) {
   const manager = new RateLimitManager({
-    kv: config.ipLimit?.kv as KVNamespace,
+    ...(config.ipLimit?.kv !== undefined ? { kv: config.ipLimit.kv } : {}),
   });
 
   return async (c: Context, next: Next) => {
@@ -424,7 +423,12 @@ export function rateLimitErrorHandler(
       </body>
     </html>
     `,
-    429
+    {
+      status: 429,
+      headers: {
+        'Retry-After': (decision.retryAfter || Math.ceil(decision.resetIn / 1000)).toString(),
+      },
+    }
   );
 }
 
@@ -455,7 +459,7 @@ export function createRateLimiter(
     rateLimit({
       config,
       identifierGenerator,
-      tierGenerator,
+      ...(tierGenerator !== undefined ? { tierGenerator } : {}),
       addHeaders: true,
       logEvents: false,
       ...options,

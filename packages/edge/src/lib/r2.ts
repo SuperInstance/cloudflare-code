@@ -544,18 +544,12 @@ export class R2Storage {
         .pipeThrough(new CompressionStream('gzip'));
       const arrayBuffer = await new Response(compressed).arrayBuffer();
 
-      // Ensure result is ArrayBuffer
-      if (arrayBuffer instanceof ArrayBuffer) {
-        return arrayBuffer;
-      }
-      // Handle SharedArrayBuffer case
-      const result = new ArrayBuffer(arrayBuffer.byteLength);
-      new Uint8Array(result).set(new Uint8Array(arrayBuffer));
-      return result;
+      // Ensure result is ArrayBuffer (handle SharedArrayBuffer case)
+      return toArrayBuffer(new Uint8Array(arrayBuffer));
     } catch (error) {
       console.warn('Compression failed, storing uncompressed:', error);
       const encoder = new TextEncoder();
-      return encoder.encode(data).buffer;
+      return toArrayBuffer(encoder.encode(data));
     }
   }
 
