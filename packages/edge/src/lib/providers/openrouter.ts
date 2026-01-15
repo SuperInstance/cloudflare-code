@@ -20,7 +20,6 @@ import type { ChatRequest, ChatResponse } from '../../types/index';
 import {
   estimateChatTokens,
   normalizeError,
-  ProviderErrorType,
 } from './base';
 
 /**
@@ -369,7 +368,10 @@ export class OpenRouterProvider implements ProviderClient {
         try {
           const json = trimmed.slice(6);
           const data = JSON.parse(json) as OpenRouterStreamResponse;
-          yield data.choices[0];
+          const choice = data.choices[0];
+          if (choice) {
+            yield choice;
+          }
         } catch (e) {
           // Skip invalid JSON
           continue;
@@ -382,32 +384,35 @@ export class OpenRouterProvider implements ProviderClient {
    * Handle error response from OpenRouter API
    */
   private async handleErrorResponse(response: Response): Promise<never> {
-    const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+    const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } })) as { error?: { message?: string } };
 
     if (response.status === 401) {
-      throw new Error(`OpenRouter authentication failed: ${error.error?.message || 'Invalid API key'}`);
+      throw new Error(`OpenRouter authentication failed: ${errorData.error?.message || 'Invalid API key'}`);
     } else if (response.status === 429) {
-      throw new Error(`OpenRouter rate limit exceeded: ${error.error?.message || 'Too many requests'}`);
+      throw new Error(`OpenRouter rate limit exceeded: ${errorData.error?.message || 'Too many requests'}`);
     } else if (response.status === 400) {
-      throw new Error(`OpenRouter invalid request: ${error.error?.message || 'Bad request'}`);
+      throw new Error(`OpenRouter invalid request: ${errorData.error?.message || 'Bad request'}`);
     } else if (response.status === 402) {
-      throw new Error(`OpenRouter credit exhausted: ${error.error?.message || 'Insufficient credits'}`);
+      throw new Error(`OpenRouter credit exhausted: ${errorData.error?.message || 'Insufficient credits'}`);
     } else {
-      throw new Error(`OpenRouter API error: ${response.status} ${error.error?.message || 'Unknown error'}`);
+      throw new Error(`OpenRouter API error: ${response.status} ${errorData.error?.message || 'Unknown error'}`);
     }
   }
 
   /**
    * Transform OpenRouter API response to standard format
    */
-  private transformResponse(data: OpenRouterAPIResponse, model: string): ChatResponse {
+  private transformResponse(data: OpenRouterAPIResponse, _model: string): ChatResponse {
     const choice = data.choices[0];
+    if (!choice) {
+      throw new Error('Invalid response: no choices returned');
+    }
 
     return {
       id: data.id,
       content: choice.message.content,
       model: data.model,
-      provider: this.name,
+      provider: 'openrouter' as const,
       finishReason: choice.finish_reason === 'stop' ? 'stop' : 'length',
       usage: {
         promptTokens: data.usage.prompt_tokens,

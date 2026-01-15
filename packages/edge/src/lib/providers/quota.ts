@@ -5,7 +5,6 @@
  * Supports daily/monthly resets, predictive capacity planning, and alerts.
  */
 
-import type { Env } from '../../types/index';
 import type { ProviderClient, QuotaInfo } from './base';
 
 /**
@@ -89,10 +88,10 @@ export class QuotaTracker {
   constructor(config: QuotaConfig = {}) {
     this.config = {
       kv: config.kv,
-      warningThreshold: config.warningThreshold || 0.8, // 80%
-      criticalThreshold: config.criticalThreshold || 0.95, // 95%
+      warningThreshold: config.warningThreshold ?? 0.8, // 80%
+      criticalThreshold: config.criticalThreshold ?? 0.95, // 95%
       enablePrediction: config.enablePrediction ?? true,
-      predictionWindow: config.predictionWindow || 24, // 24 hours
+      predictionWindow: config.predictionWindow ?? 24, // 24 hours
     };
   }
 
@@ -216,7 +215,7 @@ export class QuotaTracker {
   async getAllQuotas(): Promise<Map<string, QuotaInfo>> {
     const quotas = new Map<string, QuotaInfo>();
 
-    for (const [name, quota] of this.quotas.entries()) {
+    for (const [name, _quota] of this.quotas.entries()) {
       const updated = await this.getQuota(name);
       if (updated) {
         quotas.set(name, updated);
@@ -525,11 +524,11 @@ export class QuotaTracker {
     if (!data || typeof data !== 'object') return false;
     const quota = data as Record<string, unknown>;
     return (
-      typeof quota.provider === 'string' &&
-      typeof quota.used === 'number' &&
-      typeof quota.limit === 'number' &&
-      typeof quota.remaining === 'number' &&
-      typeof quota.resetTime === 'number'
+      typeof quota['provider'] === 'string' &&
+      typeof quota['used'] === 'number' &&
+      typeof quota['limit'] === 'number' &&
+      typeof quota['remaining'] === 'number' &&
+      typeof quota['resetTime'] === 'number'
     );
   }
 
