@@ -64,7 +64,14 @@ export class R2Storage {
       if (typeof data === 'string') {
         const encoder = new TextEncoder();
         const uint8Array = encoder.encode(data);
-        body = uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
+        const bufferSlice = uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
+        // Ensure we have an ArrayBuffer, not SharedArrayBuffer
+        if (bufferSlice instanceof ArrayBuffer) {
+          body = bufferSlice;
+        } else {
+          body = new ArrayBuffer(bufferSlice.byteLength);
+          new Uint8Array(body).set(new Uint8Array(bufferSlice));
+        }
       } else if (data instanceof ArrayBuffer) {
         body = data;
       } else {
@@ -130,7 +137,7 @@ export class R2Storage {
 
       // Decompress if needed - metadata is accessed via customProperties in some versions
       const customProps = (object as unknown as { customProperties?: Record<string, string> }).customProperties;
-      if (customProps?.compressed === 'true') {
+      if (customProps && customProps['compressed'] === 'true') {
         data = await this.decompress(data);
       }
 
@@ -506,10 +513,22 @@ export class R2Storage {
    * Compress data if compression is enabled
    */
   private async maybeCompress(data: string): Promise<ArrayBuffer> {
+    // Helper to convert Uint8Array.buffer to ArrayBuffer
+    const toArrayBuffer = (uint8Array: Uint8Array): ArrayBuffer => {
+      const bufferSlice = uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
+      if (bufferSlice instanceof ArrayBuffer) {
+        return bufferSlice;
+      }
+      // Handle SharedArrayBuffer case
+      const arrayBuffer = new ArrayBuffer(bufferSlice.byteLength);
+      new Uint8Array(arrayBuffer).set(new Uint8Array(bufferSlice));
+      return arrayBuffer;
+    };
+
     if (!this.options.compression) {
       const encoder = new TextEncoder();
       const uint8Array = encoder.encode(data);
-      return uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
+      return toArrayBuffer(uint8Array);
     }
 
     try {
@@ -518,14 +537,21 @@ export class R2Storage {
 
       // Note: CompressionStream might not be available in all environments
       if (typeof CompressionStream === 'undefined') {
-        return uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
+        return toArrayBuffer(uint8Array);
       }
 
       const compressed = new Response(uint8Array).body!
         .pipeThrough(new CompressionStream('gzip'));
       const arrayBuffer = await new Response(compressed).arrayBuffer();
 
-      return arrayBuffer;
+      // Ensure result is ArrayBuffer
+      if (arrayBuffer instanceof ArrayBuffer) {
+        return arrayBuffer;
+      }
+      // Handle SharedArrayBuffer case
+      const result = new ArrayBuffer(arrayBuffer.byteLength);
+      new Uint8Array(result).set(new Uint8Array(arrayBuffer));
+      return result;
     } catch (error) {
       console.warn('Compression failed, storing uncompressed:', error);
       const encoder = new TextEncoder();
