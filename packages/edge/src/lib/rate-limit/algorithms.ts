@@ -29,7 +29,7 @@ export class TokenBucketAlgorithm {
   constructor(
     capacity: number,
     refillRate: number,
-    burst?: number,
+    _burst?: number,
     storage?: DurableObjectStorage
   ) {
     this.capacity = capacity;
@@ -198,7 +198,9 @@ export class SlidingWindowAlgorithm {
     this.maxRequests = maxRequests;
     this.windowMs = windowMs;
     this.state = new Map();
-    this.storage = storage;
+    if (storage !== undefined) {
+      this.storage = storage;
+    }
   }
 
   /**
@@ -247,22 +249,25 @@ export class SlidingWindowAlgorithm {
     }
 
     // Calculate reset time (when oldest request expires)
-    const resetTime =
-      validTimestamps.length > 0
-        ? validTimestamps[0] + this.windowMs
-        : now + this.windowMs;
+    const oldestTimestamp = validTimestamps.length > 0 ? validTimestamps[0] : undefined;
+    const resetTime = oldestTimestamp
+      ? oldestTimestamp + this.windowMs
+      : now + this.windowMs;
 
-    return {
+    const result: RateLimitDecision = {
       allowed,
       remaining: Math.max(0, this.maxRequests - validTimestamps.length),
       limit: this.maxRequests,
       resetTime,
       resetIn: Math.max(0, resetTime - now),
       currentUsage: validTimestamps.length,
-      retryAfter: allowed
-        ? undefined
-        : Math.ceil((resetTime - now) / 1000),
     };
+
+    if (!allowed) {
+      result.retryAfter = Math.ceil((resetTime - now) / 1000);
+    }
+
+    return result;
   }
 
   /**
@@ -327,7 +332,9 @@ export class FixedWindowAlgorithm {
     this.maxRequests = maxRequests;
     this.windowMs = windowMs;
     this.state = new Map();
-    this.storage = storage;
+    if (storage !== undefined) {
+      this.storage = storage;
+    }
   }
 
   /**
@@ -360,6 +367,11 @@ export class FixedWindowAlgorithm {
       this.state.set(identifier, state);
     }
 
+    // State should be defined at this point
+    if (!state) {
+      throw new Error('State became undefined after initialization');
+    }
+
     // Check if under limit
     const allowed = state.count < this.maxRequests;
 
@@ -375,17 +387,20 @@ export class FixedWindowAlgorithm {
     // Calculate reset time
     const resetTime = currentWindowStart + this.windowMs;
 
-    return {
+    const result: RateLimitDecision = {
       allowed,
       remaining: Math.max(0, this.maxRequests - state.count),
       limit: this.maxRequests,
       resetTime,
       resetIn: Math.max(0, resetTime - now),
       currentUsage: state.count,
-      retryAfter: allowed
-        ? undefined
-        : Math.ceil((resetTime - now) / 1000),
     };
+
+    if (!allowed) {
+      result.retryAfter = Math.ceil((resetTime - now) / 1000);
+    }
+
+    return result;
   }
 
   /**
@@ -451,6 +466,11 @@ export class LeakyBucketAlgorithm {
       this.state.set(identifier, state);
     }
 
+    // State should be defined at this point
+    if (!state) {
+      throw new Error('State became undefined after initialization');
+    }
+
     // Leak tokens (process requests) based on elapsed time
     const elapsed = (now - state.lastLeak) / 1000; // seconds
     const tokensToLeak = elapsed * this.leakRate;
@@ -473,15 +493,20 @@ export class LeakyBucketAlgorithm {
     // Calculate time until bucket has space
     const resetMs = state.tokens > 0 ? (state.tokens / this.leakRate) * 1000 : 0;
 
-    return {
+    const result: RateLimitDecision = {
       allowed,
       remaining: Math.floor(this.capacity - state.tokens),
       limit: this.capacity,
       resetTime: now + resetMs,
       resetIn: Math.ceil(resetMs),
       currentUsage: Math.floor(state.tokens),
-      retryAfter: allowed ? undefined : Math.ceil(resetMs / 1000),
     };
+
+    if (!allowed) {
+      result.retryAfter = Math.ceil(resetMs / 1000);
+    }
+
+    return result;
   }
 
   /**
@@ -555,9 +580,9 @@ export class RateLimitAlgorithmFactory {
    */
   static createSlidingWindowRPM(
     requestsPerMinute: number,
-    storage?: DurableObjectStorage
+    _storage?: DurableObjectStorage
   ): SlidingWindowAlgorithm {
-    return new SlidingWindowAlgorithm(requestsPerMinute, 60000, storage);
+    return new SlidingWindowAlgorithm(requestsPerMinute, 60000, _storage);
   }
 
   /**
@@ -565,9 +590,9 @@ export class RateLimitAlgorithmFactory {
    */
   static createFixedWindowRPM(
     requestsPerMinute: number,
-    storage?: DurableObjectStorage
+    _storage?: DurableObjectStorage
   ): FixedWindowAlgorithm {
-    return new FixedWindowAlgorithm(requestsPerMinute, 60000, storage);
+    return new FixedWindowAlgorithm(requestsPerMinute, 60000, _storage);
   }
 }
 
