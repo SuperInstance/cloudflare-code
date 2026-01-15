@@ -391,7 +391,8 @@ export class QuotaTracker {
    */
   private calculateAverageHourlyUsage(providerName: string): number {
     const now = Date.now();
-    const windowStart = now - this.config.predictionWindow * 60 * 60 * 1000;
+    const predictionWindow = this.config.predictionWindow ?? 24;
+    const windowStart = now - predictionWindow * 60 * 60 * 1000;
 
     const providerUsage = this.usageHistory.filter(
       (r) => r.provider === providerName && r.timestamp > windowStart
@@ -400,7 +401,7 @@ export class QuotaTracker {
     if (providerUsage.length === 0) return 0;
 
     const total = providerUsage.reduce((sum, r) => sum + r.amount, 0);
-    return total / this.config.predictionWindow;
+    return total / predictionWindow;
   }
 
   /**
@@ -436,9 +437,11 @@ export class QuotaTracker {
    */
   private async checkAlerts(providerName: string, quota: QuotaInfo): Promise<void> {
     const usagePercentage = quota.used / quota.limit;
+    const criticalThreshold = this.config.criticalThreshold ?? 0.95;
+    const warningThreshold = this.config.warningThreshold ?? 0.8;
 
     // Critical alert
-    if (usagePercentage >= this.config.criticalThreshold) {
+    if (usagePercentage >= criticalThreshold) {
       const alert: QuotaAlert = {
         id: crypto.randomUUID(),
         provider: providerName,
@@ -465,7 +468,7 @@ export class QuotaTracker {
       }
     }
     // Warning alert
-    else if (usagePercentage >= this.config.warningThreshold) {
+    else if (usagePercentage >= warningThreshold) {
       const alert: QuotaAlert = {
         id: crypto.randomUUID(),
         provider: providerName,
