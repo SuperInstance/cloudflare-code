@@ -155,7 +155,7 @@ export class RequestRouter {
       throw new Error('No providers available');
     }
 
-    let selectedProvider: ProviderClient;
+    let selectedProvider: ProviderClient | undefined;
     let score: ProviderScore | undefined;
 
     switch (strategy) {
@@ -183,13 +183,20 @@ export class RequestRouter {
         selectedProvider = availableProviders[0];
     }
 
-    return {
+    if (!selectedProvider) {
+      throw new Error('No provider could be selected');
+    }
+
+    const result: RoutingResult = {
       provider: selectedProvider,
       providerName: selectedProvider.name,
       strategy,
-      score,
       timestamp: Date.now(),
     };
+    if (score !== undefined) {
+      result.score = score;
+    }
+    return result;
   }
 
   /**
@@ -209,7 +216,11 @@ export class RequestRouter {
    * Select provider with most free tier quota
    */
   private async selectFreeTierFirst(providers: ProviderClient[]): Promise<ProviderClient> {
-    let bestProvider = providers[0];
+    if (providers.length === 0) {
+      throw new Error('No providers available for free tier selection');
+    }
+
+    let bestProvider = providers[0]!;
     let bestQuota = 0;
 
     for (const provider of providers) {
@@ -229,7 +240,11 @@ export class RequestRouter {
    * Select provider with lowest latency
    */
   private async selectLowestLatency(providers: ProviderClient[]): Promise<ProviderClient> {
-    let bestProvider = providers[0];
+    if (providers.length === 0) {
+      throw new Error('No providers available for latency selection');
+    }
+
+    let bestProvider = providers[0]!;
     let bestLatency = Infinity;
 
     for (const provider of providers) {
@@ -248,12 +263,16 @@ export class RequestRouter {
    */
   private async selectCostOptimized(
     providers: ProviderClient[],
-    request: ChatRequest
+    _request: ChatRequest
   ): Promise<[ProviderClient, ProviderScore]> {
+    if (providers.length === 0) {
+      throw new Error('No providers available for cost optimization');
+    }
+
     const scores: ProviderScore[] = [];
 
     for (const provider of providers) {
-      const score = await this.calculateProviderScore(provider, request);
+      const score = await this.calculateProviderScore(provider, _request);
       scores.push(score);
     }
 
@@ -261,7 +280,14 @@ export class RequestRouter {
     scores.sort((a, b) => b.score - a.score);
 
     const bestScore = scores[0];
-    const bestProvider = providers.find((p) => p.name === bestScore.provider)!;
+    if (!bestScore) {
+      throw new Error('Could not calculate provider scores');
+    }
+
+    const bestProvider = providers.find((p) => p.name === bestScore.provider);
+    if (!bestProvider) {
+      throw new Error(`Provider "${bestScore.provider}" not found in available providers`);
+    }
 
     return [bestProvider, bestScore];
   }
@@ -270,9 +296,13 @@ export class RequestRouter {
    * Select provider using round-robin load balancing
    */
   private async selectLoadBalanced(providers: ProviderClient[]): Promise<ProviderClient> {
+    if (providers.length === 0) {
+      throw new Error('No providers available for load balancing');
+    }
+
     // Simple round-robin based on request count
     let minRequests = Infinity;
-    let bestProvider = providers[0];
+    let bestProvider = providers[0]!;
 
     for (const provider of providers) {
       const health = await provider.getHealthStatus();
@@ -289,6 +319,10 @@ export class RequestRouter {
    * Select highest quality provider
    */
   private async selectQualityFirst(providers: ProviderClient[]): Promise<ProviderClient> {
+    if (providers.length === 0) {
+      throw new Error('No providers available for quality selection');
+    }
+
     // Prefer providers with better capabilities
     const qualityOrder = ['cloudflare', 'cerebras', 'groq', 'openrouter'];
 
@@ -299,7 +333,7 @@ export class RequestRouter {
       }
     }
 
-    return providers[0];
+    return providers[0]!;
   }
 
   /**

@@ -87,12 +87,14 @@ export class QuotaTracker {
 
   constructor(config: QuotaConfig = {}) {
     this.config = {
-      kv: config.kv,
       warningThreshold: config.warningThreshold ?? 0.8, // 80%
       criticalThreshold: config.criticalThreshold ?? 0.95, // 95%
       enablePrediction: config.enablePrediction ?? true,
       predictionWindow: config.predictionWindow ?? 24, // 24 hours
     };
+    if (config.kv !== undefined) {
+      this.config.kv = config.kv;
+    }
   }
 
   /**
