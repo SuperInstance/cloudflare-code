@@ -146,7 +146,7 @@ export class EmbeddingService {
     const quantized = new Int8Array(embedding.length);
     for (let i = 0; i < embedding.length; i++) {
       // Map to [-128, 127] range
-      quantized[i] = Math.round(((embedding[i] - min) / range) * 255 - 128);
+      quantized[i] = Math.round(((embedding[i]! - min) / range) * 255 - 128);
     }
 
     const latency = performance.now() - startTime;
@@ -178,7 +178,7 @@ export class EmbeddingService {
 
     for (let i = 0; i < quantized.length; i++) {
       // Map from [-128, 127] back to original range
-      embedding[i] = ((quantized[i] + 128) / 255) * range + min;
+      embedding[i] = ((quantized[i]! + 128) / 255) * range + min;
     }
 
     return embedding;
@@ -208,19 +208,19 @@ export class EmbeddingService {
 
     // Process 8 elements at a time
     for (; i + 8 <= len; i += 8) {
-      dotProduct += a[i] * b[i] + a[i + 1] * b[i + 1] + a[i + 2] * b[i + 2] + a[i + 3] * b[i + 3] +
-                   a[i + 4] * b[i + 4] + a[i + 5] * b[i + 5] + a[i + 6] * b[i + 6] + a[i + 7] * b[i + 7];
-      normA += a[i] * a[i] + a[i + 1] * a[i + 1] + a[i + 2] * a[i + 2] + a[i + 3] * a[i + 3] +
-              a[i + 4] * a[i + 4] + a[i + 5] * a[i + 5] + a[i + 6] * a[i + 6] + a[i + 7] * a[i + 7];
-      normB += b[i] * b[i] + b[i + 1] * b[i + 1] + b[i + 2] * b[i + 2] + b[i + 3] * b[i + 3] +
-              b[i + 4] * b[i + 4] + b[i + 5] * b[i + 5] + b[i + 6] * b[i + 6] + b[i + 7] * b[i + 7];
+      dotProduct += a[i]! * b[i]! + a[i + 1]! * b[i + 1]! + a[i + 2]! * b[i + 2]! + a[i + 3]! * b[i + 3]! +
+                   a[i + 4]! * b[i + 4]! + a[i + 5]! * b[i + 5]! + a[i + 6]! * b[i + 6]! + a[i + 7]! * b[i + 7]!;
+      normA += a[i]! * a[i]! + a[i + 1]! * a[i + 1]! + a[i + 2]! * a[i + 2]! + a[i + 3]! * a[i + 3]! +
+              a[i + 4]! * a[i + 4]! + a[i + 5]! * a[i + 5]! + a[i + 6]! * a[i + 6]! + a[i + 7]! * a[i + 7]!;
+      normB += b[i]! * b[i]! + b[i + 1]! * b[i + 1]! + b[i + 2]! * b[i + 2]! + b[i + 3]! * b[i + 3]! +
+              b[i + 4]! * b[i + 4]! + b[i + 5]! * b[i + 5]! + b[i + 6]! * b[i + 6]! + b[i + 7]! * b[i + 7]!;
     }
 
     // Process remaining elements
     for (; i < len; i++) {
-      dotProduct += a[i] * b[i];
-      normA += a[i] * a[i];
-      normB += b[i] * b[i];
+      dotProduct += a[i]! * b[i]!;
+      normA += a[i]! * a[i]!;
+      normB += b[i]! * b[i]!;
     }
 
     const denominator = Math.sqrt(normA) * Math.sqrt(normB);
@@ -262,8 +262,8 @@ export class EmbeddingService {
 
     const len = a.length;
     for (let i = 0; i < len; i++) {
-      const aVal = ((a[i] + 128) / 255) * aRange + aMin;
-      const bVal = ((b[i] + 128) / 255) * bRange + bMin;
+      const aVal = ((a[i]! + 128) / 255) * aRange + aMin;
+      const bVal = ((b[i]! + 128) / 255) * bRange + bMin;
 
       dotProduct += aVal * bVal;
       normA += aVal * aVal;
@@ -289,10 +289,14 @@ export class EmbeddingService {
     }
 
     try {
-      const response = await this.ai.embed(text, { model: this.model });
+      // Use the AI binding to generate embeddings
+      // @ts-ignore - Cloudflare Workers AI types may not be up to date
+      const result = await this.ai.run(this.model, { input: [text] });
 
-      // Response is an array of numbers
-      const embeddingArray = response as unknown as number[];
+      // Extract the embedding vector from the response
+      const embeddingData = result as unknown as { data: Array<{ embedding: number[] }> };
+      const embeddingArray = embeddingData.data[0]!.embedding;
+
       return new Float32Array(embeddingArray);
     } catch (error) {
       throw new Error(`Workers AI embedding failed: ${error}`);
@@ -325,8 +329,8 @@ export class EmbeddingService {
       throw new Error(`Fallback API failed: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
-    const embeddingArray = data.data[0].embedding;
+    const data = await response.json() as { data: Array<{ embedding: number[] }> };
+    const embeddingArray = data.data[0]!.embedding;
     return new Float32Array(embeddingArray);
   }
 

@@ -97,15 +97,11 @@ interface CheckRequest {
  * Rate Limit Durable Object
  */
 export class RateLimitDO implements DurableObject {
-  private state: DurableObjectState;
   private storage: DurableObjectStorage;
   private doState: DORateLimitState;
-  private env: unknown;
 
-  constructor(state: DurableObjectState, env: unknown) {
-    this.state = state;
+  constructor(state: DurableObjectState, _env: unknown) {
     this.storage = state.storage;
-    this.env = env;
 
     // Initialize default state
     this.doState = {
@@ -264,8 +260,6 @@ export class RateLimitDO implements DurableObject {
     tokens: number,
     burstConfig?: CheckRequest['burstConfig']
   ): Promise<RateLimitDecision> {
-    const now = Date.now();
-
     if (algorithm === 'token-bucket') {
       return this.checkTokenBucket(tokens, burstConfig);
     } else if (algorithm === 'sliding-window') {
@@ -297,7 +291,7 @@ export class RateLimitDO implements DurableObject {
         lastRefill: now,
         capacity: this.doState.config.maxRequests,
         refillRate: this.doState.config.maxRequests / (this.doState.config.windowMs / 1000),
-        burst,
+        ...(burst !== undefined && { burst }),
       };
 
       this.doState.tokenBucket = bucket;
@@ -333,7 +327,7 @@ export class RateLimitDO implements DurableObject {
     const tokensNeeded = bucket.capacity - bucket.tokens;
     const resetMs = (tokensNeeded / bucket.refillRate) * 1000;
 
-    return {
+    const result: RateLimitDecision = {
       allowed,
       remaining: Math.floor(remaining),
       limit: Math.floor(effectiveCapacity),
@@ -341,8 +335,13 @@ export class RateLimitDO implements DurableObject {
       resetIn: Math.floor(resetMs),
       currentUsage: Math.floor(bucket.capacity - bucket.tokens),
       tier: this.doState.tier,
-      retryAfter: allowed ? undefined : Math.ceil(resetMs / 1000),
     };
+
+    if (!allowed) {
+      result.retryAfter = Math.ceil(resetMs / 1000);
+    }
+
+    return result;
   }
 
   /**
@@ -377,11 +376,10 @@ export class RateLimitDO implements DurableObject {
     window.timestamps = validTimestamps;
 
     // Calculate reset time (when oldest request expires)
-    const resetTime = validTimestamps.length > 0
-      ? validTimestamps[0] + window.windowMs
-      : now + window.windowMs;
+    const oldestTimestamp = validTimestamps.length > 0 ? validTimestamps[0]! : now;
+    const resetTime = oldestTimestamp + window.windowMs;
 
-    return {
+    const result: RateLimitDecision = {
       allowed,
       remaining: Math.max(0, window.maxRequests - validTimestamps.length),
       limit: window.maxRequests,
@@ -389,8 +387,13 @@ export class RateLimitDO implements DurableObject {
       resetIn: Math.max(0, resetTime - now),
       currentUsage: validTimestamps.length,
       tier: this.doState.tier,
-      retryAfter: allowed ? undefined : Math.ceil((resetTime - now) / 1000),
     };
+
+    if (!allowed) {
+      result.retryAfter = Math.ceil((resetTime - now) / 1000);
+    }
+
+    return result;
   }
 
   /**
@@ -402,13 +405,18 @@ export class RateLimitDO implements DurableObject {
       const burst = this.doState.config.burst;
       const effectiveCapacity = burst ? capacity + burst : capacity;
 
-      this.doState.tokenBucket = {
+      const tokenBucketState: TokenBucketState = {
         tokens: effectiveCapacity,
         lastRefill: Date.now(),
         capacity,
         refillRate: capacity / (this.doState.config.windowMs / 1000),
-        burst,
       };
+
+      if (burst !== undefined) {
+        tokenBucketState.burst = burst;
+      }
+
+      this.doState.tokenBucket = tokenBucketState;
     } else if (algorithm === 'sliding-window' && !this.doState.slidingWindow) {
       this.doState.slidingWindow = {
         timestamps: [],
@@ -471,14 +479,10 @@ export class RateLimitDO implements DurableObject {
  * Provides aggregated statistics and global rate limiting.
  */
 export class RateLimitCoordinatorDO implements DurableObject {
-  private state: DurableObjectState;
   private storage: DurableObjectStorage;
-  private env: unknown;
 
-  constructor(state: DurableObjectState, env: unknown) {
-    this.state = state;
+  constructor(state: DurableObjectState, _env: unknown) {
     this.storage = state.storage;
-    this.env = env;
   }
 
   /**
@@ -533,9 +537,7 @@ export class RateLimitCoordinatorDO implements DurableObject {
     }
 
     count++;
-    await this.storage.put(key, count, {
-      expirationTtl: Math.ceil(windowMs / 1000),
-    });
+    await this.storage.put(key, count);
 
     return Response.json({
       allowed: true,
@@ -559,9 +561,8 @@ export class RateLimitCoordinatorDO implements DurableObject {
 
     // Count all keys
     const keys = await this.storage.list();
-    for (const key of keys.keys) {
-      const value = await this.storage.get<number>(key.name);
-      if (value) {
+    for (const [_keyName, value] of keys) {
+      if (typeof value === 'number') {
         stats.totalRequests += value;
       }
     }

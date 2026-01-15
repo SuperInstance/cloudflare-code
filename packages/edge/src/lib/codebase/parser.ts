@@ -18,7 +18,6 @@ import type {
   Import,
   Export,
   ParserOptions,
-  ChunkType,
 } from './types';
 
 const DEFAULT_OPTIONS: Required<ParserOptions> = {
@@ -181,10 +180,9 @@ const STRUCTURE_PATTERNS: Record<
  * Codebase Parser
  */
 export class CodebaseParser {
-  private options: Required<ParserOptions>;
-
   constructor(options: ParserOptions = {}) {
-    this.options = { ...DEFAULT_OPTIONS, ...options };
+    // Store options if needed later, otherwise just validate
+    void { ...DEFAULT_OPTIONS, ...options };
   }
 
   /**
@@ -245,7 +243,8 @@ export class CodebaseParser {
     }
 
     // Try content patterns
-    const firstLine = content.split('\n')[0];
+    const lines = content.split('\n');
+    const firstLine = lines[0] ?? '';
     for (const [lang, patterns] of Object.entries(LANGUAGE_PATTERNS)) {
       for (const pattern of patterns) {
         if (pattern.test(firstLine) || pattern.test(content.substring(0, 1000))) {
@@ -287,7 +286,7 @@ export class CodebaseParser {
       let match;
       const regex = new RegExp(patterns.function);
       while ((match = regex.exec(content)) !== null) {
-        structure.functions.push(match[1]);
+        if (match[1]) structure.functions.push(match[1]);
       }
     }
 
@@ -296,7 +295,7 @@ export class CodebaseParser {
       let match;
       const regex = new RegExp(patterns.class);
       while ((match = regex.exec(content)) !== null) {
-        structure.classes.push(match[1]);
+        if (match[1]) structure.classes.push(match[1]);
       }
     }
 
@@ -305,7 +304,7 @@ export class CodebaseParser {
       let match;
       const regex = new RegExp(patterns.interface);
       while ((match = regex.exec(content)) !== null) {
-        structure.interfaces.push(match[1]);
+        if (match[1]) structure.interfaces.push(match[1]);
       }
     }
 
@@ -343,8 +342,9 @@ export class CodebaseParser {
       let lineNum = 0;
       let charCount = 0;
       for (let i = 0; i < lines.length; i++) {
-        charCount += lines[i].length + 1;
-        if (charCount > matchStart) {
+        const line = lines[i]!;
+        charCount += line.length + 1;
+        if (charCount > matchStart!) {
           lineNum = i + 1;
           break;
         }
@@ -352,9 +352,9 @@ export class CodebaseParser {
 
       // Extract symbols (simplified)
       const symbols: string[] = [];
-      const importStatement = match[0];
+      const importStatement = match[0]!;
       const symbolMatch = importStatement.match(/\{([^}]+)\}/);
-      if (symbolMatch) {
+      if (symbolMatch && symbolMatch[1]) {
         symbols.push(...symbolMatch[1].split(',').map(s => s.trim()));
       }
 
@@ -392,11 +392,12 @@ export class CodebaseParser {
       if (!name) continue;
 
       // Find line number
-      const matchStart = match.index;
+      const matchStart = match.index!;
       let lineNum = 0;
       let charCount = 0;
       for (let i = 0; i < lines.length; i++) {
-        charCount += lines[i].length + 1;
+        const line = lines[i]!;
+        charCount += line.length + 1;
         if (charCount > matchStart) {
           lineNum = i + 1;
           break;

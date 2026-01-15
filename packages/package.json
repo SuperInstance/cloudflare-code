@@ -1,0 +1,68 @@
+{
+  "name": "@claudeflare/monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "factory-core",
+    "saas-core",
+    "business-core",
+    "marketing-core",
+    "core-interfaces",
+    "benchmark-core"
+  ],
+  "scripts": {
+    "build": "npm run build:all",
+    "build:all": "npm run build:factory && npm run build:saas && npm run build:business && npm run build:marketing && npm run build:interfaces && npm run build:benchmark",
+    "build:factory": "cd factory-core && npm run build",
+    "build:saas": "cd saas-core && npm run build",
+    "build:business": "cd business-core && npm run build",
+    "build:marketing": "cd marketing-core && npm run build",
+    "build:interfaces": "cd core-interfaces && npm run build",
+    "build:benchmark": "cd benchmark-core && npm run build",
+    "dev": "npm run dev:factory",
+    "dev:factory": "cd factory-core && npm run dev",
+    "dev:saas": "cd saas-core && npm run dev",
+    "dev:business": "cd business-core && npm run dev",
+    "dev:marketing": "cd marketing-core && npm run dev",
+    "test": "npm run test:all",
+    "test:all": "npm run test:factory && npm run test:saas && npm run test:business && npm run test:benchmark && npm run test:marketing",
+    "test:factory": "cd factory-core && npm test",
+    "test:saas": "cd saas-core && npm test",
+    "test:business": "cd business-core && npm test",
+    "test:marketing": "cd marketing-core && npm test",
+    "test:benchmark": "cd benchmark-core && npm run benchmark",
+    "benchmark": "cd benchmark-core && npm run benchmark",
+    "lint": "npm run lint:all",
+    "lint:all": "npm run lint:factory && npm run lint:saas && npm run lint:business && npm run lint:marketing && npm run lint:interfaces",
+    "lint:factory": "cd factory-core && npm run lint",
+    "lint:saas": "cd saas-core && npm run lint",
+    "lint:business": "cd business-core && npm run lint",
+    "lint:marketing": "cd marketing-core && npm run lint",
+    "lint:interfaces": "cd core-interfaces && npm run lint",
+    "format": "prettier --write packages/*/src/**/*.ts",
+    "clean": "rm -rf packages/*/dist",
+    "typecheck": "npm run typecheck:all",
+    "typecheck:all": "npm run typecheck:factory && npm run typecheck:saas && npm run typecheck:business && npm run typecheck:interfaces && npm run typecheck:benchmark",
+    "typecheck:factory": "cd factory-core && npm run typecheck",
+    "typecheck:saas": "cd saas-core && npm run typecheck",
+    "typecheck:business": "cd business-core && npm run typecheck",
+    "typecheck:interfaces": "cd core-interfaces && npm run typecheck",
+    "typecheck:benchmark": "cd benchmark-core && npm run typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "prettier": "^3.0.0",
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "claudeflare",
+    "monorepo",
+    "cloudflare",
+    "ai",
+    "saas",
+    "factory"
+  ]
+}

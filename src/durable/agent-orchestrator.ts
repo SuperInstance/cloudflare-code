@@ -5,6 +5,16 @@
 export class AgentOrchestrator {
   private counter = 0;
   private sessions = new Map<string, any>();
+  private storage: DurableObjectStorage;
+
+  constructor(state: DurableObjectState) {
+    this.storage = state.storage;
+    // Load state from storage
+    const savedCounter = this.storage.get<number>('counter');
+    if (savedCounter !== undefined) {
+      this.counter = savedCounter;
+    }
+  }
 
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
@@ -48,7 +58,7 @@ export class AgentOrchestrator {
     return new Response(null, { status: 101, webSocket: client });
   }
 
-  private handleCounter(request: Request): Response {
+  private async handleCounter(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const action = url.searchParams.get('action');
 
@@ -57,9 +67,11 @@ export class AgentOrchestrator {
         return Response.json({ value: this.counter });
       case 'increment':
         this.counter++;
+        await this.storage.put('counter', this.counter);
         return Response.json({ value: this.counter });
       case 'reset':
         this.counter = 0;
+        await this.storage.put('counter', this.counter);
         return Response.json({ value: this.counter });
       default:
         return Response.json({ error: 'Invalid action' }, { status: 400 });

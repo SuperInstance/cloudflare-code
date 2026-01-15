@@ -16,11 +16,10 @@
  * - Hit rate: 45-80%
  */
 
-import type { ChatResponse } from '@claudeflare/shared';
+import type { ChatResponse } from '../../types';
 import { EmbeddingService } from '../embeddings';
 import { HNSWIndex } from '../hnsw';
 import type { KVCache } from '../kv';
-import { CompressionUtils } from '../compression';
 
 export interface SemanticCacheOptions {
   /**
@@ -54,7 +53,7 @@ export interface SemanticCacheOptions {
   /**
    * KV cache for WARM tier
    */
-  kvCache?: KVCache;
+  kvCache?: KVCache | null;
 
   /**
    * Enable/disable cache persistence
@@ -98,27 +97,35 @@ export interface SemanticCacheResult {
  * queries, not just exact string matches.
  */
 export class SemanticCache {
-  private options: Required<SemanticCacheOptions>;
+  private options: SemanticCacheOptions;
   private embeddingService: EmbeddingService;
   private hnswIndex: HNSWIndex;
-  private kvCache?: KVCache;
+  private kvCache: KVCache | null;
   private hotCache: Map<string, CachedResponse>;
   private metrics: CacheMetrics;
 
   constructor(options: SemanticCacheOptions = {}) {
+    const similarityThreshold = options.similarityThreshold ?? 0.90;
+    const maxHotEntries = options.maxHotEntries ?? 10000;
+    const ttl = options.ttl ?? 60 * 60 * 24 * 7;
+    const embeddingService = options.embeddingService ?? new EmbeddingService();
+    const hnswIndex = options.hnswIndex ?? new HNSWIndex();
+    const kvCache = options.kvCache ?? null;
+    const enablePersistence = options.enablePersistence ?? true;
+
     this.options = {
-      similarityThreshold: options.similarityThreshold ?? 0.90,
-      maxHotEntries: options.maxHotEntries ?? 10000,
-      ttl: options.ttl ?? 60 * 60 * 24 * 7, // 7 days
-      embeddingService: options.embeddingService ?? new EmbeddingService(),
-      hnswIndex: options.hnswIndex ?? new HNSWIndex(),
-      kvCache: options.kvCache,
-      enablePersistence: options.enablePersistence ?? true,
+      similarityThreshold,
+      maxHotEntries,
+      ttl,
+      embeddingService,
+      hnswIndex,
+      kvCache,
+      enablePersistence,
     };
 
-    this.embeddingService = this.options.embeddingService;
-    this.hnswIndex = this.options.hnswIndex;
-    this.kvCache = this.options.kvCache;
+    this.embeddingService = embeddingService;
+    this.hnswIndex = hnswIndex;
+    this.kvCache = kvCache;
     this.hotCache = new Map();
 
     this.metrics = {
@@ -225,20 +232,21 @@ export class SemanticCache {
 
       // Create cache entry
       const cacheKey = this.generateCacheKey(prompt, metadata);
+      const embeddingData = new Uint8Array(quantized.quantized);
       const entry: CachedResponse = {
         key: cacheKey,
         prompt,
         response,
-        embedding: quantized.quantized,
+        embedding: embeddingData,
         timestamp: Date.now(),
         hits: 0,
         metadata: {
           model: metadata.model ?? 'unknown',
-          temperature: metadata.temperature,
-          maxTokens: metadata.maxTokens,
-          language: metadata.language,
-          framework: metadata.framework,
-          similarityThreshold: this.options.similarityThreshold,
+          similarityThreshold: this.options.similarityThreshold!,
+          ...(metadata.temperature !== undefined && { temperature: metadata.temperature }),
+          ...(metadata.maxTokens !== undefined && { maxTokens: metadata.maxTokens }),
+          ...(metadata.language && { language: metadata.language }),
+          ...(metadata.framework && { framework: metadata.framework }),
         },
       };
 
@@ -246,7 +254,7 @@ export class SemanticCache {
       this.addToHotCache(prompt, embedding, response, entry.metadata);
 
       // Persist to WARM tier (KV)
-      if (this.kvCache && this.options.enablePersistence) {
+      if (this.kvCache && this.options.enablePersistence!) {
         await this.storeInWarmCache(entry);
       }
 
@@ -319,7 +327,7 @@ export class SemanticCache {
    * @private
    */
   private async checkHotCache(
-    prompt: string,
+    _prompt: string,
     embedding: Float32Array,
     metadata: Partial<CacheMetadata>
   ): Promise<SemanticCacheResult> {
@@ -330,7 +338,7 @@ export class SemanticCache {
 
     // Check each result for similarity threshold and context match
     for (const result of results) {
-      if (result.similarity < this.options.similarityThreshold) {
+      if (result.similarity! < this.options.similarityThreshold!) {
         continue;
       }
 
@@ -372,7 +380,7 @@ export class SemanticCache {
    * @private
    */
   private async checkWarmCache(
-    prompt: string,
+    _prompt: string,
     embedding: Float32Array,
     metadata: Partial<CacheMetadata>
   ): Promise<SemanticCacheResult> {
@@ -414,7 +422,7 @@ export class SemanticCache {
         // Calculate similarity
         const similarity = this.embeddingService.similarity(embedding, dequantized);
 
-        if (similarity >= this.options.similarityThreshold) {
+        if (similarity >= this.options.similarityThreshold!) {
           if (!bestMatch || similarity > bestMatch.similarity) {
             bestMatch = { entry, similarity };
           }
@@ -475,11 +483,11 @@ export class SemanticCache {
       hits: 0,
       metadata: {
         model: metadata.model ?? 'unknown',
-        temperature: metadata.temperature,
-        maxTokens: metadata.maxTokens,
-        language: metadata.language,
-        framework: metadata.framework,
-        similarityThreshold: this.options.similarityThreshold,
+        similarityThreshold: this.options.similarityThreshold!,
+        ...(metadata.temperature !== undefined && { temperature: metadata.temperature }),
+        ...(metadata.maxTokens !== undefined && { maxTokens: metadata.maxTokens }),
+        ...(metadata.language && { language: metadata.language }),
+        ...(metadata.framework && { framework: metadata.framework }),
       },
     };
 
@@ -549,7 +557,7 @@ export class SemanticCache {
    * @private
    */
   private evictIfNeeded(): void {
-    if (this.hotCache.size <= this.options.maxHotEntries) {
+    if (this.hotCache.size <= this.options.maxHotEntries!) {
       return;
     }
 
@@ -557,17 +565,22 @@ export class SemanticCache {
     const entries = Array.from(this.hotCache.entries());
     entries.sort((a, b) => {
       // Prioritize keeping entries with high hit counts
-      if (a[1].hits !== b[1].hits) {
-        return b[1].hits - a[1].hits;
+      const aVal = a[1]!;
+      const bVal = b[1]!;
+      if (aVal.hits !== bVal.hits) {
+        return bVal.hits - aVal.hits;
       }
       // Then by timestamp (keep recent)
-      return b[1].timestamp - a[1].timestamp;
+      return bVal.timestamp - aVal.timestamp;
     });
 
     // Evict 10% of entries
-    const toEvict = Math.floor(this.options.maxHotEntries * 0.1);
-    for (let i = this.options.maxHotEntries; i < this.options.maxHotEntries + toEvict; i++) {
-      const [key] = entries[i];
+    const maxEntries = this.options.maxHotEntries!;
+    const toEvict = Math.floor(maxEntries * 0.1);
+    for (let i = maxEntries; i < maxEntries + toEvict; i++) {
+      const entry = entries[i];
+      if (!entry) continue;
+      const [key] = entry;
       this.hotCache.delete(key);
       this.hnswIndex.remove(key);
     }
@@ -581,10 +594,10 @@ export class SemanticCache {
   private recordMetrics(startTime: number, response: ChatResponse): void {
     const latency = performance.now() - startTime;
     this.metrics.totalLatency += latency;
-    this.metrics.tokensSaved += response.tokens.prompt + response.tokens.completion;
+    this.metrics.tokensSaved += response.usage.promptTokens + response.usage.completionTokens;
 
     // Approximate cost savings (assuming $0.01 per 1K tokens)
-    this.metrics.costSaved += (response.tokens.prompt + response.tokens.completion) * 0.00001;
+    this.metrics.costSaved += (response.usage.promptTokens + response.usage.completionTokens) * 0.00001;
   }
 }
 

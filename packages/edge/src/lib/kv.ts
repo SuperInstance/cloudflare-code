@@ -182,7 +182,11 @@ export class KVCache {
    */
   async list(prefix: string, limit?: number): Promise<string[]> {
     try {
-      const list = await this.kv.list({ prefix, limit });
+      const options: KVNamespaceListOptions = { prefix };
+      if (limit !== undefined) {
+        options.limit = limit;
+      }
+      const list = await this.kv.list(options);
       return list.keys.map(k => k.name);
     } catch (error) {
       console.error(`KV list failed for prefix ${prefix}:`, error);
@@ -374,7 +378,7 @@ export class KVCache {
 
     const quantized = new Int8Array(embedding.length);
     for (let i = 0; i < embedding.length; i++) {
-      quantized[i] = Math.round(((embedding[i] - min) / range) * 255 - 128);
+      quantized[i] = Math.round(((embedding[i]! - min) / range) * 255 - 128);
     }
 
     return Array.from(quantized);
@@ -388,7 +392,7 @@ export class KVCache {
     const embedding = new Float32Array(quantized.length);
 
     for (let i = 0; i < quantized.length; i++) {
-      embedding[i] = ((quantized[i] + 128) / 255) * range + min;
+      embedding[i] = ((quantized[i]! + 128) / 255) * range + min;
     }
 
     return embedding;

@@ -55,6 +55,9 @@ export interface Env {
 
   // Codebase RAG Storage (runtime)
   CODEBASE_VECTOR_STORE?: unknown; // CodeVectorStore instance
+
+  // Index signature for Hono compatibility
+  [key: string]: unknown;
 }
 
 /**
@@ -258,3 +261,6 @@ export class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
+
+// Re-export storage types
+export type { SessionData, ConversationMessage, UserPreferences, MemoryEntry } from '../storage-types';

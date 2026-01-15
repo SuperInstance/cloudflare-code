@@ -143,7 +143,10 @@ export class HNSWIndex {
 
     // Search from top level down to level 1
     for (let l = Math.min(level, this.maxLevel); l > 0; l--) {
-      curr = this.searchLayer(vec2, curr, l, 1)[0];
+      const results = this.searchLayer(vector, curr, l, 1);
+      if (results.length > 0) {
+        curr = results[0]!;
+      }
     }
 
     // At level 0, find efConstruction closest neighbors
@@ -189,7 +192,7 @@ export class HNSWIndex {
     for (let l = this.maxLevel; l > 0; l--) {
       const results = this.searchLayer(query, curr, l, 1);
       if (results.length > 0) {
-        curr = results[0];
+        curr = results[0]!;
       }
     }
 
@@ -399,7 +402,7 @@ export class HNSWIndex {
 
       // Check if we can improve
       const furthest = w[w.length - 1];
-      if (current.distance > furthest.distance && w.length >= ef) {
+      if (furthest && current.distance > furthest.distance && w.length >= ef) {
         break;
       }
 
@@ -419,7 +422,7 @@ export class HNSWIndex {
 
         const neighborDist = 1 - this.calculateSimilarity(query, neighborNode.vector);
 
-        if (w.length < ef || neighborDist < furthest.distance) {
+        if (w.length < ef || (furthest && neighborDist < furthest.distance)) {
           candidates.push({ id: neighborId, distance: neighborDist });
           w.push({ id: neighborId, distance: neighborDist });
 
@@ -523,9 +526,9 @@ export class HNSWIndex {
     let normB = 0;
 
     for (let i = 0; i < a.length; i++) {
-      dotProduct += a[i] * b[i];
-      normA += a[i] * a[i];
-      normB += b[i] * b[i];
+      dotProduct += a[i]! * b[i]!;
+      normA += a[i]! * a[i]!;
+      normB += b[i]! * b[i]!;
     }
 
     const denominator = Math.sqrt(normA) * Math.sqrt(normB);
@@ -559,7 +562,7 @@ export class HNSWIndex {
   private dotProductSimilarity(a: Float32Array, b: Float32Array): number {
     let sum = 0;
     for (let i = 0; i < a.length; i++) {
-      sum += a[i] * b[i];
+      sum += a[i]! * b[i]!;
     }
     return sum;
   }

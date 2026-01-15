@@ -16,14 +16,7 @@ import type {
   ConversationContext,
   DirectorState,
 } from '../lib/agents/types';
-
-export interface Env {
-  DIRECTOR_DO: DurableObjectNamespace;
-  PLANNER_DO: DurableObjectNamespace;
-  EXECUTOR_DO: DurableObjectNamespace;
-  AGENT_REGISTRY: DurableObjectNamespace;
-  AGENTS_KV?: KVNamespace;
-}
+import type { Env } from '../types';
 
 /**
  * Director Agent - Main orchestration point
@@ -140,9 +133,7 @@ export class DirectorAgent implements DurableObject {
     const stateData = {
       sessionId: this.directorState.sessionId,
       activePlanners: Array.from(this.directorState.activePlanners),
-      completedPlans: Array.from(this.directorState.completedPlans.entries()).map(
-        ([id, plan]) => ({ id, ...plan })
-      ),
+      completedPlans: Array.from(this.directorState.completedPlans.values()),
       context: this.directorState.context,
       metrics: this.directorState.metrics,
     };
@@ -237,8 +228,8 @@ export class DirectorAgent implements DurableObject {
     // Create planner stubs
     const plannerPromises = plannerExpertise.map((expertise) => {
       const plannerId = `planner-${expertise}-${this.state.id.toString()}`;
-      const plannerStub = this.env.PLANNER_DO.get(
-        this.env.PLANNER_DO.idFromName(plannerId)
+      const plannerStub = this.env.PLANNER_DO!.get(
+        this.env.PLANNER_DO!.idFromName(plannerId)
       );
 
       this.directorState.activePlanners.add(plannerId);
@@ -271,16 +262,17 @@ export class DirectorAgent implements DurableObject {
     const plans: Plan[] = [];
 
     for (const result of results) {
-      if (!result) continue;
+      const response = result as Response;
+      if (!response || !response.ok) continue;
 
       try {
-        const response = await result.json();
+        const data = await response.json() as { plan?: Plan };
 
-        if (response.plan) {
-          plans.push(response.plan as Plan);
+        if (data.plan) {
+          plans.push(data.plan);
 
           // Store completed plan
-          this.directorState.completedPlans.set(response.plan.id, response.plan);
+          this.directorState.completedPlans.set(data.plan.id, data.plan);
         }
       } catch (error) {
         console.error('Failed to parse planner response:', error);
@@ -296,6 +288,10 @@ export class DirectorAgent implements DurableObject {
    * Select the best plan based on priority and confidence
    */
   private selectBestPlan(plans: Plan[]): Plan {
+    if (plans.length === 0) {
+      throw new Error('No plans available');
+    }
+
     // Sort by priority (descending) and confidence (descending)
     const sorted = [...plans].sort((a, b) => {
       if (a.priority !== b.priority) {
@@ -304,7 +300,7 @@ export class DirectorAgent implements DurableObject {
       return b.confidence - a.confidence;
     });
 
-    return sorted[0];
+    return sorted[0]!;
   }
 
   /**
@@ -316,8 +312,8 @@ export class DirectorAgent implements DurableObject {
     status: string;
   }> {
     const executorId = `executor-${plan.id}`;
-    const executorStub = this.env.EXECUTOR_DO.get(
-      this.env.EXECUTOR_DO.idFromName(executorId)
+    const executorStub = this.env.EXECUTOR_DO!.get(
+      this.env.EXECUTOR_DO!.idFromName(executorId)
     );
 
     const response = await executorStub.fetch(
@@ -340,8 +336,8 @@ export class DirectorAgent implements DurableObject {
 
     return {
       executorId,
-      output: result.output || '',
-      status: result.status || 'unknown',
+      output: (result as any).output || '',
+      status: (result as any).status || 'unknown',
     };
   }
 
@@ -390,15 +386,16 @@ export class DirectorAgent implements DurableObject {
     // Update context
     this.directorState.context = {
       sessionId: request.sessionId,
+      conversationId: this.directorState.context.conversationId || crypto.randomUUID(),
       userId: request.userId,
       messageCount: this.directorState.context.messageCount + request.messages.length,
       totalTokens: this.directorState.context.totalTokens,
       lastActivity: Date.now(),
       preferences: {
-        language: request.context?.language,
-        framework: request.context?.framework,
-        model: request.preferences?.model,
-        temperature: request.preferences?.temperature,
+        ...(request.context?.language && { language: request.context.language }),
+        ...(request.context?.framework && { framework: request.context.framework }),
+        ...(request.preferences?.model && { model: request.preferences.model }),
+        ...(request.preferences?.temperature !== undefined && { temperature: request.preferences.temperature }),
       },
       history: [
         ...this.directorState.context.history,
@@ -408,6 +405,8 @@ export class DirectorAgent implements DurableObject {
           timestamp: msg.timestamp || Date.now(),
         })),
       ],
+      threads: this.directorState.context.threads || new Map(),
+      metadata: this.directorState.context.metadata || {},
     };
 
     // Keep history manageable (last 100 messages)
@@ -421,7 +420,7 @@ export class DirectorAgent implements DurableObject {
   /**
    * Update metrics after response
    */
-  private async updateMetrics(response: ChatResponse, latency: number): Promise<void> {
+  private async updateMetrics(_response: ChatResponse, latency: number): Promise<void> {
     this.directorState.metrics.requestsProcessed++;
     this.directorState.metrics.totalLatency += latency;
     this.directorState.metrics.averageLatency =
@@ -437,12 +436,15 @@ export class DirectorAgent implements DurableObject {
   private initializeEmptyContext(): ConversationContext {
     return {
       sessionId: '',
+      conversationId: crypto.randomUUID(),
       userId: '',
       messageCount: 0,
       totalTokens: 0,
       lastActivity: Date.now(),
       preferences: {},
       history: [],
+      threads: new Map(),
+      metadata: {},
     };
   }
 
@@ -509,7 +511,7 @@ export class DirectorAgent implements DurableObject {
  * Helper function to create Director Agent stub
  */
 export function createDirectorStub(env: Env, sessionId: string): DurableObjectStub {
-  return env.DIRECTOR_DO.get(env.DIRECTOR_DO.idFromName(`director-${sessionId}`));
+  return env.DIRECTOR_DO!.get(env.DIRECTOR_DO!.idFromName(`director-${sessionId}`));
 }
 
 /**
@@ -530,7 +532,7 @@ export async function orchestrateChat(
   );
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { error?: string };
     throw new Error(error.error || 'Orchestration failed');
   }
 

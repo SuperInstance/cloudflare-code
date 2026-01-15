@@ -462,10 +462,8 @@ export class CodeVectorStore {
 
   /**
    * Load index from KV storage
-   *
-   * @private
    */
-  private async load(): Promise<void> {
+  async load(): Promise<void> {
     if (!this.kv || !this.options.persist.enabled) return;
 
     try {
@@ -473,7 +471,7 @@ export class CodeVectorStore {
       if (!data) return;
 
       const chunksData = data as Array<[string, any]>;
-      for (const [id, chunkData] of chunksData) {
+      for (const [, chunkData] of chunksData) {
         const chunk: CodeChunk = {
           ...chunkData,
           embedding: new Float32Array(chunkData.embedding),
@@ -581,7 +579,9 @@ export class CodeVectorStore {
     // Simple LRU: limit cache size
     if (this.cache.size >= this.options.cacheSize) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
     }
 
     this.cache.set(key, results.map(r => r.chunk));

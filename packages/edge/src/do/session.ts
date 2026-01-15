@@ -124,6 +124,10 @@ export class SessionDO {
     const method = request.method;
     const sessionId = url.pathname.split('/')[1];
 
+    if (!sessionId) {
+      return new Response('Session ID required', { status: 400 });
+    }
+
     try {
       switch (method) {
         case 'GET':
@@ -534,8 +538,8 @@ export class SessionDO {
    * Get message history with limit
    */
   async getHistory(limit?: number): Promise<ConversationMessage[]> {
-    const messages = this.state.blockConcurrencyWhile(async () => {
-      const stored = await this.state.storage.get<SessionData[]>('messages');
+    const messages = await this.state.blockConcurrencyWhile(async () => {
+      const stored = await this.state.storage.get<ConversationMessage[]>('messages');
       return stored || [];
     });
 
@@ -555,7 +559,7 @@ export class SessionDO {
       throw new Error('No active session found');
     }
 
-    const session = allSessions[0]; // Use first session
+    const session = allSessions[0]!; // Use first session
     let messages = session.messages;
     let totalTokens = 0;
     let messageCount = 0;
@@ -563,7 +567,8 @@ export class SessionDO {
 
     // Calculate tokens and truncate if needed
     for (let i = messages.length - 1; i >= 0; i--) {
-      const msgTokens = messages[i].tokens || this.estimateTokens(messages[i].content);
+      const msg = messages[i]!;
+      const msgTokens = msg.tokens || this.estimateTokens(msg.content);
 
       if (totalTokens + msgTokens > tokenLimit) {
         messages = messages.slice(i + 1);
@@ -582,10 +587,10 @@ export class SessionDO {
       truncated,
       metadata: {
         sessionId: session.sessionId,
-        userId: session.userId,
+        userId: session.userId!,
         language: session.metadata.language,
         framework: session.metadata.framework,
-        projectPath: session.metadata.projectPath,
+        projectPath: session.metadata.projectPath!,
       },
     };
   }
@@ -602,10 +607,6 @@ export class SessionDO {
         metadata: {
           ...session.metadata,
           ...metadata,
-          customData: {
-            ...session.metadata.customData,
-            ...metadata,
-          },
         },
       };
       await this.set(sessionId, updated);
@@ -670,7 +671,7 @@ export async function getSession(env: Env, sessionId: string): Promise<SessionDa
     return null;
   }
 
-  const data = await response.json();
+  const data = await response.json() as { session: SessionData };
   return data.session;
 }
 
@@ -688,7 +689,7 @@ export async function createSession(env: Env, sessionData: Partial<SessionData>)
     })
   );
 
-  const data = await response.json();
+  const data = await response.json() as { session: SessionData };
   return data.session;
 }
 
@@ -709,7 +710,7 @@ export async function updateSession(env: Env, sessionId: string, updates: Partia
     throw new Error('Session not found');
   }
 
-  const data = await response.json();
+  const data = await response.json() as { session: SessionData };
   return data.session;
 }
 

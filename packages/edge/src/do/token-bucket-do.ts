@@ -11,7 +11,7 @@ export class TokenBucketDO implements DurableObject {
   private state: TokenBucketState;
   private storage: DurableObjectStorage;
 
-  constructor(state: DurableObjectState, env: unknown) {
+  constructor(state: DurableObjectState, _env: unknown) {
     this.storage = state.storage;
 
     // Initialize state from storage or defaults

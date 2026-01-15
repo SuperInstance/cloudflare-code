@@ -23,6 +23,7 @@ const DEFAULT_OPTIONS: Required<EmbeddingGeneratorOptions> = {
   includeLanguage: true,
   includeSignature: true,
   batchSize: 10,
+  ai: undefined as unknown as AiTextEmbeddingsInput,
 };
 
 /**
@@ -65,7 +66,7 @@ export class CodeEmbeddingGenerator {
     this.options = { ...DEFAULT_OPTIONS, ...options };
     this.embeddingService = new EmbeddingService({
       model: this.options.model,
-      ai: options.ai,
+      ...(options.ai !== undefined && { ai: options.ai }),
     });
   }
 
@@ -174,12 +175,8 @@ export class CodeEmbeddingGenerator {
    * @returns Chunks with new embeddings
    */
   async regenerateEmbeddings(chunks: CodeChunk[]): Promise<CodeChunk[]> {
-    // Remove existing embeddings
-    const chunksToEmbed = chunks.map(chunk => ({
-      ...chunk,
-      embedding: undefined,
-      indexedAt: undefined,
-    }));
+    // Remove existing embeddings by creating new objects without those properties
+    const chunksToEmbed = chunks.map(({ embedding, indexedAt, ...rest }) => rest);
 
     return this.generateEmbeddings(chunksToEmbed);
   }
@@ -269,10 +266,12 @@ export class CodeEmbeddingGenerator {
 
     for (let i = 0; i < sampleSize; i++) {
       for (let j = i + 1; j < sampleSize; j++) {
-        if (embeddedChunks[i].embedding && embeddedChunks[j].embedding) {
+        const embI = embeddedChunks[i]!.embedding;
+        const embJ = embeddedChunks[j]!.embedding;
+        if (embI && embJ) {
           totalSimilarity += this.embeddingService.similarity(
-            embeddedChunks[i].embedding,
-            embeddedChunks[j].embedding
+            embI,
+            embJ
           );
           comparisons++;
         }

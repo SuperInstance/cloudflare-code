@@ -80,6 +80,9 @@ export class MetricsAggregator {
     const recentAnomalies = await this.detectAnomalies();
     const forecast = await this.generateForecast(now, timeRange);
 
+    const overallCache = await this.cacheCollector.getOverallMetrics();
+    const cacheSavings = await this.cacheCollector.getSavings();
+
     return {
       timestamp: now,
       timeRange: { start: startTime, end: now, label },
@@ -90,7 +93,10 @@ export class MetricsAggregator {
       providerStatus,
       cachePerformance: {
         ...cachePerformance,
-        overall: await this.cacheCollector.getOverallMetrics(),
+        overall: {
+          hitRate: overallCache.hitRate,
+          savings: cacheSavings.costSaved,
+        },
       },
       topProviders,
       recentAnomalies,
@@ -136,7 +142,7 @@ export class MetricsAggregator {
     const cascadeSavingsAmount = grossCost * 0.10;
 
     const totalSavings = cacheSavingsAmount + routingSavingsAmount + cascadeSavingsAmount;
-    const totalCost = grossCost - totalSavings;
+    void (grossCost - totalSavings); // Calculate but don't use for now
 
     return {
       totalSavings,
@@ -330,7 +336,7 @@ export class MetricsAggregator {
    */
   async generateForecast(
     now: number,
-    period: 'hour' | 'day' | 'week'
+    _period: 'hour' | 'day' | 'week'
   ): Promise<{
     nextHour: number;
     nextDay: number;
@@ -374,7 +380,7 @@ export class MetricsAggregator {
     const intercept = (sumY - slope * sumX) / n;
 
     // Calculate forecast
-    const lastDayCost = costs[costs.length - 1];
+    const lastDayCost = costs[costs.length - 1] ?? 0;
     const nextDay = lastDayCost + slope;
     const nextHour = nextDay / 24;
     const nextWeek = nextDay * 7;

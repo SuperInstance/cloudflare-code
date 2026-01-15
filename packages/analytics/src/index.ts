@@ -1,99 +1,22 @@
 /**
- * ClaudeFlare Analytics Platform
- * Comprehensive performance analytics and ML Ops system
+ * ClaudeFlare Analytics - Ultra-Optimized
+ * Lightweight analytics and monitoring
  */
 
-// ============================================================================
 // Monitoring
-// ============================================================================
+export { RealtimeMonitor } from './monitoring/realtime-monitor.js';
+export { MetricsCollector, MetricsMiddleware, MetricsAggregator } from './monitoring/metrics-collector.js';
 
-export {
-  RealtimeMonitor,
-  type AlertThreshold,
-  type Anomaly,
-  type MetricStatistics,
-  type HealthStatus,
-} from './monitoring/realtime-monitor.js';
-
-export {
-  MetricsCollector,
-  WorkerMetricsSource,
-  RequestMetricsSource,
-  CustomMetricsSource,
-  MetricsMiddleware,
-  MetricsAggregator,
-  type MetricSource,
-} from './monitoring/metrics-collector.js';
-
-// ============================================================================
 // Experiments
-// ============================================================================
+export { ABTestingFramework } from './experiments/ab-testing.js';
+export { StatisticalAnalyzer } from './experiments/statistical-analyzer.js';
+export { TrafficAllocator } from './experiments/traffic-allocator.js';
 
-export {
-  ABTestingFramework,
-  type ExperimentAssignment,
-  type ExperimentMetric,
-} from './experiments/ab-testing.js';
-
-export {
-  StatisticalAnalyzer,
-  type SampleSizeConfig,
-  type TestConfig,
-  type TestResult,
-} from './experiments/statistical-analyzer.js';
-
-export {
-  TrafficAllocator,
-  GradualRollout,
-  CanaryDeployment,
-  StickyAllocation,
-  type AllocationConfig,
-} from './experiments/traffic-allocator.js';
-
-export {
-  ExperimentStorage,
-  KVExperimentStorage,
-  D1ExperimentStorage,
-  type StorageConfig,
-} from './experiments/experiment-storage.js';
-
-// ============================================================================
 // Features
-// ============================================================================
+export { FeatureFlagService, FeatureFlagMiddleware } from './features/feature-flags.js';
 
-export {
-  FeatureFlagService,
-  FeatureFlagMiddleware,
-  type FlagEvaluationContext,
-  type FlagEvaluationResult,
-  type BulkEvaluationResult,
-} from './features/feature-flags.js';
-
-export {
-  FeatureFlagStorage,
-  KVFeatureFlagStorage,
-  D1FeatureFlagStorage,
-  MemoryFeatureFlagStorage,
-  type FlagStats,
-} from './features/feature-storage.js';
-
-// ============================================================================
 // ML Monitoring
-// ============================================================================
-
-export {
-  ModelMonitoringService,
-  type ModelConfig,
-  type DriftThresholdConfig,
-  type PredictionRecord,
-  type LabeledPrediction,
-  type ModelAlert,
-} from './ml/model-monitoring.js';
-
-export {
-  ModelMonitoringStorage,
-  D1ModelMonitoringStorage,
-} from './ml/ml-storage.js';
+export { ModelMonitoringService } from './ml/model-monitoring.js';
 
 // ============================================================================
 // Insights

@@ -1,5 +1,5 @@
-import type { ErrorResponse, ErrorCode } from '../types/index';
-import { HttpStatus } from '../types/index';
+import type { ErrorResponse } from '../types/index';
+import { ErrorCode, HttpStatus } from '../types/index';
 
 /**
  * Application Error with structured error response
@@ -37,7 +37,7 @@ export class AppError extends Error {
  */
 export class ValidationError extends AppError {
   constructor(message: string, details?: unknown) {
-    super('VALIDATION_ERROR', message, HttpStatus.BAD_REQUEST, details);
+    super(ErrorCode.VALIDATION_ERROR, message, HttpStatus.BAD_REQUEST, details);
     this.name = 'ValidationError';
   }
 }
@@ -50,7 +50,7 @@ export class NotFoundError extends AppError {
     const message = identifier
       ? `${resource} with id '${identifier}' not found`
       : `${resource} not found`;
-    super('NOT_FOUND', message, HttpStatus.NOT_FOUND);
+    super(ErrorCode.NOT_FOUND, message, HttpStatus.NOT_FOUND);
     this.name = 'NotFoundError';
   }
 }
@@ -60,7 +60,7 @@ export class NotFoundError extends AppError {
  */
 export class UnauthorizedError extends AppError {
   constructor(message = 'Unauthorized') {
-    super('UNAUTHORIZED', message, HttpStatus.UNAUTHORIZED);
+    super(ErrorCode.UNAUTHORIZED, message, HttpStatus.UNAUTHORIZED);
     this.name = 'UnauthorizedError';
   }
 }
@@ -70,7 +70,7 @@ export class UnauthorizedError extends AppError {
  */
 export class ForbiddenError extends AppError {
   constructor(message = 'Forbidden') {
-    super('FORBIDDEN', message, HttpStatus.FORBIDDEN);
+    super(ErrorCode.FORBIDDEN, message, HttpStatus.FORBIDDEN);
     this.name = 'ForbiddenError';
   }
 }
@@ -81,7 +81,7 @@ export class ForbiddenError extends AppError {
 export class RateLimitError extends AppError {
   constructor(retryAfter?: number) {
     super(
-      'RATE_LIMIT_EXCEEDED',
+      ErrorCode.RATE_LIMIT_EXCEEDED,
       'Rate limit exceeded',
       HttpStatus.TOO_MANY_REQUESTS,
       { retryAfter }
@@ -95,7 +95,7 @@ export class RateLimitError extends AppError {
  */
 export class InternalServerError extends AppError {
   constructor(message = 'Internal server error', details?: unknown) {
-    super('INTERNAL_ERROR', message, HttpStatus.INTERNAL_SERVER_ERROR, details);
+    super(ErrorCode.INTERNAL_ERROR, message, HttpStatus.INTERNAL_SERVER_ERROR, details);
     this.name = 'InternalServerError';
   }
 }
@@ -108,7 +108,7 @@ export class ServiceUnavailableError extends AppError {
     const message = service
       ? `Service '${service}' is currently unavailable`
       : 'Service temporarily unavailable';
-    super('SERVICE_UNAVAILABLE', message, HttpStatus.SERVICE_UNAVAILABLE);
+    super(ErrorCode.SERVICE_UNAVAILABLE, message, HttpStatus.SERVICE_UNAVAILABLE);
     this.name = 'ServiceUnavailableError';
   }
 }
@@ -121,7 +121,7 @@ export class TimeoutError extends AppError {
     const message = operation
       ? `Operation '${operation}' timed out`
       : 'Operation timed out';
-    super('TIMEOUT', message, HttpStatus.GATEWAY_TIMEOUT);
+    super(ErrorCode.TIMEOUT, message, HttpStatus.GATEWAY_TIMEOUT);
     this.name = 'TimeoutError';
   }
 }
@@ -132,9 +132,9 @@ export class TimeoutError extends AppError {
 export class UpstreamError extends AppError {
   constructor(provider: string, originalError?: string) {
     super(
-      'UPSTREAM_ERROR',
+      ErrorCode.UPSTREAM_ERROR,
       `Error communicating with ${provider}`,
-      HttpStatus.BAD_GATEWAY,
+      HttpStatus.SERVICE_UNAVAILABLE,
       { provider, originalError }
     );
     this.name = 'UpstreamError';
@@ -147,7 +147,7 @@ export class UpstreamError extends AppError {
 export class NotImplemented extends AppError {
   constructor(feature: string) {
     super(
-      'NOT_IMPLEMENTED',
+      ErrorCode.NOT_IMPLEMENTED,
       `${feature} is not yet implemented`,
       HttpStatus.NOT_IMPLEMENTED
     );

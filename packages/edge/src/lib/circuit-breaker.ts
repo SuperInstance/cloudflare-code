@@ -102,7 +102,7 @@ export interface CircuitBreakerStats {
  * ```
  */
 export class CircuitBreaker {
-  private options: Required<CircuitBreakerOptions>;
+  private options: CircuitBreakerOptions;
   private state: CircuitState = 'CLOSED';
   private failureCount: number = 0;
   private successCount: number = 0;
@@ -110,7 +110,6 @@ export class CircuitBreaker {
   private lastSuccessTime: number = 0;
   private openedAt: number = 0;
   private halfOpenCallCount: number = 0;
-  private localInitialized: boolean = false;
 
   constructor(options: CircuitBreakerOptions) {
     this.options = {
@@ -118,9 +117,9 @@ export class CircuitBreaker {
       successThreshold: options.successThreshold ?? 2,
       timeout: options.timeout ?? 60000,
       halfOpenMaxCalls: options.halfOpenMaxCalls ?? 3,
-      kv: options.kv,
       name: options.name,
       ttl: options.ttl ?? 3600,
+      ...(options.kv && { kv: options.kv }),
     };
 
     // Load state from KV if available
@@ -151,7 +150,7 @@ export class CircuitBreaker {
 
     // Check half-open call limit
     if (this.state === 'HALF_OPEN') {
-      if (this.halfOpenCallCount >= this.options.halfOpenMaxCalls) {
+      if (this.halfOpenCallCount >= this.options.halfOpenMaxCalls!) {
         throw new Error(
           `Circuit breaker HALF_OPEN for ${this.options.name}. ` +
           `Max test calls (${this.options.halfOpenMaxCalls}) reached.`
@@ -238,7 +237,7 @@ export class CircuitBreaker {
     if (this.state === 'HALF_OPEN') {
       this.successCount++;
 
-      if (this.successCount >= this.options.successThreshold) {
+      if (this.successCount >= this.options.successThreshold!) {
         await this.transitionToClosed();
       }
     } else if (this.state === 'CLOSED') {
@@ -261,7 +260,7 @@ export class CircuitBreaker {
 
     if (this.state === 'HALF_OPEN') {
       this.transitionToOpen();
-    } else if (this.failureCount >= this.options.failureThreshold) {
+    } else if (this.failureCount >= this.options.failureThreshold!) {
       this.transitionToOpen();
     }
 
@@ -325,7 +324,7 @@ export class CircuitBreaker {
   private shouldAttemptReset(): boolean {
     if (this.openedAt === 0) return false;
     const timeSinceOpened = Date.now() - this.openedAt;
-    return timeSinceOpened >= this.options.timeout;
+    return timeSinceOpened >= this.options.timeout!;
   }
 
   /**
@@ -349,7 +348,6 @@ export class CircuitBreaker {
         this.lastSuccessTime = state.lastSuccessTime;
         this.openedAt = state.openedAt ?? 0;
         this.halfOpenCallCount = state.halfOpenCallCount;
-        this.localInitialized = true;
       }
     } catch (error) {
       console.error('CircuitBreaker KV load error:', error);
@@ -363,12 +361,15 @@ export class CircuitBreaker {
     if (!this.options.kv) return;
 
     try {
+      const putOptions: KVNamespacePutOptions = {};
+      if (this.options.ttl !== undefined) {
+        putOptions.expirationTtl = this.options.ttl;
+      }
+
       await this.options.kv.put(
         this.getStorageKey(),
         JSON.stringify(this.getStats()),
-        {
-          expirationTtl: this.options.ttl,
-        }
+        putOptions
       );
     } catch (error) {
       console.error('CircuitBreaker KV save error:', error);
@@ -394,11 +395,16 @@ export function createCircuitBreaker(
   name: string,
   kv?: KVNamespace
 ): CircuitBreaker {
-  return new CircuitBreaker({
+  const options: CircuitBreakerOptions = {
     name,
     failureThreshold: 5,
     successThreshold: 2,
     timeout: 60000,
-    kv,
-  });
+  };
+
+  if (kv !== undefined) {
+    options.kv = kv;
+  }
+
+  return new CircuitBreaker(options);
 }

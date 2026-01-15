@@ -205,32 +205,44 @@ export class CodeChunker {
     } | null = null;
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+      const line = lines[i]!;
       const lineNum = i + 1;
 
       // Check for function/class start
-      const isFunctionStart = patterns.function?.test(line);
-      const isClassStart = patterns.class?.test(line);
+      const isFunctionStart = patterns.function?.test(line) ?? false;
+      const isClassStart = patterns.class?.test(line) ?? false;
 
       if (isFunctionStart || isClassStart) {
         // Save previous chunk if exists
         if (currentChunk && currentChunk.content.length > 0) {
-          chunks.push(this.finalizeChunk(currentChunk, parsed.path, parsed.language, i));
+          chunks.push(this.finalizeChunk(currentChunk, parsed.path!, parsed.language!, i));
         }
 
         // Extract name
         const nameMatch = line.match(/(?:function|class|def|func|interface)\s+(\w+)/);
-        const name = nameMatch ? nameMatch[1] : undefined;
+        const name = nameMatch ? nameMatch[1]! : undefined;
 
         // Start new chunk
-        currentChunk = {
+        const chunkData: {
+          startLine: number;
+          content: string[];
+          type: ChunkType;
+          name?: string;
+          bracketDepth: number;
+          inBlock: boolean;
+        } = {
           startLine: lineNum,
           content: [line],
           type: isFunctionStart ? 'function' : 'class',
-          name,
           bracketDepth: 0,
           inBlock: false,
         };
+
+        if (name !== undefined) {
+          chunkData.name = name;
+        }
+
+        currentChunk = chunkData;
 
         // Check if block starts on same line
         if (patterns.blockStart?.test(line)) {
@@ -248,7 +260,7 @@ export class CodeChunker {
         // Check if block ends
         if (currentChunk.bracketDepth <= 0 && patterns.blockEnd?.test(line)) {
           currentChunk.content.push(line);
-          chunks.push(this.finalizeChunk(currentChunk, parsed.path, parsed.language, lineNum));
+          chunks.push(this.finalizeChunk(currentChunk, parsed.path!, parsed.language!, lineNum));
           currentChunk = null;
           continue;
         }
@@ -261,7 +273,7 @@ export class CodeChunker {
         // Check if chunk is too large
         const content = currentChunk.content.join('\n');
         if (content.length > this.options.maxSize) {
-          chunks.push(this.finalizeChunk(currentChunk, parsed.path, parsed.language, lineNum));
+          chunks.push(this.finalizeChunk(currentChunk, parsed.path!, parsed.language!, lineNum));
           currentChunk = null;
         }
       }
@@ -269,7 +281,7 @@ export class CodeChunker {
 
     // Don't forget the last chunk
     if (currentChunk && currentChunk.content.length > 0) {
-      chunks.push(this.finalizeChunk(currentChunk, parsed.path, parsed.language, lines.length));
+      chunks.push(this.finalizeChunk(currentChunk, parsed.path!, parsed.language!, lines.length));
     }
 
     // If no chunks were created, fall back to size-based chunking
@@ -336,8 +348,8 @@ export class CodeChunker {
     }
 
     for (let i = 1; i < chunks.length; i++) {
-      const prevChunk = chunks[i - 1];
-      const currChunk = chunks[i];
+      const prevChunk = chunks[i - 1]!;
+      const currChunk = chunks[i]!;
 
       // Get overlap from previous chunk
       const prevLines = prevChunk.content.split('\n');
@@ -350,7 +362,7 @@ export class CodeChunker {
       if (overlapLines > 0) {
         const overlapContent = prevLines.slice(-overlapLines).join('\n');
         currChunk.content = overlapContent + '\n...\n' + currChunk.content;
-        currChunk.startLine = Math.max(1, prevChunk.endLine - overlapLines + 1);
+        currChunk.startLine = Math.max(1, prevChunk.endLine! - overlapLines + 1);
       }
     }
 
@@ -411,7 +423,7 @@ export class CodeChunker {
     const content = chunkData.content.join('\n');
     const startLine = chunkData.startLine;
 
-    return {
+    const result: CodeChunk = {
       id: this.generateChunkId(filePath, startLine, endLine),
       filePath,
       language,
@@ -419,11 +431,16 @@ export class CodeChunker {
       startLine,
       endLine,
       type: chunkData.type,
-      name: chunkData.name,
       dependencies: [],
       imports: [],
       exports: [],
     };
+
+    if (chunkData.name !== undefined) {
+      result.name = chunkData.name;
+    }
+
+    return result;
   }
 
   /**

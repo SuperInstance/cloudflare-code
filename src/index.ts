@@ -7,6 +7,11 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { CodeReviewService } from './services/code-review-service';
 import { SecurityTestingService } from './services/security-testing-service';
+import { EnterpriseAuthService } from './services/auth-service';
+import { TestingService } from './services/testing-service';
+import { createAuthRoutes } from './routes/auth-routes';
+import { createAuthMiddleware } from './middleware/auth-middleware';
+import { createTestingRoutes } from './routes/testing-routes';
 
 type Bindings = {
   // KV Storage
@@ -39,6 +44,26 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+// Initialize authentication service
+const authConfig = {
+  jwtSecret: 'your-secret-key-change-in-production',
+  jwtAlgorithm: 'HS256',
+  jwtExpiry: 3600, // 1 hour
+  refreshTokenExpiry: 86400, // 24 hours
+  maxLoginAttempts: 5,
+  lockoutDuration: 15, // minutes
+  mfaRequired: false,
+  sessionTimeout: 3600, // 1 hour
+  cookieSecure: false,
+  cookieSameSite: 'lax' as const
+};
+
+const authService = new EnterpriseAuthService(authConfig);
+const authMiddleware = createAuthMiddleware(authService);
+
+// Initialize testing service
+const testingService = new TestingService();
+
 // Middleware
 app.use('*', cors());
 
@@ -68,8 +93,16 @@ app.get('/metrics', (c) => {
   });
 });
 
+// Authentication routes
+app.route('/api/v1/auth', createAuthRoutes(authService));
+
+// Testing routes
+app.route('/api/v1/testing', createTestingRoutes(testingService));
+
 // API v1 routes
-app.route('/api/v1', createAPIRouter());
+const apiRouter = createAPIRouter();
+app.use('/api/v1/*', authMiddleware); // Apply auth to all v1 endpoints
+app.route('/api/v1', apiRouter);
 
 // Durable Object routes
 app.route('/api/do', createDORouter());
@@ -90,10 +123,28 @@ function createAPIRouter() {
   const codeReviewService = new CodeReviewService();
   const securityTestingService = new SecurityTestingService();
 
+  
   router.get('/test', (c) => {
     return c.json({
       status: 'ok',
       message: 'API is working',
+      auth: (c as any).auth
+    });
+  });
+
+  // Public demo endpoint for easy authentication testing
+  router.post('/demo-auth', async (c) => {
+    return c.json({
+      success: true,
+      message: 'Demo authentication successful',
+      auth: {
+        userId: 'demo-user-id',
+        userEmail: 'demo@claudeflare.com',
+        userRole: 'developer',
+        permissions: ['read', 'write', 'demo']
+      },
+      token: 'demo_token_' + Math.random().toString(36).substring(7),
+      usage: 'Use this token in Authorization header as "Bearer demo_token_..." for API access'
     });
   });
 
@@ -105,7 +156,7 @@ function createAPIRouter() {
     });
   });
 
-  // Code review endpoints
+  // Code review endpoints - require authentication
   router.post('/code-review', async (c) => {
     try {
       const request = await c.req.json();
@@ -124,12 +175,24 @@ function createAPIRouter() {
         config = {}
       } = request;
 
+      // Get authentication context
+      const auth = (c as any).auth;
+      if (!auth.userEmail) {
+        return c.json({
+          success: false,
+          error: 'Authentication required'
+        }, 401);
+      }
+
       // Perform code review
       const result = await codeReviewService.reviewCode({
         content: request.content,
         filePath,
         config
       });
+
+      // Log the review for audit
+      console.log(`Code review performed by ${auth.userEmail} for ${filePath}`);
 
       // Return result with proper HTTP status
       if (result.success) {
@@ -146,7 +209,7 @@ function createAPIRouter() {
     }
   });
 
-  // Code review endpoint with file path parameter
+  // Code review endpoint with file path parameter - require authentication
   router.post('/code-review/:filePath', async (c) => {
     try {
       const filePath = c.req.param('filePath');
@@ -160,12 +223,24 @@ function createAPIRouter() {
         }, 400);
       }
 
+      // Get authentication context
+      const auth = (c as any).auth;
+      if (!auth.userEmail) {
+        return c.json({
+          success: false,
+          error: 'Authentication required'
+        }, 401);
+      }
+
       // Perform code review
       const result = await codeReviewService.reviewCode({
         content: request.content,
         filePath,
         config: request.config || {}
       });
+
+      // Log the review for audit
+      console.log(`Code review performed by ${auth.userEmail} for ${filePath}`);
 
       // Return result with proper HTTP status
       if (result.success) {
@@ -242,10 +317,10 @@ function createAPIRouter() {
   });
 
   // ============================================================================
-  // Security Testing Endpoints
+  // Security Testing Endpoints - require authentication and specific permissions
   // ============================================================================
 
-  // Main security testing endpoint
+  // Main security testing endpoint - require authentication
   router.post('/security-test', async (c) => {
     try {
       const request = await c.req.json();
@@ -257,6 +332,18 @@ function createAPIRouter() {
           error: 'Target is required'
         }, 400);
       }
+
+      // Get authentication context
+      const auth = (c as any).auth;
+      if (!auth.userEmail) {
+        return c.json({
+          success: false,
+          error: 'Authentication required'
+        }, 401);
+      }
+
+      // Log the security test for audit
+      console.log(`Security test performed by ${auth.userEmail} for target: ${request.target}`);
 
       // Perform security scan
       const result = await securityTestingService.performSecurityScan({
@@ -358,7 +445,7 @@ function createAPIRouter() {
     });
   });
 
-  // Quick security test endpoint for common use cases
+  // Quick security test endpoint for common use cases - require authentication
   router.post('/security-test/quick', async (c) => {
     try {
       const request = await c.req.json();
@@ -370,6 +457,18 @@ function createAPIRouter() {
           error: 'Target is required'
         }, 400);
       }
+
+      // Get authentication context
+      const auth = (c as any).auth;
+      if (!auth.userEmail) {
+        return c.json({
+          success: false,
+          error: 'Authentication required'
+        }, 401);
+      }
+
+      // Log the quick security test for audit
+      console.log(`Quick security test performed by ${auth.userEmail} for target: ${request.target}`);
 
       // Determine target type and perform appropriate scan
       let scanRequest: any = {
@@ -458,7 +557,7 @@ function createDORouter() {
     try {
       const id = c.env.AGENT_ORCHESTRATOR.idFromName('test');
       const stub = c.env.AGENT_ORCHESTRATOR.get(id);
-      const response = await stub.fetch('https://fake.com/stats');
+      const response = await stub.fetch('http://dummy/counter?action=get');
       return await response.json();
     } catch (error) {
       return c.json({ error: 'Agent Orchestrator not available' }, 500);
@@ -470,7 +569,7 @@ function createDORouter() {
     try {
       const id = c.env.VECTOR_INDEX.idFromName('test');
       const stub = c.env.VECTOR_INDEX.get(id);
-      const response = await stub.fetch('https://fake.com/stats');
+      const response = await stub.fetch('http://dummy/stats');
       return await response.json();
     } catch (error) {
       return c.json({ error: 'Vector Index not available' }, 500);

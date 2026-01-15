@@ -100,7 +100,7 @@ export class ProviderMetricsCollector {
   /**
    * Record a successful request
    */
-  recordSuccess(provider: string, latency: number, tokens: number): void {
+  recordSuccess(provider: string, latency: number, _tokens: number): void {
     const snapshot = this.rollingMetrics.get(provider) || this.createSnapshot();
     snapshot.requestCount++;
     snapshot.successCount++;
@@ -131,14 +131,20 @@ export class ProviderMetricsCollector {
     const snapshot = this.rollingMetrics.get(provider) || this.createSnapshot();
     snapshot.quotaUsed = used;
     snapshot.quotaTotal = total;
-    snapshot.quotaResetTime = resetTime;
+    if (resetTime !== undefined) {
+      snapshot.quotaResetTime = resetTime;
+    }
     this.rollingMetrics.set(provider, snapshot);
 
     // Persist to KV
     const kvKey = `provider:${provider}:quota`;
+    const kvData: { used: number; total: number; resetTime?: number } = { used, total };
+    if (resetTime !== undefined) {
+      kvData.resetTime = resetTime;
+    }
     await this.kvCache.put(
       kvKey,
-      JSON.stringify({ used, total, resetTime }),
+      JSON.stringify(kvData),
       {
         expirationTtl: 3600, // 1 hour
       }
@@ -156,12 +162,20 @@ export class ProviderMetricsCollector {
   } | null> {
     const snapshot = this.rollingMetrics.get(provider);
     if (snapshot) {
-      return {
+      const result: {
+        used: number;
+        total: number;
+        percentage: number;
+        resetTime?: number;
+      } = {
         used: snapshot.quotaUsed,
         total: snapshot.quotaTotal,
         percentage: (snapshot.quotaUsed / snapshot.quotaTotal) * 100,
-        resetTime: snapshot.quotaResetTime,
       };
+      if (snapshot.quotaResetTime !== undefined) {
+        result.resetTime = snapshot.quotaResetTime;
+      }
+      return result;
     }
 
     // Check KV cache
@@ -271,7 +285,6 @@ export class ProviderMetricsCollector {
       errorCodes: {},
       quotaUsed: 0,
       quotaTotal: Infinity,
-      quotaResetTime: undefined,
       health: 'healthy',
       lastUpdate: Date.now(),
       recentMetrics: [],
@@ -319,7 +332,7 @@ export class ProviderMetricsCollector {
     );
     const requestsPerMinute = recentRequests.length;
 
-    return {
+    const result: ProviderMetrics = {
       provider,
       timestamp: now,
       health: snapshot.health,
@@ -333,12 +346,15 @@ export class ProviderMetricsCollector {
       tokensPerSecond: 0, // Would need token tracking
       quotaUsed: snapshot.quotaUsed,
       quotaTotal: snapshot.quotaTotal,
-      quotaResetTime: snapshot.quotaResetTime,
       costPer1KTokens: {
         input: 0,
         output: 0,
       }, // Would need pricing data
     };
+    if (snapshot.quotaResetTime !== undefined) {
+      result.quotaResetTime = snapshot.quotaResetTime;
+    }
+    return result;
   }
 
   /**

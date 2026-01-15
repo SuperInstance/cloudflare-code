@@ -8,15 +8,15 @@
 import type { CacheMetrics } from './types';
 
 export class CacheMetricsCollector {
-  private kvCache: KVNamespace;
-  private r2Storage: R2Bucket;
+  private _kvCache: KVNamespace;
+  private _r2Storage: R2Bucket;
 
   // In-memory metrics by tier
   private tierMetrics: Map<'hot' | 'warm' | 'cold', CacheSnapshot>;
 
   constructor(kvCache: KVNamespace, r2Storage: R2Bucket) {
-    this.kvCache = kvCache;
-    this.r2Storage = r2Storage;
+    this._kvCache = kvCache;
+    this._r2Storage = r2Storage;
     this.tierMetrics = new Map();
     this.tierMetrics.set('hot', this.createSnapshot('hot'));
     this.tierMetrics.set('warm', this.createSnapshot('warm'));
@@ -68,7 +68,7 @@ export class CacheMetricsCollector {
    */
   async getTierMetrics(tier: 'hot' | 'warm' | 'cold'): Promise<CacheMetrics> {
     const snapshot = this.tierMetrics.get(tier)!;
-    const latencies = snapshot.latencies.sort((a, b) => a - b);
+    void snapshot.latencies.sort((a, b) => a - b); // Sort for percentiles if needed
 
     // Calculate average entry age (simplified)
     const avgEntryAge = Date.now() - snapshot.lastUpdate;
@@ -91,6 +91,8 @@ export class CacheMetricsCollector {
         snapshot.totalRequests > 0
           ? (snapshot.evictions / snapshot.totalRequests) * 1000
           : 0,
+      avgEntryAge,
+      staleEntries: 0, // Would need TTL tracking
     };
   }
 

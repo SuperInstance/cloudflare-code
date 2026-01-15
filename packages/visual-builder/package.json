@@ -1,0 +1,53 @@
+{
+  "name": "@claudeflare/visual-builder",
+  "version": "0.1.0",
+  "description": "Visual drag-and-drop interface for ClaudeFlare Application Factory",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@claudeflare/factory-core": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-flow-renderer": "^10.3.17",
+    "zustand": "^4.4.7",
+    "recharts": "^2.8.0",
+    "lucide-react": "^0.292.0",
+    "clsx": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "claudeflare",
+    "visual-builder",
+    "drag-drop",
+    "react",
+    "cloudflare",
+    "application-factory"
+  ],
+  "author": "ClaudeFlare Team",
+  "license": "MIT"
+}

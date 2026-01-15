@@ -1,0 +1,55 @@
+{
+  "$schema": "https://unpkg.com/nx@16.8.0/schema/nx-schema.json",
+  "projects": {
+    "core-interfaces": {
+      "tags": ["type:core"],
+      "implicitDependencies": []
+    },
+    "factory-core": {
+      "tags": ["type:core", "scope:factory"],
+      "implicitDependencies": ["core-interfaces"]
+    },
+    "saas-core": {
+      "tags": ["type:core", "scope:saas"],
+      "implicitDependencies": ["core-interfaces"]
+    },
+    "business-core": {
+      "tags": ["type:core", "scope:business"],
+      "implicitDependencies": ["core-interfaces"]
+    },
+    "marketing-core": {
+      "tags": ["type:core", "scope:marketing"],
+      "implicitDependencies": ["core-interfaces"]
+    },
+    "benchmark-core": {
+      "tags": ["type:benchmark"],
+      "implicitDependencies": [
+        "core-interfaces",
+        "factory-core",
+        "saas-core",
+        "business-core",
+        "marketing-core"
+      ]
+    }
+  },
+  "affected": {
+    "defaultBase": "main"
+  },
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "cache": true
+    },
+    "test": {
+      "inputs": ["default", "^default"],
+      "cache": true
+    },
+    "lint": {
+      "inputs": ["default", "^default"]
+    },
+    "format": {
+      "inputs": ["default", "^default"]
+    }
+  }
+}
