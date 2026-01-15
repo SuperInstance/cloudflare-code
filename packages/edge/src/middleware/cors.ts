@@ -38,14 +38,40 @@ const DEFAULT_CORS_CONFIG: CORSConfig = {
 export function createCORS(config: CORSConfig = {}) {
   const mergedConfig = { ...DEFAULT_CORS_CONFIG, ...config };
 
-  return cors({
-    origin: mergedConfig.origin,
-    allowMethods: mergedConfig.allowMethods,
-    allowHeaders: mergedConfig.allowHeaders,
-    credentials: mergedConfig.credentials,
-    maxAge: mergedConfig.maxAge,
-    exposeHeaders: mergedConfig.exposeHeaders,
-  });
+  const corsOptions: {
+    origin: string | string[] | ((origin: string) => string | null | undefined);
+    allowMethods?: string[];
+    allowHeaders?: string[];
+    credentials?: boolean;
+    maxAge?: number;
+    exposeHeaders?: string[];
+  } = {
+    origin: typeof mergedConfig.origin === 'string'
+      ? mergedConfig.origin
+      : Array.isArray(mergedConfig.origin)
+      ? mergedConfig.origin
+      : mergedConfig.origin === undefined
+      ? '*'
+      : (origin: string) => (mergedConfig.origin as (origin: string) => boolean)(origin) ? origin : null,
+  };
+
+  if (mergedConfig.allowMethods) {
+    corsOptions.allowMethods = mergedConfig.allowMethods;
+  }
+  if (mergedConfig.allowHeaders) {
+    corsOptions.allowHeaders = mergedConfig.allowHeaders;
+  }
+  if (mergedConfig.credentials !== undefined) {
+    corsOptions.credentials = mergedConfig.credentials;
+  }
+  if (mergedConfig.maxAge !== undefined) {
+    corsOptions.maxAge = mergedConfig.maxAge;
+  }
+  if (mergedConfig.exposeHeaders) {
+    corsOptions.exposeHeaders = mergedConfig.exposeHeaders;
+  }
+
+  return cors(corsOptions);
 }
 
 /**
@@ -77,11 +103,6 @@ export function corsWithOriginValidation(allowedOrigins: string[]) {
     c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-ID, X-Session-ID');
     c.header('Access-Control-Allow-Credentials', 'true');
     c.header('Access-Control-Max-Age', '86400');
-    c.header('Access-Control-Expose-Headers', 'X-Request-ID, X-RateLimit-Remaining, X-RateLimit-Reset');
-
-    if (c.req.method === 'OPTIONS') {
-      return c.text('', 204);
-    }
 
     await next();
   };

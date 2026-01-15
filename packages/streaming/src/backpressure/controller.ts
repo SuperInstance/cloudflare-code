@@ -290,6 +290,7 @@ export class FlowController {
         initialDelay: 1000,
         maxDelay: 30000,
       },
+      circuitBreaker: config.circuitBreaker ?? undefined,
     };
 
     if (config.circuitBreaker) {

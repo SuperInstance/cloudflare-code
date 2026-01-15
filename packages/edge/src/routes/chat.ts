@@ -18,10 +18,6 @@ import {
   createGroqProvider,
   createCerebrasProvider,
   createOpenRouterProvider,
-  type CloudflareAIConfig,
-  type GroqConfig,
-  type CerebrasConfig,
-  type OpenRouterConfig,
 } from '../lib/providers';
 
 /**
@@ -44,12 +40,11 @@ function initializeProviders(env: Env): void {
 
   // Register Cloudflare Workers AI (highest priority - native integration)
   if (env.CLOUDFLARE_ACCOUNT_ID && (env.AI || env.CLOUDFLARE_API_TOKEN)) {
-    const cfConfig: CloudflareAIConfig = {
+    registry.register(createCloudflareAIProvider({
       accountId: env.CLOUDFLARE_ACCOUNT_ID,
-      apiToken: env.CLOUDFLARE_API_TOKEN,
-      apiKey: env.CLOUDFLARE_API_TOKEN || '',
-    };
-    registry.register(createCloudflareAIProvider(cfConfig, env), {
+      apiKey: env.CLOUDFLARE_API_TOKEN ?? '',
+      ...(env.CLOUDFLARE_API_TOKEN ? { apiToken: env.CLOUDFLARE_API_TOKEN } : {}),
+    }, env), {
       priority: 10,
       enabled: true,
     });
@@ -57,10 +52,9 @@ function initializeProviders(env: Env): void {
 
   // Register Groq (fastest - 840 TPS)
   if (env.GROQ_API_KEY) {
-    const groqConfig: GroqConfig = {
+    registry.register(createGroqProvider({
       apiKey: env.GROQ_API_KEY,
-    };
-    registry.register(createGroqProvider(groqConfig), {
+    }), {
       priority: 8,
       enabled: true,
     });
@@ -68,10 +62,9 @@ function initializeProviders(env: Env): void {
 
   // Register Cerebras (ultra-fast - 2600 TPS)
   if (env.CEREBRAS_API_KEY) {
-    const cerebrasConfig: CerebrasConfig = {
+    registry.register(createCerebrasProvider({
       apiKey: env.CEREBRAS_API_KEY,
-    };
-    registry.register(createCerebrasProvider(cerebrasConfig), {
+    }), {
       priority: 7,
       enabled: true,
     });
@@ -79,10 +72,9 @@ function initializeProviders(env: Env): void {
 
   // Register OpenRouter (300+ models)
   if (env.OPENROUTER_API_KEY) {
-    const openRouterConfig: OpenRouterConfig = {
+    registry.register(createOpenRouterProvider({
       apiKey: env.OPENROUTER_API_KEY,
-    };
-    registry.register(createOpenRouterProvider(openRouterConfig), {
+    }), {
       priority: 5,
       enabled: true,
     });
@@ -248,6 +240,18 @@ export async function createChatCompletionStream(c: Context<{ Bindings: Env }>) 
 
     // Use first available provider for streaming
     const provider = availableProviders[0];
+    if (!provider) {
+      return c.json(
+        {
+          error: {
+            code: 'SERVICE_UNAVAILABLE',
+            message: 'No available providers',
+            timestamp: Date.now(),
+          },
+        },
+        503
+      );
+    }
 
     // Set up SSE stream
     const encoder = new TextEncoder();
@@ -321,9 +325,8 @@ export async function getProvidersStatus(c: Context<{ Bindings: Env }>) {
     }
 
     // Get all provider statuses
-    const healthStatuses = registry.getAllHealthStatus();
     const quotas = await registry.getAllQuotas();
-    const stats = registry.getStats();
+    const _stats = registry.getStats();
 
     const providers: Array<{
       name: string;
@@ -337,8 +340,8 @@ export async function getProvidersStatus(c: Context<{ Bindings: Env }>) {
       };
     }> = [];
 
-    for (const [name, metadata] of Object.entries(registry['providers'].entries())) {
-      const [providerName, providerMetadata] = metadata as [string, unknown];
+    for (const [_name, metadata] of Object.entries(registry['providers'].entries())) {
+      const [_providerName, providerMetadata] = metadata as [string, unknown];
       const meta = providerMetadata as {
         provider: { name: string };
         enabled: boolean;
@@ -347,24 +350,37 @@ export async function getProvidersStatus(c: Context<{ Bindings: Env }>) {
 
       const quota = quotas.get(meta.provider.name);
 
-      providers.push({
+      const providerData: {
+        name: string;
+        enabled: boolean;
+        healthy: boolean;
+        quota?: {
+          used: number;
+          limit: number;
+          remaining: number;
+          percentage: number;
+        };
+      } = {
         name: meta.provider.name,
         enabled: meta.enabled,
         healthy: meta.isHealthy,
-        quota: quota
-          ? {
-              used: quota.used,
-              limit: quota.limit,
-              remaining: quota.remaining,
-              percentage: (quota.used / quota.limit) * 100,
-            }
-          : undefined,
-      });
+      };
+
+      if (quota) {
+        providerData.quota = {
+          used: quota.used,
+          limit: quota.limit,
+          remaining: quota.remaining,
+          percentage: (quota.used / quota.limit) * 100,
+        };
+      }
+
+      providers.push(providerData);
     }
 
     return c.json(
       {
-        stats,
+        _stats,
         providers,
         timestamp: Date.now(),
       },

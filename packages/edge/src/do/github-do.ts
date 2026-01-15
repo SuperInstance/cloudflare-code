@@ -57,12 +57,14 @@ export class GitHubDurableObject {
       // Get session endpoint
       if (path.startsWith('/session/') && request.method === 'GET') {
         const sessionId = path.split('/')[2];
+        if (!sessionId) return new Response('Invalid session ID', { status: 400 });
         return this.getSession(sessionId);
       }
 
       // Create session endpoint
       if (path.startsWith('/session/') && request.method === 'POST') {
         const sessionId = path.split('/')[2];
+        if (!sessionId) return new Response('Invalid session ID', { status: 400 });
         const body = await request.json() as { installationId: number };
         return this.createSession(sessionId, body.installationId);
       }
@@ -70,12 +72,14 @@ export class GitHubDurableObject {
       // Delete session endpoint
       if (path.startsWith('/session/') && request.method === 'DELETE') {
         const sessionId = path.split('/')[2];
+        if (!sessionId) return new Response('Invalid session ID', { status: 400 });
         return this.deleteSession(sessionId);
       }
 
       // Execute GitHub API call
       if (path.startsWith('/api/') && request.method === 'POST') {
         const sessionId = path.split('/')[2];
+        if (!sessionId) return new Response('Invalid session ID', { status: 400 });
         const body = await request.json();
         return this.executeApiCall(sessionId, body);
       }
@@ -126,15 +130,20 @@ export class GitHubDurableObject {
   private async createSession(sessionId: string, installationId: number): Promise<Response> {
     // Initialize config if not already done
     if (!this.config) {
-      this.config = {
+      const config: GitHubAppConfig = {
         appId: parseInt(this.env.GITHUB_APP_ID || '0', 10),
         privateKey: this.env.GITHUB_PRIVATE_KEY || '',
-        webhookSecret: this.env.GITHUB_WEBHOOK_SECRET,
       };
 
-      if (!this.config.appId || !this.config.privateKey) {
+      if (this.env.GITHUB_WEBHOOK_SECRET !== undefined) {
+        config.webhookSecret = this.env.GITHUB_WEBHOOK_SECRET;
+      }
+
+      if (!config.appId || !config.privateKey) {
         throw new Error('GitHub App credentials not configured');
       }
+
+      this.config = config;
     }
 
     // Initialize client if not already done

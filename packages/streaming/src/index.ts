@@ -15,7 +15,6 @@ export * from './types';
 
 export {
   StreamProcessor,
-  StreamProcessorImpl,
   TimeWindow,
   CountWindow,
   SessionWindow,
@@ -53,7 +52,8 @@ export {
 
 export {
   SourceConnector,
-  ConnectorFactory,
+  createSourceConnector,
+  createSourceStreamFromConfig,
   KafkaConnector,
   HttpConnector,
   WebSocketConnector,
@@ -70,7 +70,7 @@ export class StreamingPlatform {
     config?: any,
     faultConfig?: any
   ): any {
-    return new StreamProcessorImpl<T>(config, faultConfig);
+    return new StreamProcessor(config, faultConfig);
   }
 
   static createTransformEngine<T>(
@@ -89,13 +89,13 @@ export class StreamingPlatform {
   static createConnector<T>(
     config: any
   ): any {
-    return ConnectorFactory.create<T>(config);
+    return createSourceConnector<T>(config);
   }
 
   static createSourceStream<T>(
     config: any
   ): any {
-    return ConnectorFactory.createSourceStream<T>(config);
+    return createSourceStreamFromConfig<T>(config);
   }
 }
 

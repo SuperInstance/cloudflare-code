@@ -6,8 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ConfidenceCascade } from '../../packages/edge/src/lib/router/cascade';
 import type { ExecutionStrategy } from '../../packages/edge/src/lib/router/types';
 import type { ProviderClient } from '../../packages/edge/src/lib/providers/base';
-import type { ChatRequest, ChatResponse } from '../../packages/edge/src/types/index';
-import type { RequestAnalysis } from '../../packages/edge/src/lib/router/types';
+import type { ChatRequest } from '../../packages/edge/src/types/index';
 
 // Mock provider client
 const createMockProvider = (name: string, tier: number): ProviderClient => {
@@ -284,8 +283,8 @@ describe('ConfidenceCascade', () => {
       // Should fall back to tier 3
       expect(result.tierUsed).toBe(3);
       expect(result.attemptsLog).toHaveLength(2);
-      expect(result.attemptsLog[0].success).toBe(false);
-      expect(result.attemptsLog[1].success).toBe(true);
+      expect(result.attemptsLog[0]?.success).toBe(false);
+      expect(result.attemptsLog[1]?.success).toBe(true);
     });
 
     it('should throw if all strategies fail', async () => {

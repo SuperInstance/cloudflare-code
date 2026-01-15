@@ -19,7 +19,7 @@ import { CodeChunker } from '../lib/codebase/chunker';
 import { CodeEmbeddingGenerator } from '../lib/codebase/embeddings';
 import { CodeVectorStore } from '../lib/codebase/vector-store';
 import { CodeRetriever } from '../lib/codebase/retriever';
-import type { UploadResult, BatchUploadResult, SupportedLanguage } from '../lib/codebase/types';
+import type { UploadResult, BatchUploadResult } from '../lib/codebase/types';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -46,7 +46,7 @@ app.post('/upload', async (c) => {
 
   try {
     const formData = await c.req.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file');
     const customPath = formData.get('path') as string | null;
 
     if (!file) {
@@ -55,6 +55,17 @@ app.post('/upload', async (c) => {
         error: 'No file provided',
       }, 400);
     }
+
+    // Check if it's a File object
+    if (typeof file !== 'object' || !('name' in file) || !('text' in file)) {
+      return c.json({
+        success: false,
+        error: 'Invalid file provided',
+      }, 400);
+    }
+
+    // Cast to File type for access to file methods
+    const fileObj = file as { name: string; text: () => Promise<string> };
 
     // Get or create vector store from env
     let vectorStore = c.env.CODEBASE_VECTOR_STORE as CodeVectorStore;
@@ -67,12 +78,12 @@ app.post('/upload', async (c) => {
     const parser = new CodebaseParser();
     const chunker = new CodeChunker();
     const embedder = new CodeEmbeddingGenerator({
-      ai: c.env.AI,
+      ...(c.env.AI !== undefined ? { ai: c.env.AI } : {}),
     });
 
     // Read file content
-    const content = await file.text();
-    const filePath = customPath || file.name;
+    const content = await fileObj.text();
+    const filePath = customPath || fileObj.name;
 
     // Parse file
     const parsed = await parser.parseFile(content, filePath);
@@ -133,10 +144,10 @@ app.post('/batch', async (c) => {
     if (contentType.includes('multipart/form-data')) {
       // Handle multipart form data
       const formData = await c.req.formData();
-      const fileEntries = formData.getAll('files') as File[];
+      const fileEntries = formData.getAll('files');
 
       files = await Promise.all(
-        fileEntries.map(async (file) => ({
+        (fileEntries as unknown[]).filter((f): f is File => f instanceof File).map(async (file) => ({
           content: await file.text(),
           path: file.name,
         }))
@@ -165,7 +176,7 @@ app.post('/batch', async (c) => {
     const parser = new CodebaseParser();
     const chunker = new CodeChunker();
     const embedder = new CodeEmbeddingGenerator({
-      ai: c.env.AI,
+      ...(c.env.AI !== undefined ? { ai: c.env.AI } : {}),
     });
 
     // Process files
@@ -272,8 +283,6 @@ app.get('/search', async (c) => {
 
     const k = parseInt(c.req.query('k') || '10', 10);
     const minSimilarity = parseFloat(c.req.query('minSimilarity') || '0.5');
-    const language = c.req.query('language') as SupportedLanguage | null;
-    const type = c.req.query('type') as string | null;
     const hybrid = c.req.query('hybrid') === 'true';
 
     // Get vector store
@@ -287,7 +296,7 @@ app.get('/search', async (c) => {
 
     // Create retriever
     const embedder = new CodeEmbeddingGenerator({
-      ai: c.env.AI,
+      ...(c.env.AI !== undefined ? { ai: c.env.AI } : {}),
     });
     const retriever = new CodeRetriever(vectorStore, embedder, {
       maxChunks: k,
@@ -469,7 +478,7 @@ app.post('/reindex', async (c) => {
     }
 
     const embedder = new CodeEmbeddingGenerator({
-      ai: c.env.AI,
+      ...(c.env.AI !== undefined ? { ai: c.env.AI } : {}),
     });
 
     // Get all chunks

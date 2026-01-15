@@ -26,10 +26,9 @@ export async function getStatus(c: Context<{ Bindings: Env }>) {
     timestamp: Date.now(),
     services,
     metrics: {
-      // These would be populated from actual metrics
-      requestsPerSecond: undefined,
-      averageLatency: undefined,
-      errorRate: undefined,
+      requestsPerSecond: 0,
+      averageLatency: 0,
+      errorRate: 0,
     },
   };
 

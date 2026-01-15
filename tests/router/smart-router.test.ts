@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SmartRouter } from '../../packages/edge/src/lib/router/smart-router';
-import type { ProviderDefinition } from '../../packages/edge/src/lib/router/types';
+import type { ProviderDefinition } from '../../packages/edge/src/lib/router/strategy';
 import type { ProviderClient } from '../../packages/edge/src/lib/providers/base';
 import type { SemanticCache } from '../../packages/edge/src/lib/cache/semantic';
 import type { ChatRequest, ChatResponse } from '../../packages/edge/src/types/index';

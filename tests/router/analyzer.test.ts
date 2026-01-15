@@ -45,8 +45,8 @@ describe('RequestAnalyzer', () => {
       expect(analysis.intent).toBe('code');
       expect(analysis.hasCode).toBe(true);
       expect(analysis.codeSnippets).toHaveLength(1);
-      expect(analysis.codeSnippets[0].language).toBe('javascript');
-      expect(analysis.codeSnippets[0].lineCount).toBeGreaterThan(0);
+      expect(analysis.codeSnippets[0]?.language).toBe('javascript');
+      expect(analysis.codeSnippets[0]?.lineCount).toBeGreaterThan(0);
       expect(analysis.languages).toContain('javascript');
     });
 

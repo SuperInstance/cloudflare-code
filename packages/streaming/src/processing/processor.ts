@@ -43,7 +43,7 @@ export class StreamTransformer<TInput = unknown, TOutput = unknown> {
 
       for (const event of currentEvents) {
         try {
-          const output = await processor.process(event);
+          const output = await processor.process(event.data as TInput);
           if (Array.isArray(output)) {
             for (const item of output) {
               results.push(this.createOutputEvent(item, event));

@@ -14,9 +14,10 @@ const START_TIME = Date.now();
 /**
  * Global error handler middleware
  */
-export async function errorHandler(c: Context, next: Next) {
+export async function errorHandler(c: Context, next: Next): Promise<Response> {
   try {
     await next();
+    return c.json({ success: true });
   } catch (error) {
     console.error('Error caught by middleware:', error);
 
@@ -149,7 +150,7 @@ export async function requestId(c: Context, next: Next) {
 /**
  * Health check middleware
  */
-export async function healthCheck(c: Context, next: Next) {
+export async function healthCheck(c: Context, next: Next): Promise<Response | void> {
   if (c.req.path === '/health') {
     const uptime = Date.now() - START_TIME;
 
@@ -162,5 +163,5 @@ export async function healthCheck(c: Context, next: Next) {
     });
   }
 
-  await next();
+  return await next();
 }

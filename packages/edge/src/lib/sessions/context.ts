@@ -91,6 +91,7 @@ export class ContextBuilder {
     // Start from most recent messages
     for (let i = session.messages.length - 1; i >= 0; i--) {
       const message = session.messages[i];
+      if (!message) continue;
       const msgTokens = message.tokens || this.estimateTokens(message.content);
 
       if (totalTokens + msgTokens > availableTokens) {
@@ -143,9 +144,11 @@ export class ContextBuilder {
     let messageTotal = 0;
 
     for (let i = session.messages.length - 1; i >= 0; i--) {
+      const message = session.messages[i];
+      if (!message) continue;
       const msgTokens =
-        session.messages[i].tokens ||
-        this.estimateTokens(session.messages[i].content);
+        message.tokens ||
+        this.estimateTokens(message.content);
 
       if (messageTotal + msgTokens > messageTokens) {
         summaryStartIndex = i;
@@ -171,12 +174,15 @@ export class ContextBuilder {
       totalTokens += summaryTokens;
 
       // Create summary message
-      messages.unshift({
-        role: 'system',
-        content: `[Previous conversation summary]\n${summary}`,
-        timestamp: oldMessages[oldMessages.length - 1].timestamp,
-        tokens: summaryTokens,
-      });
+      const lastOldMessage = oldMessages[oldMessages.length - 1];
+      if (lastOldMessage) {
+        messages.unshift({
+          role: 'system',
+          content: `[Previous conversation summary]\n${summary}`,
+          timestamp: lastOldMessage.timestamp,
+          tokens: summaryTokens,
+        });
+      }
     }
 
     // Check if we're still over limit
@@ -186,7 +192,7 @@ export class ContextBuilder {
 
     return {
       messages,
-      summary,
+      ...(summary !== undefined ? { summary } : {}),
       totalTokens,
       messageCount: messages.length,
       truncated,

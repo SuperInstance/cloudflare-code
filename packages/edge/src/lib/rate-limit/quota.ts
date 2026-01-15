@@ -293,7 +293,6 @@ export class QuotaManager {
       }
 
       // Calculate remaining quota
-      const _remaining = config.limit - usage.used;
       const softLimitThreshold = config.softLimit
         ? config.limit * config.softLimit
         : config.limit;
@@ -360,7 +359,6 @@ export class QuotaManager {
     }
 
     const state = await this.getState(identifier, tier);
-    const _now = Date.now();
 
     // Update request quota
     await this.incrementQuota(identifier, 'requests', increment);
@@ -436,7 +434,6 @@ export class QuotaManager {
    * Reset quota for a specific type
    */
   async resetQuota(identifier: string, type: QuotaType): Promise<void> {
-    const _key = this.getStorageKey(identifier);
     const cached = this.cache.get(identifier);
 
     if (cached && cached.quotas.has(type)) {

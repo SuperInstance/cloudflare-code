@@ -366,7 +366,7 @@ export class PubSubBroker {
       subscriberId,
       filter: options.filter,
       createdAt: Date.now(),
-      position: options.position,
+      ...(options.position !== undefined ? { position: options.position as SubscriptionPosition } : {}),
     };
 
     this.subscriptions.set(subscriptionId, {

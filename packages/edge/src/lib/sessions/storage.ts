@@ -5,7 +5,7 @@
  * with intelligent promotion/demotion based on access patterns.
  */
 
-import type { SessionData, StorageTier } from '../../types/index';
+import type { SessionData } from '../../types/index';
 import type { DurableObjectNamespace } from '@cloudflare/workers-types';
 import { KVCache } from '../kv';
 import { R2Storage } from '../r2';
@@ -129,8 +129,6 @@ export class SessionStorage {
    * Tries HOT -> WARM -> COLD
    */
   async load(sessionId: string): Promise<SessionData | null> {
-    const startTime = performance.now();
-
     try {
       // Try HOT tier first
       let session = await this.loadFromHot(sessionId);
@@ -147,8 +145,11 @@ export class SessionStorage {
       if (session) {
         this.recordAccess(sessionId, 'warm', this.calculateSessionSize(session));
         // Promote to HOT if frequently accessed
-        if (this.options.autoMigrate && this.shouldPromote(sessionId, 'warm')) {
-          this.promote(sessionId, 'warm', 'hot').catch(console.error);
+        if (this.options.autoMigrate) {
+          const shouldPromote = await this.shouldPromote(sessionId, 'warm');
+          if (shouldPromote) {
+            this.promote(sessionId, 'warm', 'hot').catch(console.error);
+          }
         }
         return session;
       }
@@ -366,7 +367,7 @@ export class SessionStorage {
       cold: { count: 0, totalSize: 0, avgAccessCount: 0 },
     };
 
-    for (const [sessionId, pattern] of this.accessPatterns.entries()) {
+    for (const [_sessionId, pattern] of this.accessPatterns.entries()) {
       const tierStats = stats[pattern.tier];
       tierStats.count++;
       tierStats.totalSize += pattern.size;
@@ -463,8 +464,8 @@ export class SessionStorage {
         return null;
       }
 
-      const data = await response.json();
-      return data.session as SessionData;
+      const data = await response.json() as { session: SessionData };
+      return data.session;
     } catch (error) {
       console.error(`Failed to load from HOT tier:`, error);
       return null;
@@ -479,7 +480,8 @@ export class SessionStorage {
     const archives = await this.r2Storage.getSessionArchive(sessionId);
 
     if (archives.length > 0) {
-      return archives[archives.length - 1]; // Return most recent
+      const lastArchive = archives[archives.length - 1];
+      return lastArchive ?? null; // Return most recent
     }
 
     return null;

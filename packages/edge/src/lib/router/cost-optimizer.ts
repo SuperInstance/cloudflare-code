@@ -5,7 +5,7 @@
  * and cost-aware strategy selection.
  */
 
-import type { ChatRequest, ChatResponse } from '../../types/index';
+import type { ChatRequest } from '../../types/index';
 import type { ProviderClient } from '../providers/base';
 import type {
   ExecutionStrategy,
@@ -62,7 +62,7 @@ export class CostOptimizer {
 
   // Free tier scheduling
   private scheduledRequests: ScheduledRequest[] = [];
-  private scheduledTimer?: ReturnType<typeof setInterval>;
+  private scheduledTimer: ReturnType<typeof setInterval> | undefined;
 
   // Statistics
   private stats = {
@@ -107,7 +107,7 @@ export class CostOptimizer {
    * @returns Cheapest valid strategy
    */
   async findCheapest(
-    request: ChatRequest,
+    _request: ChatRequest,
     analysis: RequestAnalysis,
     strategies: ExecutionStrategy[],
     minQuality: number = 0.7
@@ -119,7 +119,7 @@ export class CostOptimizer {
       // Return lowest quality strategy if none meet threshold
       return strategies.reduce((cheapest, s) =>
         s.costPer1M < cheapest.costPer1M ? s : cheapest
-      );
+      , strategies[0]!);
     }
 
     // Sort by cost (ascending)
@@ -128,7 +128,7 @@ export class CostOptimizer {
     // Prefer free tier
     const freeStrategies = validStrategies.filter(s => s.costPer1M === 0);
     if (freeStrategies.length > 0) {
-      return freeStrategies[0];
+      return freeStrategies[0]!;
     }
 
     // Check if any free tier providers have quota
@@ -145,7 +145,7 @@ export class CostOptimizer {
     }
 
     // Return cheapest paid strategy
-    return validStrategies[0];
+    return validStrategies[0]!;
   }
 
   /**
@@ -253,7 +253,7 @@ export class CostOptimizer {
    *
    * @private
    */
-  private generateBatchKey(request: ChatRequest, analysis: RequestAnalysis): string {
+  private generateBatchKey(_request: ChatRequest, analysis: RequestAnalysis): string {
     const parts = [
       analysis.complexity,
       analysis.intent,
@@ -302,7 +302,7 @@ export class CostOptimizer {
    *
    * @private
    */
-  private calculateScheduleTime(analysis: RequestAnalysis, priority: number): number {
+  private calculateScheduleTime(_analysis: RequestAnalysis, priority: number): number {
     const now = Date.now();
 
     // High priority requests execute sooner
@@ -322,7 +322,7 @@ export class CostOptimizer {
    * @private
    */
   private calculatePriority(
-    request: ChatRequest,
+    _request: ChatRequest,
     analysis: RequestAnalysis,
     basePriority: number
   ): number {

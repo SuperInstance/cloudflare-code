@@ -220,6 +220,10 @@ export class FaultToleranceEngine extends EventEmitter {
     return this.checkpoints[this.checkpoints.length - 1] || null;
   }
 
+  public getLastCheckpointSafe(): CheckpointData | null {
+    return this.getLastCheckpoint();
+  }
+
   generateIdempotencyKey(event: Event): string {
     if (this.config.idempotency.keyGenerator) {
       return this.config.idempotency.keyGenerator(event);
@@ -327,14 +331,15 @@ export class FaultToleranceEngine extends EventEmitter {
   }
 
   forceCheckpoint(): Promise<CheckpointData> {
+    const lastCheckpoint = this.getLastCheckpoint();
     const checkpoint = {
       id: this.generateCheckpointId(),
       timestamp: Date.now(),
-      sequence: this.getLastCheckpoint()?.sequence + 1 || 1,
+      sequence: (lastCheckpoint?.sequence ?? 0) + 1,
       state: {}
     };
 
-    return this.commitCheckpoint(checkpoint);
+    return this.commitCheckpoint(checkpoint) as Promise<CheckpointData>;
   }
 
   cleanup(): void {
@@ -394,7 +399,9 @@ export class FaultToleranceStrategy {
         }
       },
       idempotency: {
-        enabled: false
+        enabled: false,
+        keyGenerator: undefined,
+        ttl: 0
       },
       ...config
     };
@@ -442,18 +449,19 @@ export class FaultToleranceManager {
   }
 
   async processEvent(event: Event): Promise<any> {
-    const lastCheckpoint = this.engine.getLastCheckpoint();
+    const lastCheckpoint = this.engine.getLastCheckpointSafe();
     const state = lastCheckpoint?.state || {};
 
     return this.engine.recover(event, state);
   }
 
   async checkpoint(state: any, metadata?: Record<string, any>): Promise<CheckpointData> {
+    const lastCp = this.engine.getLastCheckpointSafe();
     const event = {
       id: 'checkpoint_' + Date.now(),
       timestamp: Date.now(),
       data: {},
-      sequence: this.engine.getLastCheckpoint()?.sequence + 1 || 1
+      sequence: (lastCp?.sequence ?? 0) + 1
     };
 
     return this.engine.checkpoint(event, state, metadata);
@@ -465,7 +473,7 @@ export class FaultToleranceManager {
       checkpoints: {
         history: this.engine.getCheckpointHistory(),
         pending: this.engine.getCheckpointHistory().length,
-        last: this.engine.getLastCheckpoint()
+        last: this.engine.getLastCheckpointSafe()
       },
       idempotency: this.engine.getIdempotencyStatus()
     };

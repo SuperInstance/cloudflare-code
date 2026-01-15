@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import type { Env } from '../types/index';
-import { HealthResponse } from '../types/index';
+import type { HealthResponse } from '../types/index';
 
 const START_TIME = Date.now();
 

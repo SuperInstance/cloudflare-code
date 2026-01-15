@@ -6,7 +6,7 @@
 
 import type { Context } from 'hono';
 import type { Env } from '../types';
-import type { ChatRequest, ChatResponse } from '../lib/agents/types';
+import type { ChatRequest } from '../lib/agents/types';
 import { orchestrateChat } from '../do/director';
 
 /**
@@ -158,7 +158,7 @@ export async function getAvailableAgents(c: Context<{ Bindings: Env }>) {
       throw new Error('Failed to get agents');
     }
 
-    const data = await response.json();
+    const data = await response.json() as { agents: unknown[]; count: number };
 
     return c.json({
       type,

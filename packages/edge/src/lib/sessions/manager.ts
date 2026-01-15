@@ -8,12 +8,10 @@
 import type {
   SessionData,
   ConversationMessage,
-  StorageTier,
 } from '../../types/index';
 import type {
   SessionInfo,
   SessionMetadata,
-  ConversationContext,
 } from '../../do/session';
 import type { DurableObjectNamespace } from '@cloudflare/workers-types';
 import { KVCache } from '../kv';
@@ -111,8 +109,8 @@ export class SessionManager {
         return null;
       }
 
-      const data = await response.json();
-      return data.session as SessionData;
+      const data = await response.json() as { session: SessionData };
+      return data.session;
     } catch (error) {
       console.error(`Failed to get session ${sessionId}:`, error);
       return null;
@@ -123,8 +121,6 @@ export class SessionManager {
    * Create new session
    */
   async create(sessionId: string, userId: string): Promise<SessionData> {
-    const now = Date.now();
-
     const sessionData: Partial<SessionData> = {
       userId,
     };
@@ -141,8 +137,8 @@ export class SessionManager {
       throw new Error(`Failed to create session: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    return data.session as SessionData;
+    const data = await response.json() as { session: SessionData };
+    return data.session;
   }
 
   /**
@@ -307,7 +303,8 @@ export class SessionManager {
 
     if (archives.length > 0) {
       // Return most recent archive
-      return archives[archives.length - 1];
+      const lastArchive = archives[archives.length - 1];
+      return lastArchive ?? null;
     }
 
     return null;
@@ -347,8 +344,8 @@ export class SessionManager {
       throw new Error(`Failed to restore session: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    const session = data.session as SessionData;
+    const data = await response.json() as { session: SessionData };
+    const session = data.session;
 
     // Add to index
     await this.addToIndex(session);

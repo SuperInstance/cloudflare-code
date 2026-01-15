@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { StrategySelector } from '../../packages/edge/src/lib/router/strategy';
-import type {
-  ProviderDefinition,
-  ExecutionStrategy,
-} from '../../packages/edge/src/lib/router/types';
+import { StrategySelector, type ProviderDefinition } from '../../packages/edge/src/lib/router/strategy';
 import type { ProviderClient } from '../../packages/edge/src/lib/providers/base';
 import type { RequestAnalysis } from '../../packages/edge/src/lib/router/types';
 
@@ -177,7 +173,7 @@ describe('StrategySelector', () => {
 
       // Should be sorted by tier (ascending)
       for (let i = 1; i < strategies.length; i++) {
-        expect(strategies[i].tier).toBeGreaterThanOrEqual(strategies[i - 1].tier);
+        expect(strategies[i]?.tier).toBeGreaterThanOrEqual(strategies[i - 1]?.tier ?? 0);
       }
     });
   });

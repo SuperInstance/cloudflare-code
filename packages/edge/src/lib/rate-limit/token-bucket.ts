@@ -13,7 +13,7 @@
  * - Automatic token refill
  */
 
-import { TokenBucketDO } from '../../do/token-bucket-do';
+import type { DurableObjectNamespace, DurableObjectStub } from '@cloudflare/workers-types';
 
 export interface TokenBucketOptions {
   /**
@@ -62,7 +62,12 @@ export interface TokenBucketState {
  * ```
  */
 export class TokenBucket {
-  private options: Required<TokenBucketOptions>;
+  private options: {
+    capacity: number;
+    refillRate: number;
+    initialTokens: number;
+    namespace: DurableObjectNamespace | undefined;
+  };
   private localCache: Map<string, TokenBucketState> = new Map();
 
   constructor(options: TokenBucketOptions) {
@@ -72,6 +77,10 @@ export class TokenBucket {
       initialTokens: options.initialTokens ?? options.capacity,
       namespace: options.namespace,
     };
+
+    if (options.namespace !== undefined) {
+      this.options.namespace = options.namespace;
+    }
   }
 
   /**
@@ -137,8 +146,10 @@ export class TokenBucket {
     // Use DO if available
     if (this.options.namespace) {
       const stub = this.options.namespace.get(
-        this.getDOId(identifier)
-      );
+        this.options.namespace.idFromName(this.getDOId(identifier))
+      ) as DurableObjectStub & {
+        getState(): Promise<TokenBucketState>;
+      };
       const state = await stub.getState();
       return state.tokens;
     }
@@ -161,8 +172,10 @@ export class TokenBucket {
   async reset(identifier: string): Promise<void> {
     if (this.options.namespace) {
       const stub = this.options.namespace.get(
-        this.getDOId(identifier)
-      );
+        this.options.namespace.idFromName(this.getDOId(identifier))
+      ) as DurableObjectStub & {
+        reset(): Promise<void>;
+      };
       await stub.reset();
     } else {
       this.localCache.delete(identifier);
@@ -178,8 +191,10 @@ export class TokenBucket {
   async getStats(identifier: string): Promise<TokenBucketState> {
     if (this.options.namespace) {
       const stub = this.options.namespace.get(
-        this.getDOId(identifier)
-      );
+        this.options.namespace.idFromName(this.getDOId(identifier))
+      ) as DurableObjectStub & {
+        getStats(): Promise<TokenBucketState>;
+      };
       return await stub.getStats();
     }
 
@@ -233,9 +248,16 @@ export class TokenBucket {
     tokens: number
   ): Promise<boolean> {
     try {
-      const stub = this.options.namespace!.get(
-        this.getDOId(identifier)
-      );
+      const namespace = this.options.namespace;
+      if (!namespace) {
+        throw new Error('Namespace not available');
+      }
+
+      const stub = namespace.get(
+        namespace.idFromName(this.getDOId(identifier))
+      ) as DurableObjectStub & {
+        consume(tokens: number): Promise<boolean>;
+      };
       return await stub.consume(tokens);
     } catch (error) {
       console.error('TokenBucket DO error:', error);
@@ -292,7 +314,7 @@ export function createRateLimiterRPM(
   return new TokenBucket({
     capacity: requestsPerMinute,
     refillRate: requestsPerMinute / 60, // tokens per second
-    namespace,
+    ...(namespace !== undefined ? { namespace } : {}),
   });
 }
 
@@ -310,6 +332,6 @@ export function createRateLimiterTPM(
   return new TokenBucket({
     capacity: tokensPerMinute,
     refillRate: tokensPerMinute / 60, // tokens per second
-    namespace,
+    ...(namespace !== undefined ? { namespace } : {}),
   });
 }

@@ -17,7 +17,7 @@ import type {
   CascadeResult,
 } from './types';
 import { RequestAnalyzer } from './analyzer';
-import { StrategySelector, ProviderDefinition } from './strategy';
+import { StrategySelector, type ProviderDefinition } from './strategy';
 import { ConfidenceCascade } from './cascade';
 import { CostOptimizer } from './cost-optimizer';
 
@@ -78,7 +78,9 @@ export class SmartRouter {
     config: Partial<SmartRouterConfig> = {}
   ) {
     this.providers = providers;
-    this.cache = cache;
+    if (cache !== undefined) {
+      this.cache = cache;
+    }
     this.config = {
       enableCache: config.enableCache ?? true,
       enableCascade: config.enableCascade ?? true,
@@ -174,7 +176,11 @@ export class SmartRouter {
         result = await this.cascade.execute(request, strategies, analysis);
       } else if (strategies.length > 0) {
         // Single strategy execution
-        result = await this.executeWithStrategy(request, strategies[0]);
+        const strategy = strategies[0];
+        if (!strategy) {
+          throw new Error('No valid strategies available');
+        }
+        result = await this.executeWithStrategy(request, strategy);
       } else {
         throw new Error('No valid strategies available');
       }
@@ -228,8 +234,8 @@ export class SmartRouter {
     const text = request.messages.map(m => m.content).join('\n\n');
     await this.cache.store(text, response, {
       model: request.model || 'default',
-      temperature: request.temperature,
-      maxTokens: request.maxTokens,
+      ...(request.temperature !== undefined ? { temperature: request.temperature } : {}),
+      ...(request.maxTokens !== undefined ? { maxTokens: request.maxTokens } : {}),
     });
   }
 
@@ -409,11 +415,12 @@ export class SmartRouter {
     costOptimizer: ReturnType<CostOptimizer['getStats']>;
     cache?: ReturnType<SemanticCache['getStats']>;
   } {
+    const cacheStats = this.cache?.getStats();
     return {
       router: this.getStats(),
       cascade: this.cascade.getStats(this.cascadeLogs),
       costOptimizer: this.costOptimizer.getStats(),
-      cache: this.cache?.getStats(),
+      ...(cacheStats !== undefined ? { cache: cacheStats } : {}),
     };
   }
 

@@ -275,8 +275,8 @@ export class RequestAnalyzer {
     let match;
 
     while ((match = codeBlockRegex.exec(text)) !== null) {
-      const language = match[1] || 'unknown';
-      const code = match[2].trim();
+      const language = match[1] ?? 'unknown';
+      const code = match[2]?.trim() ?? '';
       const lineCount = code.split('\n').length;
 
       snippets.push({
@@ -291,7 +291,7 @@ export class RequestAnalyzer {
     let inlineMatch;
 
     while ((inlineMatch = inlineCodeRegex.exec(text)) !== null) {
-      const code = inlineMatch[1];
+      const code = inlineMatch[1] ?? '';
       if (code.length > 3) { // Only significant inline code
         snippets.push({
           language: 'unknown',

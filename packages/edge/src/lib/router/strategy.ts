@@ -9,8 +9,6 @@ import type { ProviderClient, ProviderCapabilities, QuotaInfo, HealthStatus } fr
 import type {
   RequestAnalysis,
   ExecutionStrategy,
-  ComplexityLevel,
-  IntentType,
 } from './types';
 
 /**
@@ -210,7 +208,11 @@ export class StrategySelector {
     if (validStrategies.length === 0) {
       // Fallback to tier 1 if no valid strategies
       console.warn('No valid strategies found, falling back to tier 1');
-      return this.TIER1_STRATEGIES[0];
+      const fallback = this.TIER1_STRATEGIES[0];
+      if (!fallback) {
+        throw new Error('No valid strategies available');
+      }
+      return fallback;
     }
 
     // Sort by score
@@ -219,7 +221,11 @@ export class StrategySelector {
     const latency = performance.now() - startTime;
     console.debug(`Strategy selection completed in ${latency.toFixed(2)}ms`);
 
-    return validStrategies[0].strategy;
+    const selected = validStrategies[0];
+    if (!selected) {
+      throw new Error('No valid strategies available');
+    }
+    return selected.strategy;
   }
 
   /**
@@ -253,9 +259,12 @@ export class StrategySelector {
 
     // Pick best from each tier
     const selected: ExecutionStrategy[] = [];
-    for (const [tier, strategies] of byTier) {
+    for (const [_tier, strategies] of byTier) {
       strategies.sort((a, b) => b.totalScore - a.totalScore);
-      selected.push(strategies[0].strategy);
+      const best = strategies[0];
+      if (best) {
+        selected.push(best.strategy);
+      }
     }
 
     // Sort by tier (ascending)
@@ -390,7 +399,7 @@ export class StrategySelector {
    * @private
    */
   private calculateSpeedScore(
-    strategy: ExecutionStrategy,
+    _strategy: ExecutionStrategy,
     analysis: RequestAnalysis,
     status: ProviderCache
   ): number {

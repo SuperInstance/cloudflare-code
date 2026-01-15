@@ -244,7 +244,7 @@ export class RetryPolicy {
    * - Network errors
    * - Timeout errors
    */
-  private defaultShouldRetry(error: Error, attempt: number): boolean {
+  private defaultShouldRetry(error: Error, _attempt: number): boolean {
     // Check for status code (for fetch/API errors)
     const statusCode = (error as any).status;
     if (statusCode) {

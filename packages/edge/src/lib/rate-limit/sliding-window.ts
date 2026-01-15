@@ -70,7 +70,7 @@ export class SlidingWindow {
     this.options = {
       maxRequests: options.maxRequests,
       windowMs: options.windowMs,
-      kv: options.kv,
+      kv: options.kv!,
       ttl: options.ttl ?? 3600, // 1 hour default
     };
   }
@@ -177,7 +177,7 @@ export class SlidingWindow {
       windowEnd: now,
       remaining: Math.max(0, this.options.maxRequests - count),
       resetTime: validRequests.length > 0
-        ? validRequests[0] + this.options.windowMs
+        ? (validRequests[0] ?? now) + this.options.windowMs
         : now,
     };
   }
@@ -281,7 +281,7 @@ export function createRateLimiterRPM(
   return new SlidingWindow({
     maxRequests: requestsPerMinute,
     windowMs: 60000, // 60 seconds
-    kv,
+    ...(kv !== undefined ? { kv } : {}),
   });
 }
 
@@ -299,6 +299,6 @@ export function createRateLimiterRPS(
   return new SlidingWindow({
     maxRequests: requestsPerSecond,
     windowMs: 1000, // 1 second
-    kv,
+    ...(kv !== undefined ? { kv } : {}),
   });
 }

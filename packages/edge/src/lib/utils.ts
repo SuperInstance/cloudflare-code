@@ -225,7 +225,19 @@ export function parseUserAgent(userAgent: string): ParsedUserAgent {
   else if (ua.includes('tablet')) device = 'Tablet';
   else device = 'Desktop';
 
-  return { browser, os, device };
+  const result: ParsedUserAgent = {
+    device,
+  };
+
+  if (browser !== undefined) {
+    result.browser = browser;
+  }
+
+  if (os !== undefined) {
+    result.os = os;
+  }
+
+  return result;
 }
 
 /**
@@ -258,7 +270,9 @@ export function createCORSHeaders(options: CORSOptions = {}): Record<string, str
     headers['Access-Control-Allow-Origin'] = options.origin;
   } else if (Array.isArray(options.origin)) {
     const requestOrigin = options.origin[0]; // Simplified - should check request origin
-    headers['Access-Control-Allow-Origin'] = requestOrigin;
+    if (requestOrigin !== undefined) {
+      headers['Access-Control-Allow-Origin'] = requestOrigin;
+    }
   } else {
     headers['Access-Control-Allow-Origin'] = '*';
   }

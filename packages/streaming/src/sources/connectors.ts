@@ -6,7 +6,7 @@ export interface SourceConnector<T = any> extends EventEmitter {
   disconnect(): Promise<void>;
   start(): void;
   stop(): void;
-  isConnected(): boolean;
+  isConnected: boolean;
   getMetrics(): SourceMetrics;
   pause(): void;
   resume(): void;
@@ -68,9 +68,9 @@ export interface FileConfig {
   transform?: (data: any) => Event;
 }
 
-export class KafkaConnector extends EventEmitter implements SourceConnector {
+export class KafkaConnector extends EventEmitter implements SourceConnector<any> {
   private config: KafkaConfig;
-  private isConnected = false;
+  private _isConnected = false;
   private metrics: SourceMetrics = {
     eventsReceived: 0,
     eventsProcessed: 0,
@@ -87,17 +87,25 @@ export class KafkaConnector extends EventEmitter implements SourceConnector {
   constructor(config: KafkaConfig) {
     super();
     this.config = {
-      brokers: [],
-      topic: '',
-      autoOffsetReset: 'latest',
-      maxWaitTime: 100,
-      maxBytes: 1024 * 1024,
-      ...config
+      ...config,
+      brokers: config.brokers ?? [],
+      topic: config.topic ?? '',
+      autoOffsetReset: config.autoOffsetReset ?? 'latest',
+      maxWaitTime: config.maxWaitTime ?? 100,
+      maxBytes: config.maxBytes ?? 1024 * 1024,
     };
   }
 
+  get isConnected(): boolean {
+    return this._isConnected;
+  }
+
+  set isConnected(value: boolean) {
+    this._isConnected = value;
+  }
+
   async connect(): Promise<void> {
-    if (this.isConnected) return;
+    if (this._isConnected) return;
 
     this.metrics.connectionStatus = 'connecting';
 
@@ -111,7 +119,7 @@ export class KafkaConnector extends EventEmitter implements SourceConnector {
       this.consumer = kafka.consumer({ groupId: this.config.groupId });
 
       await this.consumer.connect();
-      this.isConnected = true;
+      this._isConnected = true;
       this.metrics.connectionStatus = 'connected';
       this.emit('connected');
 
@@ -131,7 +139,7 @@ export class KafkaConnector extends EventEmitter implements SourceConnector {
     this.processing = true;
 
     const processBatch = async () => {
-      if (!this.isConnected) {
+      if (!this._isConnected) {
         this.processing = false;
         return;
       }
@@ -178,14 +186,14 @@ export class KafkaConnector extends EventEmitter implements SourceConnector {
   }
 
   disconnect(): Promise<void> {
-    if (!this.isConnected) return Promise.resolve();
+    if (!this._isConnected) return Promise.resolve();
 
     return new Promise(async (resolve) => {
       try {
         if (this.consumer) {
           await this.consumer.disconnect();
         }
-        this.isConnected = false;
+        this._isConnected = false;
         this.metrics.connectionStatus = 'disconnected';
         this.emit('disconnected');
         resolve();
@@ -209,10 +217,6 @@ export class KafkaConnector extends EventEmitter implements SourceConnector {
     });
   }
 
-  isConnected(): boolean {
-    return this.isConnected;
-  }
-
   pause(): void {
     this.consumer?.pause([{ topic: this.config.topic }]);
     this.emit('paused');
@@ -233,9 +237,9 @@ export class KafkaConnector extends EventEmitter implements SourceConnector {
   }
 }
 
-export class HttpConnector extends EventEmitter implements SourceConnector {
+export class HttpConnector extends EventEmitter implements SourceConnector<any> {
   private config: HttpConfig;
-  private isConnected = false;
+  private _isConnected = false;
   private metrics: SourceMetrics = {
     eventsReceived: 0,
     eventsProcessed: 0,
@@ -252,23 +256,31 @@ export class HttpConnector extends EventEmitter implements SourceConnector {
   constructor(config: HttpConfig) {
     super();
     this.config = {
-      method: 'GET',
-      interval: 5000,
-      timeout: 10000,
-      maxRetries: 3,
-      ...config
+      ...config,
+      method: config.method ?? 'GET',
+      interval: config.interval ?? 5000,
+      timeout: config.timeout ?? 10000,
+      maxRetries: config.maxRetries ?? 3,
     };
   }
 
+  get isConnected(): boolean {
+    return this._isConnected;
+  }
+
+  set isConnected(value: boolean) {
+    this._isConnected = value;
+  }
+
   async connect(): Promise<void> {
-    this.isConnected = true;
+    this._isConnected = true;
     this.metrics.connectionStatus = 'connected';
     this.emit('connected');
     return Promise.resolve();
   }
 
   disconnect(): Promise<void> {
-    this.isConnected = false;
+    this._isConnected = false;
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -287,7 +299,7 @@ export class HttpConnector extends EventEmitter implements SourceConnector {
 
   private startPolling(): void {
     this.intervalId = setInterval(async () => {
-      if (!this.isConnected || this.paused) return;
+      if (!this._isConnected || this.paused) return;
 
       try {
         await this.fetchData();
@@ -295,7 +307,7 @@ export class HttpConnector extends EventEmitter implements SourceConnector {
         this.metrics.errors++;
         this.emit('error', error);
       }
-    }, this.config.interval);
+    }, this.config.interval!);
   }
 
   private async fetchData(): Promise<void> {
@@ -305,7 +317,7 @@ export class HttpConnector extends EventEmitter implements SourceConnector {
       method: this.config.method,
       headers: this.config.headers,
       body: this.config.body ? JSON.stringify(this.config.body) : undefined,
-      signal: AbortSignal.timeout(this.config.timeout)
+      signal: AbortSignal.timeout(this.config.timeout!)
     });
 
     if (!response.ok) {
@@ -400,7 +412,7 @@ export class WebSocketConnector extends EventEmitter implements SourceConnector 
   }
 
   async connect(): Promise<void> {
-    if (this.isConnected) return;
+    if (this._isConnected) return;
 
     this.metrics.connectionStatus = 'connecting';
 
@@ -411,7 +423,7 @@ export class WebSocketConnector extends EventEmitter implements SourceConnector 
       this.ws = new WebSocket(wsUrl, wsProtocols);
 
       this.ws.onopen = () => {
-        this.isConnected = true;
+        this._isConnected = true;
         this.metrics.connectionStatus = 'connected';
         this.reconnectAttempts = 0;
         this.emit('connected');
@@ -446,7 +458,7 @@ export class WebSocketConnector extends EventEmitter implements SourceConnector 
       };
 
       this.ws.onclose = () => {
-        this.isConnected = false;
+        this._isConnected = false;
         this.metrics.connectionStatus = 'disconnected';
         this.emit('disconnected');
 
@@ -477,7 +489,7 @@ export class WebSocketConnector extends EventEmitter implements SourceConnector 
   }
 
   disconnect(): Promise<void> {
-    if (!this.isConnected) return Promise.resolve();
+    if (!this._isConnected) return Promise.resolve();
 
     return new Promise((resolve) => {
       if (this.reconnectIntervalId) {
@@ -490,7 +502,7 @@ export class WebSocketConnector extends EventEmitter implements SourceConnector 
         this.ws = null;
       }
 
-      this.isConnected = false;
+      this._isConnected = false;
       this.metrics.connectionStatus = 'disconnected';
       this.emit('disconnected');
       resolve();
@@ -575,7 +587,7 @@ export class DatabaseConnector extends EventEmitter implements SourceConnector {
       });
 
       await this.connection.query('SELECT 1');
-      this.isConnected = true;
+      this._isConnected = true;
       this.metrics.connectionStatus = 'connected';
       this.emit('connected');
 
@@ -588,7 +600,7 @@ export class DatabaseConnector extends EventEmitter implements SourceConnector {
   }
 
   disconnect(): Promise<void> {
-    if (!this.isConnected) return Promise.resolve();
+    if (!this._isConnected) return Promise.resolve();
 
     return new Promise((resolve) => {
       if (this.intervalId) {
@@ -601,7 +613,7 @@ export class DatabaseConnector extends EventEmitter implements SourceConnector {
         this.connection = null;
       }
 
-      this.isConnected = false;
+      this._isConnected = false;
       this.metrics.connectionStatus = 'disconnected';
       this.emit('disconnected');
       resolve();
@@ -617,7 +629,7 @@ export class DatabaseConnector extends EventEmitter implements SourceConnector {
 
   private startPolling(): void {
     this.intervalId = setInterval(async () => {
-      if (!this.isConnected) return;
+      if (!this._isConnected) return;
 
       try {
         await this.fetchData();
@@ -732,7 +744,7 @@ export class FileConnector extends EventEmitter implements SourceConnector {
         throw new Error(`File not found: ${this.config.path}`);
       }
 
-      this.isConnected = true;
+      this._isConnected = true;
       this.metrics.connectionStatus = 'connected';
       this.emit('connected');
 
@@ -765,7 +777,7 @@ export class FileConnector extends EventEmitter implements SourceConnector {
 
   private startPolling(): void {
     this.intervalId = setInterval(() => {
-      if (!this.isConnected) return;
+      if (!this._isConnected) return;
 
       try {
         this.readFile();
@@ -872,7 +884,7 @@ export class FileConnector extends EventEmitter implements SourceConnector {
   }
 
   disconnect(): Promise<void> {
-    if (!this.isConnected) return Promise.resolve();
+    if (!this._isConnected) return Promise.resolve();
 
     return new Promise((resolve) => {
       if (this.watcher) {
@@ -885,7 +897,7 @@ export class FileConnector extends EventEmitter implements SourceConnector {
         this.intervalId = null;
       }
 
-      this.isConnected = false;
+      this._isConnected = false;
       this.metrics.connectionStatus = 'disconnected';
       this.emit('disconnected');
       resolve();

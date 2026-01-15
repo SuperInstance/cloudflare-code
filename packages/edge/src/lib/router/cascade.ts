@@ -110,6 +110,10 @@ export class ConfidenceCascade {
 
     for (let i = 0; i < strategiesToTry.length; i++) {
       const strategy = strategiesToTry[i];
+      if (!strategy) {
+        continue;
+      }
+
       const attemptStartTime = performance.now();
 
       try {
@@ -222,7 +226,7 @@ export class ConfidenceCascade {
    */
   private async evaluateConfidence(
     response: ChatResponse,
-    request: ChatRequest,
+    _request: ChatRequest,
     analysis?: RequestAnalysis
   ): Promise<number> {
     let confidence = 0.5; // Base confidence
@@ -328,27 +332,6 @@ export class ConfidenceCascade {
   }
 
   /**
-   * Should escalate to next tier?
-   *
-   * @private
-   */
-  private shouldUpgrade(confidence: number, currentTier: number): boolean {
-    const threshold = this.getConfidenceThreshold({
-      tier: currentTier as 1 | 2 | 3,
-      name: '',
-      provider: '',
-      model: '',
-      expectedQuality: 0,
-      confidence: 0,
-      costPer1M: 0,
-      expectedLatency: 0,
-      maxTokens: 0,
-    });
-
-    return confidence < threshold && this.config.enableAutoEscalation;
-  }
-
-  /**
    * Get configuration
    */
   getConfig(): Required<CascadeConfig> {
@@ -378,14 +361,14 @@ export class ConfidenceCascade {
     const tierDistribution = new Map<number, number>();
     for (const log of attemptsLog) {
       const lastAttempt = log[log.length - 1];
-      if (lastAttempt.success) {
+      if (lastAttempt?.success) {
         const tier = lastAttempt.strategy.tier;
         tierDistribution.set(tier, (tierDistribution.get(tier) || 0) + 1);
       }
     }
 
     const successfulCascades = attemptsLog.filter(log =>
-      log[log.length - 1].success
+      log[log.length - 1]?.success
     ).length;
     const successRate = totalCascades > 0 ? successfulCascades / totalCascades : 0;
 

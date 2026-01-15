@@ -30,7 +30,7 @@ export class StreamAnalytics {
   private lastUpdateTime: number;
   private options: Required<AnomalyDetection>;
 
-  constructor(options: AnomalyDetection = {}) {
+  constructor(options: AnomalyDetection = {} as AnomalyDetection) {
     this.options = {
       enabled: options.enabled ?? true,
       algorithm: options.algorithm ?? 'statistical',

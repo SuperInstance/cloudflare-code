@@ -78,9 +78,9 @@ export class TimeWindow<T = any> implements Window<T> {
     this.processor.emit('windowClose', this);
 
     if (this.windowFn) {
-      this.windowFn(this).then(result => {
+      this.windowFn(this).then((result: unknown) => {
         this.processor.emit('windowResult', this, result);
-      }).catch(error => {
+      }).catch((error: unknown) => {
         this.processor.emit('windowError', this, error);
       });
     }
@@ -126,9 +126,9 @@ export class CountWindow<T = any> implements Window<T> {
     this.processor.emit('windowClose', this);
 
     if (this.windowFn) {
-      this.windowFn(this).then(result => {
+      this.windowFn(this).then((result: unknown) => {
         this.processor.emit('windowResult', this, result);
-      }).catch(error => {
+      }).catch((error: unknown) => {
         this.processor.emit('windowError', this, error);
       });
     }
@@ -154,7 +154,7 @@ export class SessionWindow<T = any> implements Window<T> {
     this.startTime = Date.now();
     this.endTime = this.startTime + size;
     this.id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.timeout = setTimeout(() => this.checkInactivity(), inactivityTimeout);
+    this.timeout = setTimeout(() => this.checkInactivity(), inactivityTimeout) as unknown as number;
   }
 
   add(event: Event<T>): void {
@@ -162,7 +162,7 @@ export class SessionWindow<T = any> implements Window<T> {
 
     this.events.push(event);
     clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.checkInactivity(), this.inactivityTimeout);
+    this.timeout = setTimeout(() => this.checkInactivity(), this.inactivityTimeout) as unknown as number;
   }
 
   private checkInactivity(): void {
@@ -185,16 +185,16 @@ export class SessionWindow<T = any> implements Window<T> {
     this.processor.emit('windowClose', this);
 
     if (this.windowFn) {
-      this.windowFn(this).then(result => {
+      this.windowFn(this).then((result: unknown) => {
         this.processor.emit('windowResult', this, result);
-      }).catch(error => {
+      }).catch((error: unknown) => {
         this.processor.emit('windowError', this, error);
       });
     }
   }
 }
 
-export class StreamProcessorImpl<T = any> extends EventEmitter implements StreamProcessor<T> {
+export class StreamProcessor<T = any> extends EventEmitter implements StreamProcessor<T> {
   private windows: Window<T>[] = [];
   private states: Map<string, { state: any; fn: StateFunction<T, any> }> = new Map();
   private activeStreams: Map<string, Subscription> = new Map();
@@ -223,16 +223,16 @@ export class StreamProcessorImpl<T = any> extends EventEmitter implements Stream
   ) {
     super();
     this.config = {
-      concurrency: 1,
-      batchSize: 100,
-      maxRetries: 3,
-      timeout: 5000,
-      backpressure: {
+      ...config,
+      concurrency: config.concurrency ?? 1,
+      batchSize: config.batchSize ?? 100,
+      maxRetries: config.maxRetries ?? 3,
+      timeout: config.timeout ?? 5000,
+      backpressure: config.backpressure ?? {
         enabled: true,
         threshold: 10000,
         strategy: 'buffer'
-      },
-      ...config
+      }
     };
 
     this.faultConfig = faultConfig;
