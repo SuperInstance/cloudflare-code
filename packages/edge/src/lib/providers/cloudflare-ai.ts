@@ -20,7 +20,6 @@ import type { ChatRequest, ChatResponse } from '../../types/index';
 import {
   estimateChatTokens,
   normalizeError,
-  ProviderErrorType,
 } from './base';
 
 /**
@@ -78,7 +77,9 @@ export class CloudflareAIProvider implements ProviderClient {
 
   constructor(config: CloudflareAIConfig, env?: Env) {
     this.config = config;
-    this.env = env;
+    if (env !== undefined) {
+      this.env = env;
+    }
 
     // Initialize quota tracking
     this.quota = {

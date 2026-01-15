@@ -20,7 +20,6 @@ import type { ChatRequest, ChatResponse } from '../../types/index';
 import {
   estimateChatTokens,
   normalizeError,
-  ProviderErrorType,
 } from './base';
 
 /**
@@ -335,7 +334,10 @@ export class CerebrasProvider implements ProviderClient {
         try {
           const json = trimmed.slice(6);
           const data = JSON.parse(json) as CerebrasStreamResponse;
-          yield data.choices[0];
+          const choice = data.choices[0];
+          if (choice) {
+            yield choice;
+          }
         } catch (e) {
           // Skip invalid JSON
           continue;
@@ -348,24 +350,27 @@ export class CerebrasProvider implements ProviderClient {
    * Handle error response from Cerebras API
    */
   private async handleErrorResponse(response: Response): Promise<never> {
-    const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+    const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } })) as { error?: { message?: string } };
 
     if (response.status === 401) {
-      throw new Error(`Cerebras authentication failed: ${error.error?.message || 'Invalid API key'}`);
+      throw new Error(`Cerebras authentication failed: ${errorData.error?.message || 'Invalid API key'}`);
     } else if (response.status === 429) {
-      throw new Error(`Cerebras rate limit exceeded: ${error.error?.message || 'Too many requests'}`);
+      throw new Error(`Cerebras rate limit exceeded: ${errorData.error?.message || 'Too many requests'}`);
     } else if (response.status === 400) {
-      throw new Error(`Cerebras invalid request: ${error.error?.message || 'Bad request'}`);
+      throw new Error(`Cerebras invalid request: ${errorData.error?.message || 'Bad request'}`);
     } else {
-      throw new Error(`Cerebras API error: ${response.status} ${error.error?.message || 'Unknown error'}`);
+      throw new Error(`Cerebras API error: ${response.status} ${errorData.error?.message || 'Unknown error'}`);
     }
   }
 
   /**
    * Transform Cerebras API response to standard format
    */
-  private transformResponse(data: CerebrasAPIResponse, model: string): ChatResponse {
+  private transformResponse(data: CerebrasAPIResponse, _model: string): ChatResponse {
     const choice = data.choices[0];
+    if (!choice) {
+      throw new Error('Invalid response: no choices returned');
+    }
 
     return {
       id: data.id,

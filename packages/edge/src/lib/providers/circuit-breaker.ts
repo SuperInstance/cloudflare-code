@@ -5,8 +5,6 @@
  * and exponential backoff retry logic for transient errors.
  */
 
-import type { ProviderClient } from './base';
-
 /**
  * Circuit breaker states
  */

@@ -13,7 +13,6 @@ import type {
   CostSavings,
   ProviderStats,
   Anomaly,
-  AggregateMetrics,
 } from './types';
 
 export class MetricsAggregator {

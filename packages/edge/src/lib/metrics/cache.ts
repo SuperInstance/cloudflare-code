@@ -8,15 +8,12 @@
 import type { CacheMetrics } from './types';
 
 export class CacheMetricsCollector {
-  private _kvCache: KVNamespace;
-  private _r2Storage: R2Bucket;
-
   // In-memory metrics by tier
   private tierMetrics: Map<'hot' | 'warm' | 'cold', CacheSnapshot>;
 
-  constructor(kvCache: KVNamespace, r2Storage: R2Bucket) {
-    this._kvCache = kvCache;
-    this._r2Storage = r2Storage;
+  constructor(_kvCache: KVNamespace, _r2Storage: R2Bucket) {
+    void _kvCache; // Reserved for future KV persistence
+    void _r2Storage; // Reserved for future R2 persistence
     this.tierMetrics = new Map();
     this.tierMetrics.set('hot', this.createSnapshot('hot'));
     this.tierMetrics.set('warm', this.createSnapshot('warm'));

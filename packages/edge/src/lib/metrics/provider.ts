@@ -301,7 +301,9 @@ export class ProviderMetricsCollector {
     snapshot.health = metrics.health;
     snapshot.quotaUsed = metrics.quotaUsed;
     snapshot.quotaTotal = metrics.quotaTotal;
-    snapshot.quotaResetTime = metrics.quotaResetTime;
+    if (metrics.quotaResetTime !== undefined) {
+      snapshot.quotaResetTime = metrics.quotaResetTime;
+    }
     snapshot.lastUpdate = Date.now();
 
     // Keep last 100 metrics for calculation

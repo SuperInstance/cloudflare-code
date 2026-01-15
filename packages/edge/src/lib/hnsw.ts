@@ -547,7 +547,7 @@ export class HNSWIndex {
   private euclideanSimilarity(a: Float32Array, b: Float32Array): number {
     let sum = 0;
     for (let i = 0; i < a.length; i++) {
-      const diff = a[i] - b[i];
+      const diff = a[i]! - b[i]!;
       sum += diff * diff;
     }
     const distance = Math.sqrt(sum);

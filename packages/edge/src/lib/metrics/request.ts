@@ -101,10 +101,18 @@ export class RequestMetricsCollector {
         break;
     }
 
-    const metrics = await this.getByTimeRange(startTime, now, {
-      provider,
-      model,
-    });
+    const queryOptions: MetricsQueryOptions = {
+      startTime,
+      endTime: now,
+    };
+    if (provider !== undefined) {
+      queryOptions.provider = provider;
+    }
+    if (model !== undefined) {
+      queryOptions.model = model;
+    }
+
+    const metrics = await this.getByTimeRange(startTime, now, queryOptions);
 
     return this.calculateAggregates(metrics, provider, period, startTime, now);
   }
@@ -150,7 +158,11 @@ export class RequestMetricsCollector {
     startTime: number,
     endTime: number
   ): Promise<RequestMetrics[]> {
-    return this.getByTimeRange(startTime, endTime, { userId });
+    return this.getByTimeRange(startTime, endTime, {
+      startTime,
+      endTime,
+      userId,
+    });
   }
 
   /**
@@ -161,7 +173,11 @@ export class RequestMetricsCollector {
     startTime: number,
     endTime: number
   ): Promise<RequestMetrics[]> {
-    return this.getByTimeRange(startTime, endTime, { feature });
+    return this.getByTimeRange(startTime, endTime, {
+      startTime,
+      endTime,
+      feature,
+    });
   }
 
   /**
@@ -200,10 +216,10 @@ export class RequestMetricsCollector {
       totalCost: metrics.reduce((sum, m) => sum + m.cost, 0),
       avgLatency: metrics.reduce((sum, m) => sum + m.latency, 0) / metrics.length,
       percentiles: {
-        p50: latencies[Math.floor(latencies.length * 0.5)],
-        p90: latencies[Math.floor(latencies.length * 0.9)],
-        p95: latencies[Math.floor(latencies.length * 0.95)],
-        p99: latencies[Math.floor(latencies.length * 0.99)],
+        p50: latencies[Math.floor(latencies.length * 0.5)] ?? 0,
+        p90: latencies[Math.floor(latencies.length * 0.9)] ?? 0,
+        p95: latencies[Math.floor(latencies.length * 0.95)] ?? 0,
+        p99: latencies[Math.floor(latencies.length * 0.99)] ?? 0,
       },
     };
   }
@@ -215,7 +231,7 @@ export class RequestMetricsCollector {
     const now = Date.now();
     const hotMaxAge = 60 * 60 * 1000; // 1 hour
 
-    for (const [hourKey, metrics] of this.hotMetrics.entries()) {
+    for (const [hourKey, _metrics] of this.hotMetrics.entries()) {
       const hourTime = this.parseHourKey(hourKey);
       const age = now - hourTime;
 
@@ -348,7 +364,7 @@ export class RequestMetricsCollector {
     const avgCostPerRequest = stats.totalCost / metrics.length;
     const cacheSavings = cacheHits * avgCostPerRequest * 0.95;
 
-    return {
+    const result: AggregateMetrics = {
       period,
       startTime,
       endTime,
@@ -362,18 +378,19 @@ export class RequestMetricsCollector {
       promptTokens: metrics.reduce((sum, m) => sum + m.tokens.prompt, 0),
       completionTokens: metrics.reduce((sum, m) => sum + m.tokens.completion, 0),
       latency: {
-        p50: latencies[Math.floor(latencies.length * 0.5)],
-        p90: latencies[Math.floor(latencies.length * 0.9)],
-        p95: latencies[Math.floor(latencies.length * 0.95)],
-        p99: latencies[Math.floor(latencies.length * 0.99)],
+        p50: latencies[Math.floor(latencies.length * 0.5)] ?? 0,
+        p90: latencies[Math.floor(latencies.length * 0.9)] ?? 0,
+        p95: latencies[Math.floor(latencies.length * 0.95)] ?? 0,
+        p99: latencies[Math.floor(latencies.length * 0.99)] ?? 0,
         avg: stats.avgLatency,
       },
       totalCost: stats.totalCost,
       avgCostPerRequest: stats.totalCost / metrics.length,
-      avgCostPer1KTokens: (stats.totalCost / totalTokens) * 1000,
+      avgCostPer1KTokens: totalTokens > 0 ? (stats.totalCost / totalTokens) * 1000 : 0,
       cacheHitRate: stats.cacheHitRate,
       cacheSavings,
     };
+    return result;
   }
 
   /**
@@ -422,7 +439,11 @@ export class RequestMetricsCollector {
    * Parse hour key to timestamp
    */
   private parseHourKey(hourKey: string): number {
-    const [year, month, day, hour] = hourKey.split('-').map(Number);
+    const parts = hourKey.split('-');
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    const hour = Number(parts[3] ?? 0);
     return Date.UTC(year, month - 1, day, hour, 0, 0, 0);
   }
 

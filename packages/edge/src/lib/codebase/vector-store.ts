@@ -66,7 +66,9 @@ export class CodeVectorStore {
     this.chunkById = new Map();
     this.chunksByFile = new Map();
     this.cache = new Map();
-    this.kv = kv;
+    if (kv !== undefined) {
+      this.kv = kv;
+    }
 
     this.stats = {
       totalSearches: 0,
