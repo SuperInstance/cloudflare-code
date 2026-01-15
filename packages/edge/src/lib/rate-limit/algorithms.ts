@@ -434,7 +434,9 @@ export class LeakyBucketAlgorithm {
     this.capacity = capacity;
     this.leakRate = leakRate;
     this.state = new Map();
-    this.storage = storage;
+    if (storage !== undefined) {
+      this.storage = storage;
+    }
   }
 
   /**
@@ -602,29 +604,26 @@ export class RateLimitAlgorithmFactory {
 export class HybridRateLimiter {
   private primary: TokenBucketAlgorithm | SlidingWindowAlgorithm;
   private secondary: FixedWindowAlgorithm;
-  private storage?: DurableObjectStorage;
 
   constructor(
     primary: RateLimitAlgorithm,
     maxRequests: number,
     windowMs: number,
-    storage?: DurableObjectStorage
+    _storage?: DurableObjectStorage
   ) {
-    this.storage = storage;
-
     if (primary === 'token-bucket') {
       this.primary = RateLimitAlgorithmFactory.createTokenBucketRPM(
         maxRequests,
-        storage
+        _storage
       );
     } else {
-      this.primary = new SlidingWindowAlgorithm(maxRequests, windowMs, storage);
+      this.primary = new SlidingWindowAlgorithm(maxRequests, windowMs, _storage);
     }
 
     this.secondary = new FixedWindowAlgorithm(
       maxRequests * 2,
       windowMs,
-      storage
+      _storage
     );
   }
 
