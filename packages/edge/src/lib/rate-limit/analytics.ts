@@ -8,7 +8,7 @@
 import type { KVNamespace } from '@cloudflare/workers-types';
 import type {
   RateLimitEvent,
-  RateLimitAnalytics,
+  RateLimitAnalytics as RateLimitAnalyticsType,
   RateLimitScope,
   SubscriptionTier,
   RateLimitStats,
@@ -23,7 +23,7 @@ export type AnalyticsWindow = 'minute' | 'hour' | 'day' | 'week' | 'month';
 /**
  * Analytics data point
  */
-interface AnalyticsDataPoint {
+export interface AnalyticsDataPoint {
   timestamp: number;
   totalRequests: number;
   blockedRequests: number;
@@ -406,7 +406,7 @@ export class RateLimitAnalytics {
     windowStart?: number,
     windowEnd?: number
   ): Promise<{
-    summary: RateLimitAnalytics;
+    summary: RateLimitAnalyticsType;
     topEndpoints: Array<{ endpoint: string; requests: number; blocked: number }>;
     topBlocked: Array<{ identifier: string; count: number }>;
     tierDistribution: Array<{ tier: string; requests: number; percentage: number }>;
@@ -667,6 +667,6 @@ export class RateLimitAnalytics {
  */
 export function createRateLimitAnalytics(
   options?: AnalyticsOptions
-): RateLimitAnalytics {
+) {
   return new RateLimitAnalytics(options);
 }
