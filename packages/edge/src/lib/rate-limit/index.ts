@@ -39,7 +39,6 @@ export type {
   RateLimitRule,
   RateLimitStats,
   RateLimitEvent,
-  RateLimitAnalytics,
   QuotaStatus,
   RateLimitManagerOptions,
   RateLimitMiddlewareOptions,
@@ -50,6 +49,7 @@ export type {
   BurstConfig,
   RateLimitLogEntry,
   AggregationWindow,
+  RateLimitAnalytics as RateLimitAnalyticsType,
 } from './types';
 
 // ============================================================================
