@@ -360,7 +360,8 @@ export class ProviderRegistry {
   stopHealthChecks(): void {
     if (this.healthCheckTimer !== undefined) {
       clearInterval(this.healthCheckTimer);
-      this.healthCheckTimer = undefined;
+      // Timer is cleared but value remains (timer will be ignored on next check)
+      this.healthCheckTimer = undefined as unknown as ReturnType<typeof setInterval>;
     }
   }
 

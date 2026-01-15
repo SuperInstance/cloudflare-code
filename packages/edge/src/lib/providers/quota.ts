@@ -91,10 +91,8 @@ export class QuotaTracker {
       criticalThreshold: config.criticalThreshold ?? 0.95, // 95%
       enablePrediction: config.enablePrediction ?? true,
       predictionWindow: config.predictionWindow ?? 24, // 24 hours
+      ...(config.kv !== undefined ? { kv: config.kv } : {}),
     };
-    if (config.kv !== undefined) {
-      this.config.kv = config.kv;
-    }
   }
 
   /**
