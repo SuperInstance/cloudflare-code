@@ -1,15 +1,7 @@
-/**
- * Log aggregation module
- * Exports logging functionality with correlation support
- */
-
-export { StructuredLogger } from './logger';
-export { LogStream } from './log-stream';
-export { LogExporter } from './log-exporter';
-export type {
-  LoggerOptions,
-  LogStreamCallback,
-  LogFilterCallback,
-  LogSubscription,
-  LogExportOptions,
-} from './logger';
+export * from './logger';
+export * from './log-processor';
+export * from './log-aggregator';
+export * from './log-search';
+export * from './log-retention';
+export * from './log-formatter';
+export * from './types';
