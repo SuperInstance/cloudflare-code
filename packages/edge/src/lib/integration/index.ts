@@ -96,6 +96,23 @@ export {
   resetGlobalIntegrationManager,
 } from './manager';
 
+// Adapter
+export type {
+  PackageAdapterOptions,
+  PackageAdapterCapability,
+} from './adapter';
+export {
+  PackageAdapter,
+  createPackageAdapter,
+  createServiceAdapter,
+  createDOAdapter,
+  createAgentAdapter,
+  BatchPackageAdapter,
+  createBatchPackageAdapter,
+  extractCapabilities,
+  autoAdaptPackage,
+} from './adapter';
+
 // Convenience re-exports
 export { createIntegrationManager as createManager } from './manager';
 export { createIntegrationManager as init } from './manager';
