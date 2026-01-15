@@ -47,13 +47,13 @@ interface ExecutorState {
  */
 export class ExecutorAgent implements DurableObject {
   private state: DurableObjectState;
-  private env: Env;
+  private _env: Env;
   private storage: DurableObjectStorage;
   private executorState: ExecutorState;
 
   constructor(state: DurableObjectState, env: Env) {
     this.state = state;
-    this.env = env;
+    this._env = env;
     this.storage = state.storage;
 
     // Initialize state
@@ -204,6 +204,7 @@ export class ExecutorAgent implements DurableObject {
       // Execute each step
       for (let i = 0; i < plan.steps.length; i++) {
         const step = plan.steps[i];
+        if (!step) continue;
 
         // Check dependencies
         if (!this.areDependenciesMet(step, this.executorState.results)) {
@@ -234,7 +235,7 @@ export class ExecutorAgent implements DurableObject {
             continue;
           } else if (recovery.type === 'abort') {
             // Abort execution
-            throw new Error(`Execution aborted: ${recovery.retryWith?.reason || 'Unknown reason'}`);
+            throw new Error('Execution aborted: Retry limit exceeded');
           } else if (recovery.type === 'fallback') {
             // Use fallback executor
             const fallbackResult = await this.executeWithFallback(
@@ -311,22 +312,22 @@ export class ExecutorAgent implements DurableObject {
       switch (step.type) {
         case 'analyze':
           output = await this.performAnalysis(step, context);
-          tokens = Math.floor(step.input.estimatedTokens as number || 500);
+          tokens = Math.floor(step.input['estimatedTokens'] as number || 500);
           break;
 
         case 'generate':
           output = await this.performGeneration(step, context);
-          tokens = Math.floor(step.input.estimatedTokens as number || 1000);
+          tokens = Math.floor(step.input['estimatedTokens'] as number || 1000);
           break;
 
         case 'validate':
           output = await this.performValidation(step, context);
-          tokens = Math.floor(step.input.estimatedTokens as number || 300);
+          tokens = Math.floor(step.input['estimatedTokens'] as number || 300);
           break;
 
         case 'retrieve':
           output = await this.performRetrieval(step, context);
-          tokens = Math.floor(step.input.estimatedTokens as number || 200);
+          tokens = Math.floor(step.input['estimatedTokens'] as number || 200);
           break;
 
         default:
@@ -362,11 +363,11 @@ export class ExecutorAgent implements DurableObject {
    */
   private async performAnalysis(
     step: { id: string; input: Record<string, unknown> },
-    context: Context
+    _context: Context
   ): Promise<string> {
     // Simulate analysis logic
     // In production, this would call an LLM or other service
-    const message = step.input.message as string || '';
+    const message = step.input['message'] as string || '';
 
     return `[Analysis] Analyzed: ${message.substring(0, 100)}...`;
   }
@@ -376,11 +377,11 @@ export class ExecutorAgent implements DurableObject {
    */
   private async performGeneration(
     step: { id: string; input: Record<string, unknown> },
-    context: Context
+    _context: Context
   ): Promise<string> {
     // Simulate generation logic
     // In production, this would call an LLM API
-    const message = step.input.message as string || '';
+    const message = step.input['message'] as string || '';
 
     return `[Generated] Based on: ${message.substring(0, 100)}...\n\n// Generated content would appear here`;
   }
@@ -389,8 +390,8 @@ export class ExecutorAgent implements DurableObject {
    * Perform validation step
    */
   private async performValidation(
-    step: { id: string; input: Record<string, unknown> },
-    context: Context
+    _step: { id: string; input: Record<string, unknown> },
+    _context: Context
   ): Promise<string> {
     // Simulate validation logic
     return '[Validation] Content validated successfully';
@@ -400,8 +401,8 @@ export class ExecutorAgent implements DurableObject {
    * Perform retrieval step
    */
   private async performRetrieval(
-    step: { id: string; input: Record<string, unknown> },
-    context: Context
+    _step: { id: string; input: Record<string, unknown> },
+    _context: Context
   ): Promise<string> {
     // Simulate retrieval logic
     // In production, this would query KV, R2, or vector DB
@@ -411,7 +412,7 @@ export class ExecutorAgent implements DurableObject {
   /**
    * Handle errors with recovery strategy
    */
-  private async handleErrors(error: string, step: { id: string }): Promise<RecoveryAction> {
+  private async handleErrors(_error: string, _step: { id: string }): Promise<RecoveryAction> {
     this.executorState.errorCount++;
 
     // Determine recovery strategy based on error count
@@ -445,7 +446,7 @@ export class ExecutorAgent implements DurableObject {
    */
   private async executeWithFallback(
     step: { id: string; type: string; description: string; input: Record<string, unknown> },
-    context: Context,
+    _context: Context,
     fallbackAgentId: string
   ): Promise<StepResult> {
     // In production, this would call a different executor DO
@@ -454,7 +455,7 @@ export class ExecutorAgent implements DurableObject {
       stepId: step.id,
       status: 'completed',
       output: `[Fallback] Executed via ${fallbackAgentId}`,
-      tokens: Math.floor(step.input.estimatedTokens as number || 500),
+      tokens: Math.floor(step.input['estimatedTokens'] as number || 500),
       latency: 500,
       retries: 0,
     };
@@ -476,7 +477,7 @@ export class ExecutorAgent implements DurableObject {
   /**
    * Update progress
    */
-  private async updateProgress(step: number): Promise<void> {
+  private async updateProgress(_step: number): Promise<void> {
     // In production, this could send notifications or update a progress store
     // For now, we just persist state
     await this.persistState();

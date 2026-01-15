@@ -148,7 +148,7 @@ export class GlobalErrorHandler {
     const startTime = Date.now();
     const steps: ErrorHandlingStep[] = [];
     let lastError = error;
-    let response?: ChatResponse;
+    let response: ChatResponse | undefined = undefined;
     let success = false;
 
     // Classify error

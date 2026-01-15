@@ -39,13 +39,13 @@ interface AnalystState {
  */
 export class AnalystAgent implements DurableObject {
   private state: DurableObjectState;
-  private env: AnalystEnv;
+  private _env: AnalystEnv;
   private storage: DurableObjectStorage;
   private analystState: AnalystState;
 
   constructor(state: DurableObjectState, env: AnalystEnv) {
     this.state = state;
-    this.env = env;
+    this._env = env;
     this.storage = state.storage;
 
     this.analystState = {
@@ -226,7 +226,18 @@ export class AnalystAgent implements DurableObject {
   }> {
     const { codebase, analysisType = 'all' } = request;
 
-    const result: typeof analysisResult = {
+    const result: {
+      structure?: ReturnType<AnalystAgent['analyzeStructure']>;
+      dependencies?: ReturnType<AnalystAgent['analyzeDependencies']>;
+      architecture?: ReturnType<AnalystAgent['analyzeArchitecture']>;
+      patterns?: Record<string, unknown>;
+      metrics: {
+        totalFiles: number;
+        totalLines: number;
+        averageFileLength: number;
+        complexity: number;
+      };
+    } = {
       metrics: {
         totalFiles: Object.keys(codebase).length,
         totalLines: 0,
@@ -236,7 +247,7 @@ export class AnalystAgent implements DurableObject {
     };
 
     // Calculate metrics
-    for (const [file, content] of Object.entries(codebase)) {
+    for (const [, content] of Object.entries(codebase)) {
       const lines = content.split('\n').length;
       result.metrics.totalLines += lines;
     }
@@ -325,6 +336,7 @@ export class AnalystAgent implements DurableObject {
 
       for (const match of imports) {
         const importPath = match[1];
+        if (!importPath) continue;
 
         if (importPath.startsWith('.') || importPath.startsWith('/')) {
           // Internal import
@@ -434,6 +446,7 @@ export class AnalystAgent implements DurableObject {
     const files = Object.keys(codebase);
     for (const file of files) {
       const content = codebase[file];
+      if (!content) continue;
       const imports = content.match(/from\s+['"]([^'"]+)['"]/g) || [];
       coupling[file] = imports.length;
     }

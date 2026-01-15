@@ -358,7 +358,7 @@ export class ProviderRegistry {
    * Stop automatic health checks
    */
   stopHealthChecks(): void {
-    if (this.healthCheckTimer) {
+    if (this.healthCheckTimer !== undefined) {
       clearInterval(this.healthCheckTimer);
       this.healthCheckTimer = undefined;
     }

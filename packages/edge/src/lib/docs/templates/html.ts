@@ -396,12 +396,21 @@ export function renderHTMLTemplate(context: TemplateContext): string {
         return;
       }
 
-      searchResults.innerHTML = matches.slice(0, 10).map(s => `
-        <div class="search-result" onclick="window.location.hash = 'symbol-' + '${s.id}'">
-          <div class="search-result-name">${escapeHtml(s.name)}</div>
-          <div class="search-result-kind">${s.kind}</div>
-        </div>
-      `).join('');
+      const resultHTML = matches.slice(0, 10).map(s => {
+        return '<div class="search-result" data-symbol-id="' + String(s.id) + '">' +
+          '<div class="search-result-name">' + escapeHtml(s.name) + '</div>' +
+          '<div class="search-result-kind">' + s.kind + '</div>' +
+          '</div>';
+      }).join('');
+
+      searchResults.innerHTML = resultHTML;
+
+      searchResults.querySelectorAll('.search-result').forEach((el: any) => {
+        el.addEventListener('click', () => {
+          const symbolId = el.getAttribute('data-symbol-id');
+          window.location.hash = 'symbol-' + symbolId;
+        });
+      });
 
       searchResults.classList.add('active');
     });

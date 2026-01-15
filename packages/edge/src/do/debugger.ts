@@ -39,13 +39,13 @@ interface DebuggerState {
  */
 export class DebuggerAgent implements DurableObject {
   private state: DurableObjectState;
-  private env: DebuggerEnv;
+  private _env: DebuggerEnv;
   private storage: DurableObjectStorage;
   private debuggerState: DebuggerState;
 
   constructor(state: DurableObjectState, env: DebuggerEnv) {
     this.state = state;
-    this.env = env;
+    this._env = env;
     this.storage = state.storage;
 
     this.debuggerState = {
@@ -221,8 +221,18 @@ export class DebuggerAgent implements DurableObject {
   }> {
     const { code, error, stackTrace } = request;
 
-    const bugs: typeof debugResult.bugs = [];
-    const fixes: typeof debugResult.fixes = [];
+    const bugs: Array<{
+      type: string;
+      severity: 'error' | 'warning' | 'info';
+      location: string;
+      message: string;
+      suggestion: string;
+    }> = [];
+    const fixes: Array<{
+      type: string;
+      description: string;
+      code?: string;
+    }> = [];
     const tests: string[] = [];
 
     // Analyze for common bugs
@@ -244,8 +254,20 @@ export class DebuggerAgent implements DurableObject {
   /**
    * Detect common bugs
    */
-  private detectCommonBugs(code: string): typeof debugResult.bugs {
-    const bugs: typeof debugResult.bugs = [];
+  private detectCommonBugs(code: string): Array<{
+    type: string;
+    severity: 'error' | 'warning' | 'info';
+    location: string;
+    message: string;
+    suggestion: string;
+  }> {
+    const bugs: Array<{
+      type: string;
+      severity: 'error' | 'warning' | 'info';
+      location: string;
+      message: string;
+      suggestion: string;
+    }> = [];
 
     // Check for null/undefined access
     const nullAccess = code.matchAll(/(\w+)\??\.\w+/g);
@@ -316,11 +338,31 @@ export class DebuggerAgent implements DurableObject {
    * Analyze error message
    */
   private analyzeErrorMessage(error: string, stackTrace?: string): {
-    bugs: typeof debugResult.bugs;
-    fixes: typeof debugResult.fixes;
+    bugs: Array<{
+      type: string;
+      severity: 'error' | 'warning' | 'info';
+      location: string;
+      message: string;
+      suggestion: string;
+    }>;
+    fixes: Array<{
+      type: string;
+      description: string;
+      code?: string;
+    }>;
   } {
-    const bugs: typeof debugResult.bugs = [];
-    const fixes: typeof debugResult.fixes = [];
+    const bugs: Array<{
+      type: string;
+      severity: 'error' | 'warning' | 'info';
+      location: string;
+      message: string;
+      suggestion: string;
+    }> = [];
+    const fixes: Array<{
+      type: string;
+      description: string;
+      code?: string;
+    }> = [];
 
     // Analyze error type
     if (error.includes('TypeError')) {
@@ -380,9 +422,12 @@ export class DebuggerAgent implements DurableObject {
   private parseLocationFromStack(stackTrace: string): string {
     const lines = stackTrace.split('\n');
     if (lines.length > 0) {
-      const match = lines[0].match(/at\s+.*?\s+\(([^)]+)\)/);
-      if (match) {
-        return match[1];
+      const firstLine = lines[0];
+      if (firstLine) {
+        const match = firstLine.match(/at\s+.*?\s+\(([^)]+)\)/);
+        if (match && match[1]) {
+          return match[1];
+        }
       }
     }
     return 'unknown';
@@ -391,7 +436,13 @@ export class DebuggerAgent implements DurableObject {
   /**
    * Suggest tests
    */
-  private suggestTests(code: string, bugs: typeof debugResult.bugs): string[] {
+  private suggestTests(code: string, bugs: Array<{
+    type: string;
+    severity: 'error' | 'warning' | 'info';
+    location: string;
+    message: string;
+    suggestion: string;
+  }>): string[] {
     const tests: string[] = [];
 
     // Suggest tests based on bugs found
@@ -450,7 +501,7 @@ export class DebuggerAgent implements DurableObject {
     suggestedFixes: string[];
     relatedDocs?: string[];
   }> {
-    const { error, stackTrace, context } = request;
+    const { error, stackTrace: _stackTrace, context: _context } = request;
 
     let errorType = 'unknown';
     let severity: 'error' | 'warning' | 'info' = 'error';

@@ -341,7 +341,7 @@ export class RequestRouter {
    */
   private async calculateProviderScore(
     provider: ProviderClient,
-    request: ChatRequest
+    _request: ChatRequest
   ): Promise<ProviderScore> {
     const quota = await provider.getQuota();
     const health = await provider.getHealthStatus();
@@ -408,6 +408,7 @@ export class RequestRouter {
 
     for (let i = 0; i < Math.min(this.config.maxFallbackAttempts, alternativeProviders.length); i++) {
       const provider = alternativeProviders[i];
+      if (!provider) continue;
 
       try {
         console.log(`Falling back to ${provider.name}`);

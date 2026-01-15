@@ -434,13 +434,13 @@ export class QuotaTracker {
   /**
    * Load status from KV
    */
-  private async loadFromKV<T>(key: string): Promise<T | null> {
+  private async loadFromKV<T>(key: string): Promise<T | undefined> {
     try {
       const data = await this.kv.get(key, 'json');
-      return (data as T) || null;
+      return (data as T) || undefined;
     } catch (error) {
       console.error('QuotaTracker KV load error:', error);
-      return null;
+      return undefined;
     }
   }
 

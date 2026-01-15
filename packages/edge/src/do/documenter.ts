@@ -39,13 +39,13 @@ interface DocumenterState {
  */
 export class DocumenterAgent implements DurableObject {
   private state: DurableObjectState;
-  private env: DocumenterEnv;
+  private _env: DocumenterEnv;
   private storage: DurableObjectStorage;
   private documenterState: DocumenterState;
 
   constructor(state: DurableObjectState, env: DocumenterEnv) {
     this.state = state;
-    this.env = env;
+    this._env = env;
     this.storage = state.storage;
 
     this.documenterState = {
@@ -278,11 +278,11 @@ export class DocumenterAgent implements DurableObject {
 
     // Extract parameters
     const paramsMatch = functionCode.match(/\(([^)]*)\)/);
-    const params = paramsMatch ? paramsMatch[1].split(',').map((p) => p.trim()) : [];
+    const params = paramsMatch && paramsMatch[1] ? paramsMatch[1].split(',').map((p) => p.trim()) : [];
 
     if (format === 'jsdoc') {
       let docs = `/**\n`;
-      docs += ` * ${this.capitalize(name)} - \n`;
+      docs += ` * ${this.capitalize(name ?? 'unknown')} - \n`;
       docs += ` *\n`;
 
       for (const param of params) {
@@ -297,7 +297,7 @@ export class DocumenterAgent implements DurableObject {
       return docs;
     } else if (format === 'typescript') {
       let docs = `/**\n`;
-      docs += ` * ${this.capitalize(name)}\n`;
+      docs += ` * ${this.capitalize(name ?? 'unknown')}\n`;
       docs += ` *\n`;
 
       for (const param of params) {
@@ -310,8 +310,8 @@ export class DocumenterAgent implements DurableObject {
 
       return docs;
     } else {
-      return `## ${this.capitalize(name)}\n\n### Parameters\n\n${
-        params.map((p) => `- \`${p}\``).join('\n')
+      return `## ${this.capitalize(name ?? 'unknown')}\n\n### Parameters\n\n${
+        params.filter((p) => p).map((p) => `- \`${p}\``).join('\n')
       }\n\n### Returns\n\n-`;
     }
   }
@@ -435,15 +435,23 @@ export class DocumenterAgent implements DurableObject {
   }> {
     const { codebase, format = 'markdown' } = request;
 
-    const endpoints: typeof apiDocsResult.endpoints = [];
+    const endpoints: Array<{
+      path: string;
+      method: string;
+      description: string;
+      parameters: Array<{ name: string; type: string; required: boolean }>;
+      responses: Record<string, string>;
+    }> = [];
 
     // Find API endpoint definitions
-    for (const [filePath, content] of Object.entries(codebase)) {
+    for (const [, content] of Object.entries(codebase)) {
       const routes = content.matchAll(/(?:app\.)?(get|post|put|delete|patch)\s*\(\s*['"]([^'"]+)['"]/g);
 
       for (const match of routes) {
         const method = match[1];
         const path = match[2];
+
+        if (!method || !path) continue;
 
         endpoints.push({
           path,
