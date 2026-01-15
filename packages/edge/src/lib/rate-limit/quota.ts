@@ -221,7 +221,12 @@ const DEFAULT_QUOTAS: Record<SubscriptionTier, QuotaConfig[]> = {
  */
 export class QuotaManager {
   private kv?: KVNamespace;
-  private options: Required<Omit<QuotaManagerOptions, 'defaultQuotas'>>;
+  private options: Omit<QuotaManagerOptions, 'defaultQuotas'> & {
+    enableTracking: boolean;
+    enableSoftLimits: boolean;
+    enableOverage: boolean;
+    ttl: number;
+  };
   private quotas: Map<SubscriptionTier, QuotaConfig[]>;
   private cache: Map<string, QuotaState>;
   private tierConfigs: Map<SubscriptionTier, TierConfig>;
@@ -336,7 +341,7 @@ export class QuotaManager {
       ...(blockedBy !== undefined ? { blockedBy } : {}),
       softLimitExceeded,
       overageAvailable,
-      overageCost: overageCost > 0 ? overageCost : undefined,
+      ...(overageCost > 0 ? { overageCost } : {}),
     };
   }
 
