@@ -1,0 +1,68 @@
+{
+  "router": {
+    "maxConcurrency": 1000,
+    "enableTransformation": true,
+    "enableFiltering": true,
+    "enableMetrics": true,
+    "rules": [
+      {
+        "id": "notifications-routing",
+        "name": "Notifications Routing",
+        "pattern": "notifications.*",
+        "type": "wildcard",
+        "actions": [
+          {
+            "type": "forward",
+            "target": "notification-service"
+          }
+        ],
+        "priority": 10,
+        "enabled": true
+      },
+      {
+        "id": "error-log-filtering",
+        "name": "Error Log Filtering",
+        "pattern": "logs.*",
+        "type": "wildcard",
+        "actions": [
+          {
+            "type": "filter",
+            "filter": {
+              "payload": {
+                "level": "error"
+              }
+            }
+          }
+        ],
+        "priority": 5,
+        "enabled": true
+      }
+    ]
+  },
+  "topics": {
+    "maxTopics": 1000,
+    "maxPartitions": 10,
+    "enableMetrics": true,
+    "retentionEnabled": true,
+    "retentionInterval": 60000,
+    "storageBackend": "kv"
+  },
+  "subscribers": {
+    "maxSubscriptions": 10000,
+    "maxRetries": 3,
+    "healthCheckInterval": 30000,
+    "enableHealthChecks": true,
+    "enableDeadLetter": true,
+    "deadLetterRetention": 604800000
+  },
+  "delivery": {
+    "maxConcurrentDeliveries": 1000,
+    "deliveryTimeout": 5000,
+    "enablePersistence": true,
+    "enableMetrics": true,
+    "enableBackpressure": true,
+    "maxQueueSize": 10000,
+    "retryBackoffMultiplier": 2,
+    "maxRetryDelay": 30000
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "name": "@claudeflare/realtime",
+  "version": "1.0.0",
+  "description": "Advanced real-time communication package for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build && npm run test"
+  },
+  "keywords": [
+    "websocket",
+    "realtime",
+    "multiplexer",
+    "presence",
+    "scalability",
+    "clouflare",
+    "ai"
+  ],
+  "author": "ClaudeFlare",
+  "license": "MIT",
+  "dependencies": {
+    "@claudeflare/logger": "^1.0.0",
+    "@claudeflare/metrics": "^1.0.0",
+    "@claudeflare/distributed-tracing": "^1.0.0",
+    "@claudeflare/error-tracking": "^1.0.0",
+    "@cloudflare/workers-types": "^4.20240520.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.12",
+    "@types/node": "^20.11.20",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "deno": ">=1.37.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/claudeflare/realtime.git"
+  },
+  "bugs": {
+    "url": "https://github.com/claudeflare/realtime/issues"
+  },
+  "homepage": "https://github.com/claudeflare/realtime#readme",
+  "peerDependencies": {
+    "cloudflare": "^3.41.0"
+  }
+}

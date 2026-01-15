@@ -1,188 +1,103 @@
 /**
- * ClaudeFlare Streaming Infrastructure
- * Real-time event streaming, message queues, stream processing, and analytics
+ * ClaudeFlare Advanced Streaming Data Platform
+ * Real-time analytics and event processing with fault tolerance
  */
 
 // ============================================================================
 // Core Types
 // ============================================================================
 
-export * from './types/index.js';
+export * from './types';
 
 // ============================================================================
-// Event Streaming
-// ============================================================================
-
-export {
-  EventStream,
-  formatSSE,
-  parseSSE,
-} from './stream/event-stream.js';
-
-// ============================================================================
-// Message Queue
+// Stream Processor
 // ============================================================================
 
 export {
-  MessageQueue,
-  PriorityQueue,
-  FIFOQueue,
-  DelayedQueue,
-  QueueManager,
-} from './queue/queue.js';
+  StreamProcessor,
+  StreamProcessorImpl,
+  TimeWindow,
+  CountWindow,
+  SessionWindow,
+  WindowFunction,
+  StateFunction
+} from './processor';
 
 // ============================================================================
-// Stream Processing
-// ============================================================================
-
-export {
-  StreamTransformer,
-  WindowOperator,
-  StreamAggregator,
-  Aggregations,
-  StreamJoiner,
-  ComplexEventProcessor,
-  Patterns,
-} from './processing/processor.js';
-
-export type {
-  WindowedEvent,
-  JoinedEvent,
-} from './processing/processor.js';
-
-// ============================================================================
-// Event Sourcing
+// Transform Engine
 // ============================================================================
 
 export {
-  EventStore,
-  CQRS,
-  createEventStore,
-  createCQRS,
-} from './sourcing/event-store.js';
-
-export type {
-  AppendResult,
-  CommandResult,
-  QueryResult,
-  EventStoreStats,
-  ProjectionHandler,
-  CommandHandler,
-  QueryHandler,
-  ConcurrencyError,
-} from './sourcing/event-store.js';
+  TransformEngine,
+  TransformFunction,
+  TransformContext,
+  TransformOperation,
+  TransformEngineFactory
+} from './transform';
 
 // ============================================================================
-// Pub/Sub
+// Fault Tolerance
 // ============================================================================
 
 export {
-  PubSubBroker,
-  createPubSubBroker,
-} from './pubsub/broker.js';
-
-export type {
-  PubSubStats,
-  TopicStats,
-} from './pubsub/broker.js';
+  FaultToleranceEngine,
+  FaultToleranceManager,
+  FaultToleranceStrategy,
+  CheckpointData,
+  RecoveryContext
+} from './fault-tolerance';
 
 // ============================================================================
-// Analytics
+// Source Connectors
 // ============================================================================
 
 export {
-  StreamAnalytics,
-  PatternRecognizer,
-  TrendAnalyzer,
-  createStreamAnalytics,
-  createPatternRecognizer,
-  createTrendAnalyzer,
-} from './analytics/analytics.js';
-
-export type {
-  Pattern,
-  TrendAnalysis,
-} from './analytics/analytics.js';
+  SourceConnector,
+  ConnectorFactory,
+  KafkaConnector,
+  HttpConnector,
+  WebSocketConnector,
+  DatabaseConnector,
+  FileConnector
+} from './sources';
 
 // ============================================================================
-// Backpressure
+// Main Platform Class
 // ============================================================================
 
-export {
-  BackpressureController,
-  FlowController,
-  CircuitBreaker,
-  RateLimiter,
-  AdaptiveThrottler,
-  createBackpressureController,
-  createFlowController,
-  createCircuitBreaker,
-  createRateLimiter,
-  createAdaptiveThrottler,
-} from './backpressure/controller.js';
+export class StreamingPlatform {
+  static createProcessor<T>(
+    config?: any,
+    faultConfig?: any
+  ): any {
+    return new StreamProcessorImpl<T>(config, faultConfig);
+  }
 
-export type {
-  BackpressureStats,
-  BackpressureResult,
-} from './backpressure/controller.js';
+  static createTransformEngine<T>(
+    config?: any
+  ): any {
+    return new TransformEngine<T>(config);
+  }
 
-// ============================================================================
-// Utilities
-// ============================================================================
+  static createFaultToleranceManager(
+    config: any,
+    processingConfig: any
+  ): any {
+    return new FaultToleranceManager(config, processingConfig);
+  }
 
-export {
-  generateEventId,
-  generateMessageId,
-  generateStreamId,
-  generateCommitId,
-  generateSnapshotId,
-  generateSubscriptionId,
-  generateTopicId,
-  generateCorrelationId,
-  generateCausationId,
-  generateJobId,
-  generatePartitionKey,
-  generateTimeBasedId,
-  generateUUID,
-  generateSnowflakeId,
-} from './utils/id-generator.js';
+  static createConnector<T>(
+    config: any
+  ): any {
+    return ConnectorFactory.create<T>(config);
+  }
 
-export {
-  delay,
-  timeout,
-  retry,
-  debounce,
-  throttle,
-  measureTime,
-  TokenBucket,
-  SlidingWindowRateLimiter,
-} from './utils/timing.js';
-
-export {
-  validateEvent,
-  validateMessage,
-  validateQueueOptions,
-  validateWindowOptions,
-  validateSubscriptionFilter,
-  validatePublishOptions,
-  validateRetryPolicy,
-  validateBackpressureStrategy,
-  isStreamEvent,
-  isMessage,
-  isEventFilter,
-} from './utils/validation.js';
-
-export {
-  calculatePercentile,
-  calculateMovingAverage,
-  calculateEMA,
-  calculateRate,
-  calculateStatistics,
-  LatencyTracker,
-  ThroughputTracker,
-  AnomalyDetector,
-  ExponentialHistogram,
-} from './utils/metrics.js';
+  static createSourceStream<T>(
+    config: any
+  ): any {
+    return ConnectorFactory.createSourceStream<T>(config);
+  }
+}
 
 // ============================================================================
 // Version

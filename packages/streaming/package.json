@@ -1,61 +1,61 @@
 {
   "name": "@claudeflare/streaming",
   "version": "1.0.0",
-  "description": "Real-time streaming infrastructure for ClaudeFlare - Event streaming, message queues, stream processing, and analytics",
+  "description": "Advanced streaming data platform for real-time analytics and event processing",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "build:watch": "tsc --watch",
-    "test": "vitest",
-    "test:coverage": "vitest --coverage",
-    "test:unit": "vitest tests/unit",
-    "test:integration": "vitest tests/integration",
-    "test:e2e": "vitest tests/e2e",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
-    "example:event-stream": "tsx examples/event-stream.ts",
-    "example:message-queue": "tsx examples/message-queue.ts",
-    "example:stream-processing": "tsx examples/stream-processing.ts",
-    "example:pubsub": "tsx examples/pubsub.ts",
-    "example:analytics": "tsx examples/analytics.ts"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src tests --ext .ts",
+    "lint:fix": "eslint src tests --ext .ts --fix",
+    "clean": "rm -rf dist",
+    "prepublish": "npm run clean && npm run build"
   },
   "keywords": [
     "streaming",
     "real-time",
-    "event-streaming",
-    "message-queue",
-    "stream-processing",
-    "event-sourcing",
-    "pubsub",
+    "event-processing",
     "analytics",
+    "claudeflare",
+    "stream-processing",
+    "fault-tolerance",
     "backpressure",
-    "cloudflare",
-    "durable-objects",
-    "sse",
-    "websocket"
+    "windowing",
+    "aggregation"
   ],
   "author": "ClaudeFlare",
   "license": "MIT",
   "dependencies": {
-    "@cloudflare/workers-types": "^4.20231218.0",
-    "itty-router": "^4.0.20",
-    "zod": "^3.22.4"
+    "events": "^3.3.0",
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@types/node": "^20.10.6",
-    "typescript": "^5.3.3",
-    "vitest": "^1.1.0",
-    "tsx": "^4.7.0",
-    "eslint": "^8.56.0",
-    "@typescript-eslint/eslint-plugin": "^6.17.0",
-    "@typescript-eslint/parser": "^6.17.0",
-    "@vitest/coverage-v8": "^1.1.0"
-  },
-  "optionalDependencies": {
-    "nanoid": "^5.0.4"
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.2",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/claudeflare/streaming.git"
+  },
+  "bugs": {
+    "url": "https://github.com/claudeflare/streaming/issues"
+  },
+  "homepage": "https://github.com/claudeflare/streaming#readme"
 }
