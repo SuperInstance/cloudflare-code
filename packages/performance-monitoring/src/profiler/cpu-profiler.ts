@@ -121,6 +121,8 @@ export class CPUProfiler {
       return;
     }
 
+    const validSession: ProfileSession & { samples: NonNullable<ProfileSession['samples']> } = session as any;
+
     try {
       // Use v8 module to get CPU profiling data
       const v8 = require('v8');
@@ -129,10 +131,10 @@ export class CPUProfiler {
       // Process profile data and extract stack traces
       const samples = this.processCPUProfile(profile);
 
-      session.samples.push(...samples);
+      validSession.samples.push(...samples);
 
       // Check if we've reached max samples
-      if (session.samples.length >= this.defaultOptions.maxSamples) {
+      if (validSession.samples.length >= (this.defaultOptions.maxSamples ?? 0)) {
         this.stop(sessionId);
         return;
       }
@@ -140,8 +142,8 @@ export class CPUProfiler {
       // Schedule next collection
       setTimeout(() => this.collectSamples(sessionId), this.defaultOptions.interval);
     } catch (error) {
-      session.status = 'error';
-      session.metadata.error = (error as Error).message;
+      validSession.status = 'error';
+      validSession.metadata.error = (error as Error).message;
       this.eventEmitter.emit('profile:error', {
         id: sessionId,
         error: (error as Error).message

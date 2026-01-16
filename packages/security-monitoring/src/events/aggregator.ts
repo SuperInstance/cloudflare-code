@@ -3,14 +3,25 @@
  * Aggregates security events for analytics and reporting
  */
 
-import { Client } from '@elastic/elasticsearch';
+// Stub for @elastic/elasticsearch Client
+interface ElasticsearchClient {
+  search(params: { index: string; body?: unknown; size?: number; from?: number; sort?: unknown[] }): Promise<{ body: unknown }>;
+}
+
 import { SecurityEvent, SecurityEventType, SecurityEventSeverity } from '../types';
-import { TimelineBucket } from './logger';
+
+// TimelineBucket interface (moved from logger.ts to avoid external dependencies)
+export interface TimelineBucket {
+  timestamp: Date;
+  count: number;
+  byType: Record<string, number>;
+  bySeverity: Record<string, number>;
+}
 
 export class EventAggregator {
-  private elasticsearch: Client;
+  private elasticsearch: ElasticsearchClient;
 
-  constructor(elasticsearch: Client) {
+  constructor(elasticsearch: ElasticsearchClient) {
     this.elasticsearch = elasticsearch;
   }
 
@@ -45,7 +56,7 @@ export class EventAggregator {
     });
 
     const counts: Record<string, number> = {};
-    const buckets = response.body.aggregations.by_type.buckets;
+    const buckets = (response.body as any).aggregations.by_type.buckets;
 
     buckets.forEach((bucket: any) => {
       counts[bucket.key] = bucket.doc_count;
@@ -85,7 +96,7 @@ export class EventAggregator {
     });
 
     const counts: Record<string, number> = {};
-    const buckets = response.body.aggregations.by_severity.buckets;
+    const buckets = (response.body as any).aggregations.by_severity.buckets;
 
     buckets.forEach((bucket: any) => {
       counts[bucket.key] = bucket.doc_count;
@@ -140,7 +151,7 @@ export class EventAggregator {
       },
     });
 
-    const buckets = response.body.aggregations.timeline.buckets;
+    const buckets = (response.body as any).aggregations.timeline.buckets;
 
     return buckets.map((bucket: any) => ({
       timestamp: new Date(bucket.key_as_string),
@@ -181,7 +192,7 @@ export class EventAggregator {
       },
     });
 
-    const buckets = response.body.aggregations.top_events.buckets;
+    const buckets = (response.body as any).aggregations.top_events.buckets;
 
     return buckets.map((bucket: any) => ({
       type: bucket.key as SecurityEventType,
@@ -243,7 +254,7 @@ export class EventAggregator {
       },
     });
 
-    const aggs = response.body.aggregations;
+    const aggs = (response.body as any).aggregations;
 
     return {
       totalEvents: aggs.total_events.value,
@@ -291,7 +302,7 @@ export class EventAggregator {
       },
     });
 
-    const buckets = response.body.aggregations.risk_ranges.buckets;
+    const buckets = (response.body as any).aggregations.risk_ranges.buckets;
 
     return {
       veryLow: buckets.find((b: any) => b.key === 'very_low')?.doc_count || 0,

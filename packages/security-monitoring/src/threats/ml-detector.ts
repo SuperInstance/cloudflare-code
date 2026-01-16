@@ -3,20 +3,25 @@
  * Detects threats using machine learning models
  */
 
-import { Cache } from '@claudeflare/cache';
+// Stub types for optional dependencies
+interface Cache {
+  get?(key: string): Promise<unknown>;
+  set?(key: string, value: unknown): Promise<void>;
+}
+
 import { EnrichedSecurityEvent, Threat, ThreatType, ThreatLevel, SecurityEventSeverity, DetectionRule } from '../types';
 
 export interface MLDetectorConfig {
   modelPath?: string;
-  cache: Cache;
+  cache?: Cache;
 }
 
 export class MLBasedDetector {
   private config: MLDetectorConfig;
   private rules: DetectionRule[] = [];
-  private model: any = null;
+  private model: unknown = null;
 
-  constructor(config: MLDetectorConfig) {
+  constructor(config: MLDetectorConfig = {}) {
     this.config = config;
   }
 
@@ -36,15 +41,20 @@ export class MLBasedDetector {
       const features = this.extractFeatures(event);
 
       // Make prediction
-      const prediction = await this.predict(features);
+      const prediction = await this.predict(features) as {
+        isThreat?: boolean;
+        confidence?: number;
+        threatType?: ThreatType;
+        reason?: string;
+      };
 
       // If prediction indicates threat
-      if (prediction.isThreat && prediction.confidence > 0.7) {
+      if (prediction.isThreat && (prediction.confidence ?? 0) > 0.7) {
         threats.push({
           id: `threat_ml_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           type: prediction.threatType || ThreatType.UNKNOWN,
-          level: this.getLevelFromConfidence(prediction.confidence),
-          severity: this.getSeverityFromConfidence(prediction.confidence),
+          level: this.getLevelFromConfidence(prediction.confidence ?? 0),
+          severity: this.getSeverityFromConfidence(prediction.confidence ?? 0),
           status: 'detected',
           timestamp: new Date(),
           source: event.source,
@@ -52,8 +62,8 @@ export class MLBasedDetector {
           indicators: [],
           affectedAssets: [event.resource || event.userId || 'unknown'],
           eventId: event.id,
-          confidence: prediction.confidence,
-          falsePositiveScore: 1 - prediction.confidence,
+          confidence: prediction.confidence ?? 0,
+          falsePositiveScore: 1 - (prediction.confidence ?? 0),
           metadata: {
             detectionMethod: 'ml',
             modelFeatures: features,
@@ -171,12 +181,13 @@ export class MLBasedDetector {
   /**
    * Make prediction
    */
-  private async predict(features: number[]): Promise<any> {
+  private async predict(features: number[]): Promise<unknown> {
     if (!this.model) {
       await this.loadModel();
     }
 
-    return await this.model.predict(features);
+    const model = this.model as { predict(features: number[]): Promise<unknown> };
+    return await model.predict(features);
   }
 
   /**
@@ -190,16 +201,17 @@ export class MLBasedDetector {
     // ML-specific rule matching logic
     for (const condition of rule.conditions) {
       const value = this.getFieldValue(event, condition.field);
+      const conditionValue = condition.value as unknown;
 
       switch (condition.operator) {
         case 'equals':
-          if (value !== condition.value) return false;
+          if (value !== conditionValue) return false;
           break;
         case 'gt':
-          if (typeof value !== 'number' || value <= condition.value) return false;
+          if (typeof value !== 'number' || value <= (conditionValue as number)) return false;
           break;
         case 'lt':
-          if (typeof value !== 'number' || value >= condition.value) return false;
+          if (typeof value !== 'number' || value >= (conditionValue as number)) return false;
           break;
         default:
           break;

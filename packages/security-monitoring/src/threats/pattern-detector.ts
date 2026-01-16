@@ -3,8 +3,15 @@
  * Detects threats using predefined patterns and signatures
  */
 
-import { Cache } from '@claudeflare/cache';
-import { Client } from '@elastic/elasticsearch';
+// Stub types for optional dependencies
+interface Cache {
+  get?(key: string): Promise<unknown>;
+  set?(key: string, value: unknown): Promise<void>;
+}
+
+interface Client {
+  search?(params: unknown): Promise<unknown>;
+}
 
 import {
   Threat,
@@ -16,15 +23,15 @@ import {
 } from '../types';
 
 export interface PatternDetectorConfig {
-  cache: Cache;
-  elasticsearch: Client;
+  cache?: Cache;
+  elasticsearch?: Client;
 }
 
 export class PatternBasedDetector {
   private config: PatternDetectorConfig;
   private rules: DetectionRule[] = [];
 
-  constructor(config: PatternDetectorConfig) {
+  constructor(config: PatternDetectorConfig = {}) {
     this.config = config;
   }
 

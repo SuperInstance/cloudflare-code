@@ -342,7 +342,8 @@ export class PerformanceProfiler {
         const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'unknown';
 
         try {
-          const response = await originalFetch.apply(this, args);
+          // @ts-ignore - fetch signature mismatch
+          const response = await originalFetch(...args);
           self.recordNetworkOperation(sessionId, 'fetch', url, response.status, Date.now() - start, 0, 0);
           return response;
         } catch (error) {

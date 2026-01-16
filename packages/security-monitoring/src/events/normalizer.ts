@@ -105,7 +105,6 @@ export class EventNormalizer {
     const typeMap: Record<string, SecurityEventType> = {
       // Authentication variations
       'login_success': SecurityEventType.AUTH_LOGIN_SUCCESS,
-      'login_success': SecurityEventType.AUTH_LOGIN_SUCCESS,
       'login.success': SecurityEventType.AUTH_LOGIN_SUCCESS,
       'login': SecurityEventType.AUTH_LOGIN_SUCCESS,
       'login_failed': SecurityEventType.AUTH_LOGIN_FAILURE,
@@ -275,6 +274,14 @@ export class EventNormalizer {
       [SecurityEventType.ALERT_ACKNOWLEDGED]: SecurityEventSeverity.INFO,
       [SecurityEventType.ALERT_RESOLVED]: SecurityEventSeverity.INFO,
       [SecurityEventType.METRIC_THRESHOLD]: SecurityEventSeverity.LOW,
+
+      // Container events
+      [SecurityEventType._CONTAINER_CREATED]: SecurityEventSeverity.INFO,
+      [SecurityEventType.container_DELETED]: SecurityEventSeverity.INFO,
+      [SecurityEventType.CONTAINER_ESCALATION]: SecurityEventSeverity.HIGH,
+
+      // Kubernetes events
+      [SecurityEventType.K8S_API_CALL]: SecurityEventSeverity.LOW,
     };
 
     return defaultSeverityMap[type] || SecurityEventSeverity.INFO;

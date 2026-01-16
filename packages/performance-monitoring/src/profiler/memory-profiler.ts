@@ -149,15 +149,17 @@ export class MemoryProfiler {
       return;
     }
 
-    this.addSample(session);
+    const validSession: ProfileSession & { samples: NonNullable<ProfileSession['samples']> } = session as any;
+
+    this.addSample(validSession);
 
     // Check if we've reached max samples or duration
-    if (session.samples.length >= this.defaultOptions.maxSamples) {
+    if (validSession.samples.length >= (this.defaultOptions.maxSamples ?? 0)) {
       this.stop(sessionId);
       return;
     }
 
-    const elapsed = Date.now() - session.startTime;
+    const elapsed = Date.now() - validSession.startTime;
     if (elapsed >= this.defaultOptions.duration!) {
       this.stop(sessionId);
       return;

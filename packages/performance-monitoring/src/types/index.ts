@@ -208,6 +208,7 @@ export interface SLIMetric {
   validEvents: number;
   value: number;
   timestamp: number;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SLO {
