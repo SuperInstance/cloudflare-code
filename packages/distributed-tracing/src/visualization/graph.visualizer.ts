@@ -7,6 +7,8 @@ import {
   Trace,
   Span,
   SpanId,
+} from '../types/trace.types';
+import {
   GraphVisualization,
   GraphVisualizationOptions,
   GraphNode,
@@ -24,19 +26,7 @@ export class GraphVisualizer {
   /**
    * Create graph visualization from trace
    */
-  createGraph(trace: Trace, options: Partial<GraphVisualizationOptions> = {}): GraphVisualization {
-    const defaultOptions: GraphVisualizationOptions = {
-      format: VisualizationFormat.SVG,
-      showLabels: true,
-      showDuration: true,
-      showErrors: true,
-      colorScheme: 'default' as any,
-      layout: 'timeline' as any,
-      grouping: 'none' as any,
-    };
-
-    const opts = { ...defaultOptions, ...options };
-
+  createGraph(trace: Trace, _options: Partial<GraphVisualizationOptions> = {}): GraphVisualization {
     const nodes = this.buildNodes(trace);
     const edges = this.buildEdges(trace);
 
@@ -321,7 +311,7 @@ export class GraphVisualizer {
 
     for (const node of graph.nodes) {
       const nodeId = node.id.substring(0, 8);
-      const label = node.hasError ? `${node.name} ❌` : node.name;
+      const label = node.hasError ? `${node.label} ❌` : node.label;
       mermaid += `    ${nodeId}[${label}]\n`;
     }
 
@@ -383,7 +373,7 @@ export class GraphVisualizer {
   /**
    * Build flame graph node recursively
    */
-  private buildFlameGraphNode(span: Span, trace: Trace): any {
+  private buildFlameGraphNode(span: Span, trace: Trace): FlameGraphNode {
     const children = trace.spans.filter((s) => s.parentSpanId === span.spanId);
     return {
       name: span.name,
@@ -392,6 +382,16 @@ export class GraphVisualizer {
       metadata: { span },
     };
   }
+}
+
+/**
+ * Flame graph node interface
+ */
+interface FlameGraphNode {
+  name: string;
+  value: number;
+  children: FlameGraphNode[];
+  metadata: { span: Span };
 }
 
 export default GraphVisualizer;

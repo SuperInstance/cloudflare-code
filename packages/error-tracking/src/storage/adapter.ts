@@ -221,7 +221,7 @@ export class InMemoryStorage implements StorageAdapter {
         errorType,
         count,
         percentage: total > 0 ? (count / total) * 100 : 0,
-        trend: 'stable',
+        trend: 'stable' as const,
         changePercent: 0
       }))
       .sort((a, b) => b.count - a.count)
@@ -922,8 +922,32 @@ export class PostgreSQLStorage implements StorageAdapter {
       affectedSessions: 0,
       totalErrors: 0,
       errorRate: 0,
-      severityDistribution: {},
-      categoryDistribution: {}
+      severityDistribution: {
+        critical: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+        info: 0
+      },
+      categoryDistribution: {
+        runtime: 0,
+        syntax: 0,
+        type: 0,
+        reference: 0,
+        range: 0,
+        network: 0,
+        api: 0,
+        database: 0,
+        authentication: 0,
+        authorization: 0,
+        validation: 0,
+        business_logic: 0,
+        integration: 0,
+        performance: 0,
+        memory: 0,
+        concurrency: 0,
+        unknown: 0
+      }
     };
   }
 

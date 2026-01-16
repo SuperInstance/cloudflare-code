@@ -8,7 +8,6 @@ import {
   StorageConfig,
   StorageStats,
   QueryOptions,
-  BatchOperation,
   BatchResult,
   StorageIndex,
 } from '../types/storage.types';
@@ -25,7 +24,7 @@ export class MemoryStorage implements TraceStorage {
   private indexes: Map<string, StorageIndex>;
   private stats: StorageStats;
 
-  constructor(config: StorageConfig = { backend: 'memory' as const }) {
+  constructor(_config?: Partial<StorageConfig>) {
     this.traces = new Map();
     this.spans = new Map();
     this.traceToSpans = new Map();

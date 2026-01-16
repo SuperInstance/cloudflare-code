@@ -9,9 +9,8 @@ import {
   ValidationResult,
   ValidationError,
   ValidationWarning,
-  TraceId,
-  SpanId,
 } from '../types/trace.types';
+import { isValidTraceId, isValidSpanId } from './id.generator';
 
 /**
  * Validate a span
@@ -267,20 +266,6 @@ export function validateTrace(trace: Trace): ValidationResult {
     errors,
     warnings,
   };
-}
-
-/**
- * Validate trace ID format
- */
-export function isValidTraceId(traceId: string): traceId is TraceId {
-  return /^[0-9a-f]{32}$/i.test(traceId);
-}
-
-/**
- * Validate span ID format
- */
-export function isValidSpanId(spanId: string): spanId is SpanId {
-  return /^[0-9a-f]{16}$/i.test(spanId);
 }
 
 /**

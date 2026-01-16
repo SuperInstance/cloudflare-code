@@ -11,14 +11,15 @@ import {
   User,
   Breadcrumb,
   Attachment,
-  ErrorTrackingConfig
+  ErrorTrackingConfig,
+  StorageAdapter
 } from '../types';
 import { ConfigurationManager, createConfig, DEFAULT_ALERT_RULES } from '../config/config';
 import { ErrorCaptureManager } from '../capture/capture';
 import { ErrorGrouper } from '../grouping/grouper';
 import { ErrorAnalyzer } from '../analyzer/analyzer';
 import { AlertManager } from '../alerting/manager';
-import { StorageFactory, StorageAdapter } from '../storage/adapter';
+import { StorageFactory } from '../storage/adapter';
 import { ErrorTrackingEventEmitter } from '../types';
 
 // ============================================================================
@@ -158,7 +159,7 @@ export class ErrorTrackingSDK
     this.grouper = new ErrorGrouper(0.8);
     this.analyzer = ErrorAnalyzer;
     this.alertManager = new AlertManager();
-    this.storage = StorageFactory.create(config.storageType || 'memory', config.storageConfig);
+    this.storage = StorageFactory.create('memory', {});
     this.scope = new ScopeImpl();
 
     this.initialize();
@@ -187,7 +188,7 @@ export class ErrorTrackingSDK
    * Setup global error handlers
    */
   private setupGlobalHandlers(): void {
-    if (typeof window === 'undefined') {
+    if (typeof (globalThis as { window?: unknown }).window === 'undefined') {
       // Node.js environment
       this.setupNodeHandlers();
     } else {
@@ -219,36 +220,45 @@ export class ErrorTrackingSDK
    * Setup browser error handlers
    */
   private setupBrowserHandlers(): void {
-    if (this.config.get('captureUnhandledRejections')) {
-      window.addEventListener('unhandledrejection', (event) => {
-        const error = event.reason instanceof Error
-          ? event.reason
-          : new Error(String(event.reason));
+    const win = globalThis as { addEventListener?: unknown };
+    if (typeof win.addEventListener === 'function') {
+      if (this.config.get('captureUnhandledRejections')) {
+        win.addEventListener('unhandledrejection', (event: unknown) => {
+          const evt = event as { reason?: unknown };
+          const error = evt.reason instanceof Error
+            ? evt.reason
+            : new Error(String(evt.reason));
 
-        this.captureException(error, { handled: false });
+          this.captureException(error, { handled: false });
+        });
+      }
+
+      win.addEventListener('error', (event: unknown) => {
+        const evt = event as { error?: unknown; message?: string };
+        this.captureException(evt.error instanceof Error ? evt.error : new Error(evt.message || 'Unknown error'), {
+          handled: false
+        });
       });
     }
 
-    window.addEventListener('error', (event) => {
-      this.captureException(event.error || new Error(event.message), {
-        handled: false
-      });
-    });
-
     if (this.config.get('captureConsole')) {
-      const consoleMethods = ['log', 'warn', 'error', 'info'];
-      const originalConsole: any = {};
+      const consoleMethods = ['log', 'warn', 'error', 'info'] as const;
+      const originalConsole: Record<string, unknown> = {};
+      const consoleRecord = console as unknown as Record<string, unknown>;
 
       consoleMethods.forEach((method) => {
-        originalConsole[method] = console[method];
-        console[method] = (...args: any[]) => {
+        originalConsole[method] = consoleRecord[method];
+        consoleRecord[method] = (...args: unknown[]) => {
           const breadcrumbManager = this.captureManager.getBreadcrumbManager();
           breadcrumbManager.captureConsole(
             method as Breadcrumb['level'],
             args.map((a) => String(a)).join(' ')
           );
 
-          originalConsole[method].apply(console, args);
+          const fn = originalConsole[method];
+          if (typeof fn === 'function') {
+            (fn as (...args: unknown[]) => void).apply(console, args);
+          }
         };
       });
     }
@@ -284,6 +294,11 @@ export class ErrorTrackingSDK
         const processed = this.config.get('beforeSend')!(event);
         if (!processed) {
           return '';
+        }
+        // Handle both sync and async beforeSend
+        if (processed instanceof Promise) {
+          processed.then(p => { if (p) this.queueEvent(p); }).catch(() => {});
+          return event.id;
         }
         event = processed;
       }
@@ -326,6 +341,11 @@ export class ErrorTrackingSDK
         const processed = this.config.get('beforeSend')!(event);
         if (!processed) {
           return '';
+        }
+        // Handle both sync and async beforeSend
+        if (processed instanceof Promise) {
+          processed.then(p => { if (p) this.queueEvent(p); }).catch(() => {});
+          return event.id;
         }
         event = processed;
       }

@@ -277,7 +277,7 @@ export interface AlertRule {
 
 export interface AlertCondition {
   field: string;
-  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'contains' | 'regex';
+  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'contains' | 'regex' | 'exists';
   value: any;
   duration?: number;
 }
@@ -551,6 +551,7 @@ export interface PerformanceMetrics {
 // ============================================================================
 
 export class ErrorTrackingEventEmitter extends EventEmitter implements ErrorTrackingEmitter {
+  // @ts-ignore - Type narrowing for typed events
   on<K extends keyof ErrorTrackingEvents>(
     event: K,
     listener: ErrorTrackingEvents[K]
@@ -558,6 +559,7 @@ export class ErrorTrackingEventEmitter extends EventEmitter implements ErrorTrac
     return super.on(event, listener);
   }
 
+  // @ts-ignore - Type narrowing for typed events
   off<K extends keyof ErrorTrackingEvents>(
     event: K,
     listener: ErrorTrackingEvents[K]
@@ -565,6 +567,7 @@ export class ErrorTrackingEventEmitter extends EventEmitter implements ErrorTrac
     return super.off(event, listener);
   }
 
+  // @ts-ignore - Type narrowing for typed events
   emit<K extends keyof ErrorTrackingEvents>(
     event: K,
     ...args: Parameters<ErrorTrackingEvents[K]>

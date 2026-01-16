@@ -234,27 +234,38 @@ export class ContextCapture {
   static captureExecutionContext(): ErrorContext {
     const context: ErrorContext = {};
 
-    if (typeof window !== 'undefined') {
+    const win = globalThis as { window?: { screen?: { width: number; height: number }; innerWidth?: number; innerHeight?: number; location?: { href: string } }; };
+    if (win.window) {
       // Browser context
-      context.userAgent = navigator.userAgent;
-      context.language = navigator.language;
-      context.platform = navigator.platform;
-      context.url = window.location.href;
-      context.referrer = document.referrer;
+      const nav = globalThis as { navigator?: { userAgent: string; language: string; platform: string } };
+      const doc = globalThis as { document?: { referrer: string } };
+      if (nav.navigator) {
+        context.userAgent = nav.navigator.userAgent;
+        context.language = nav.navigator.language;
+        context.platform = nav.navigator.platform;
+      }
+      if (win.window.location) {
+        context.url = win.window.location?.href;
+      }
+      if (doc.document) {
+        context.referrer = doc.document.referrer;
+      }
       context.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      context.locale = navigator.language;
+      if (nav.navigator) {
+        context.locale = nav.navigator.language;
+      }
 
-      if (window.screen) {
+      if (win.window.screen) {
         context.screenSize = {
-          width: window.screen.width,
-          height: window.screen.height
+          width: win.window.screen.width,
+          height: win.window.screen.height
         };
       }
 
-      if (window.innerWidth && window.innerHeight) {
+      if (win.window.innerWidth && win.window.innerHeight) {
         context.viewportSize = {
-          width: window.innerWidth,
-          height: window.innerHeight
+          width: win.window.innerWidth,
+          height: win.window.innerHeight
         };
       }
     }
@@ -352,18 +363,45 @@ export class ContextCapture {
       return undefined;
     }
 
-    const perfData: Record<string, any> = {};
+    const perfData: Record<string, unknown> = {};
+    const perf = performance as unknown as {
+      memory?: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      };
+      timing?: {
+        domContentLoadedEventEnd: number;
+        navigationStart: number;
+        loadEventEnd: number;
+        domainLookupEnd: number;
+        domainLookupStart: number;
+        connectEnd: number;
+        connectStart: number;
+        responseStart: number;
+      };
+      getEntriesByType?(type: string): Array<{
+        domContentLoadedEventEnd: number;
+        fetchStart: number;
+        loadEventEnd: number;
+        domainLookupEnd: number;
+        domainLookupStart: number;
+        connectEnd: number;
+        connectStart: number;
+        responseStart: number;
+      }>;
+    };
 
-    if (performance.memory) {
+    if (perf.memory) {
       perfData.memory = {
-        usedJSHeapSize: performance.memory.usedJSHeapSize,
-        totalJSHeapSize: performance.memory.totalJSHeapSize,
-        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
+        usedJSHeapSize: perf.memory.usedJSHeapSize,
+        totalJSHeapSize: perf.memory.totalJSHeapSize,
+        jsHeapSizeLimit: perf.memory.jsHeapSizeLimit
       };
     }
 
-    if (performance.timing) {
-      const timing = performance.timing;
+    if (perf.timing) {
+      const timing = perf.timing;
       perfData.timing = {
         domContentLoaded: timing.domContentLoadedEventEnd - timing.navigationStart,
         pageLoad: timing.loadEventEnd - timing.navigationStart,
@@ -373,8 +411,8 @@ export class ContextCapture {
       };
     }
 
-    if (performance.getEntriesByType) {
-      const navigation = performance.getEntriesByType('navigation')[0] as any;
+    if (perf.getEntriesByType) {
+      const navigation = perf.getEntriesByType('navigation')[0];
       if (navigation) {
         perfData.navigationTiming = {
           domContentLoaded: navigation.domContentLoadedEventEnd - navigation.fetchStart,

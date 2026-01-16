@@ -5,10 +5,8 @@
 
 import {
   TraceStorage,
-  StorageConfig,
   StorageStats,
   QueryOptions,
-  BatchOperation,
   BatchResult,
   StorageIndex,
 } from '../types/storage.types';
@@ -40,11 +38,9 @@ interface DurableObjectState {
  */
 export class TraceStorageDurableObject {
   private state: DurableObjectState;
-  private env: any;
 
-  constructor(state: DurableObjectState, env: any) {
+  constructor(state: DurableObjectState, _env: unknown) {
     this.state = state;
-    this.env = env;
   }
 
   async fetch(request: Request): Promise<Response> {
@@ -61,7 +57,7 @@ export class TraceStorageDurableObject {
         if (!traceId) throw new Error('Missing traceId');
         result = await this.getTrace(traceId);
       } else if (path === '/put' && method === 'POST') {
-        const body = await request.json();
+        const body = await request.json() as { traceId: TraceId; trace: Trace };
         result = await this.putTrace(body.traceId, body.trace);
       } else if (path === '/delete' && method === 'DELETE') {
         const traceId = url.searchParams.get('traceId');
@@ -76,10 +72,10 @@ export class TraceStorageDurableObject {
         if (!spanId) throw new Error('Missing spanId');
         result = await this.getSpan(spanId);
       } else if (path === '/putSpan' && method === 'POST') {
-        const body = await request.json();
+        const body = await request.json() as { spanId: SpanId; span: Span };
         result = await this.putSpan(body.spanId, body.span);
       } else if (path === '/batchPutSpans' && method === 'POST') {
-        const body = await request.json();
+        const body = await request.json() as { spans: Span[] };
         result = await this.batchPutSpans(body.spans);
       } else if (path === '/queryTracesByService' && method === 'GET') {
         const service = url.searchParams.get('service');
@@ -300,7 +296,7 @@ export class DurableObjectStorage implements TraceStorage {
     }
 
     const response = await this.stub.fetch(new Request(url, init));
-    const data = await response.json();
+    const data = await response.json() as { error?: string; [key: string]: unknown };
 
     if (!response.ok) {
       throw new Error(data.error || 'Request failed');
@@ -334,7 +330,7 @@ export class DurableObjectStorage implements TraceStorage {
     await this.request('POST', '/putSpan', { spanId, span });
   }
 
-  async deleteSpan(spanId: SpanId): Promise<void> {
+  async deleteSpan(_spanId: SpanId): Promise<void> {
     // Implementation for deleteSpan
     throw new Error('deleteSpan not implemented');
   }
@@ -343,7 +339,7 @@ export class DurableObjectStorage implements TraceStorage {
     return await this.request('POST', '/batchPutSpans', { spans });
   }
 
-  async batchDeleteSpans(spanIds: SpanId[]): Promise<BatchResult> {
+  async batchDeleteSpans(_spanIds: SpanId[]): Promise<BatchResult> {
     // Implementation for batchDeleteSpans
     throw new Error('batchDeleteSpans not implemented');
   }
@@ -361,18 +357,18 @@ export class DurableObjectStorage implements TraceStorage {
     return await this.request('GET', `/querySpansByTrace?traceId=${encodeURIComponent(traceId)}`);
   }
 
-  async queryTracesByTimeRange(startTime: number, endTime: number, options?: QueryOptions): Promise<Trace[]> {
+  async queryTracesByTimeRange(startTime: number, endTime: number, _options?: QueryOptions): Promise<Trace[]> {
     // Implementation would require time-based indexing
     const traces = await this.listTraces();
     return traces.filter((t) => t.startTime >= startTime && t.startTime <= endTime);
   }
 
-  async createIndex(index: StorageIndex): Promise<void> {
+  async createIndex(_index: StorageIndex): Promise<void> {
     // Durable Objects handle indexing implicitly
     throw new Error('createIndex not implemented');
   }
 
-  async deleteIndex(name: string): Promise<void> {
+  async deleteIndex(_name: string): Promise<void> {
     throw new Error('deleteIndex not implemented');
   }
 

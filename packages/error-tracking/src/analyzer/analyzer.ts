@@ -10,7 +10,6 @@ import {
   ErrorImpact,
   ErrorTrend,
   ErrorPattern,
-  PatternType,
   RootCauseAnalysis,
   ErrorCategory,
   ErrorSeverity,
@@ -40,7 +39,7 @@ export class FrequencyAnalyzer {
         errorType,
         count,
         percentage: total > 0 ? (count / total) * 100 : 0,
-        trend: 'stable',
+        trend: 'stable' as const,
         changePercent: 0
       }))
       .sort((a, b) => b.count - a.count);

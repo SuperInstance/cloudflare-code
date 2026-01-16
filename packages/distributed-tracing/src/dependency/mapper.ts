@@ -12,7 +12,6 @@ import {
   DependencyGraph,
   DependencyNode,
   DependencyGraphMetrics,
-  TraceId,
   Duration,
 } from '../types/trace.types';
 import { calculateDurationStatistics } from '../utils/time.utils';

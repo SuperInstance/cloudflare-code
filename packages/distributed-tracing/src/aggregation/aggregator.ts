@@ -15,7 +15,6 @@ import {
   TraceCompleteness,
   TraceMetrics,
   TraceService,
-  ValidationResult,
 } from '../types/trace.types';
 import { validateSpan, validateTrace, calculateCompleteness } from '../utils/validation.utils';
 import {
