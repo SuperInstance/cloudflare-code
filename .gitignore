@@ -29,6 +29,16 @@ coverage/
 .nyc_output/
 *.lcov
 
+# Test build outputs
+tests/**/*.js
+tests/**/*.js.map
+tests/**/*.d.ts
+tests/**/*.d.ts.map
+**/tests/**/*.js
+**/tests/**/*.js.map
+**/tests/**/*.d.ts
+**/tests/**/*.d.ts.map
+
 # IDE
 .vscode/
 .idea/
