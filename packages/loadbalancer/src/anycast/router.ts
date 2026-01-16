@@ -443,7 +443,7 @@ export class AnycastRouter {
     const adsByRegion = new Map<Region, number>();
 
     for (const [region, ads] of this.advertisements) {
-      adsByRegion.set(region, ads.length);
+      adsByRegion.set(region as Region, ads.length);
     }
 
     const totalAds = Array.from(this.advertisements.values())

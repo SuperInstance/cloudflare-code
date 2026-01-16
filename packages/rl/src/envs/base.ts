@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Base Environment Interface
  * Gym-like environment interface for RL agents

@@ -299,9 +299,6 @@ export class RenderingManager {
           ttl: 3600,
           staleWhileRevalidate: 300,
         },
-        staticPaths: ['/docs/*', '/blog/*'],
-        dynamicPaths: ['/dashboard/*', '/user/*'],
-        threshold: 1000,
       },
     });
   }

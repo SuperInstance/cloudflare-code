@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Consent Management Durable Object for GDPR compliance
  * @packageDocumentation

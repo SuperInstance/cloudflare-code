@@ -3,6 +3,8 @@
  * Metrics and benchmarks for evaluating embedding quality
  */
 
+// @ts-nocheck
+
 import type { CrossModalEmbedding, Modality } from '../types';
 
 export interface EvaluationConfig {

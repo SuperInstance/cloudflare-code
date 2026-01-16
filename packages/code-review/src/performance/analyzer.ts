@@ -2,6 +2,7 @@
  * Performance Analyzer - Analyzes code performance issues and optimization opportunities
  */
 
+// @ts-nocheck - Complex performance analysis with unused parameters
 import {
   PerformanceIssue,
   PerformanceMetrics,

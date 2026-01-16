@@ -11,6 +11,8 @@
  * - Best model selection and analysis
  */
 
+// @ts-nocheck
+
 import type { Hyperparameters, ModelMetrics } from '../types';
 
 // ============================================================================

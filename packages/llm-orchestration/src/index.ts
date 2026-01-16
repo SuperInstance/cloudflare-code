@@ -16,15 +16,7 @@ export {
   ModelRegistry,
 } from './models/registry.js';
 export type {
-  ModelInfo,
-  ModelMetadata,
-  ModelCapabilities,
-  ModelPerformanceMetrics,
-  ModelConstraints,
-  ModelPricing,
   ModelComparison,
-  ModelMetrics,
-  ProviderState,
 } from './models/registry.js';
 
 // Router
@@ -84,12 +76,7 @@ export type {
   ModelCapabilities,
   ModelSize,
   ModelTier,
-  ModelPricing,
-  ModelPerformanceMetrics,
-  ModelConstraints,
   ModelVersion,
-  ModelMetadata,
-  ModelInfo,
   ModelStatus,
 
   // Request/Response Types

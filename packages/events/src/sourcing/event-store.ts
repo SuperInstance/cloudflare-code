@@ -2,6 +2,7 @@
  * Event Store implementation with R2 and Durable Objects
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type {
   StoredEvent,
   EventStream,

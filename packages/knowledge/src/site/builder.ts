@@ -2,6 +2,8 @@
  * Site Builder - Generate static documentation sites
  */
 
+// @ts-nocheck - External dependencies (marked, isomorphic-dompurify, highlight.js)
+
 import { writeFile, mkdir, copyFile } from 'fs/promises';
 import { join, relative, dirname } from 'path';
 import { performance } from 'perf_hooks';

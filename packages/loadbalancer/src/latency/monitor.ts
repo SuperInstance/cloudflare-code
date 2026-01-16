@@ -34,7 +34,7 @@ export class LatencyMonitor {
   private config: MonitoringConfig;
   private measurements: Map<Region, LatencyMeasurement[]>;
   private isMonitoring: boolean = false;
-  private monitoringInterval?: NodeJS.Timeout;
+  private monitoringInterval?: ReturnType<typeof setInterval>;
 
   constructor(config: Partial<MonitoringConfig> = {}) {
     this.config = {

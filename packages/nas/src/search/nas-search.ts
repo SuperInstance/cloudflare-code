@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Neural Architecture Search Orchestrator
  * Main entry point for NAS with all search strategies

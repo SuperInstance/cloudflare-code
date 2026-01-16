@@ -1,0 +1,17 @@
+{
+  "name": "@claudeflare/logger",
+  "version": "1.0.0",
+  "description": "Logger utility for ClaudeFlare",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["logger", "logging"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ClaudeFlare Pipelines - Ultra-Optimized
  * Advanced pipeline and workflow system

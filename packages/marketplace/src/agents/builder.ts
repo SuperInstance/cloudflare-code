@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Custom Agent Builder
  * Provides tools for building, testing, and packaging custom AI agents

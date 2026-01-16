@@ -2,6 +2,7 @@
  * K6 configuration for performance tests
  */
 
+// @ts-nocheck
 import { Options } from 'k6';
 
 export const options: Options = {

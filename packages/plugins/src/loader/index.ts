@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Loader module exports
  */

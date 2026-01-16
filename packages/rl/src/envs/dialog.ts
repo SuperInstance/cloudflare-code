@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Dialog Environments for RL
  */

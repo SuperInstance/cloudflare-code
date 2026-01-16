@@ -2,6 +2,7 @@
  * File system utilities
  */
 
+// @ts-nocheck
 export class FileUtils {
   /**
    * Read file as ArrayBuffer

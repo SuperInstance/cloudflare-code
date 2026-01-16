@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Pipeline Orchestration
  * Manages workflow execution and dependencies

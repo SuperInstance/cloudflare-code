@@ -1,10 +1,12 @@
-import {
+import type {
   FallbackConfig,
-  FallbackFunction,
-  FallbackPriority,
   ExecutionContext,
   ExecutionResultData,
+} from '../types/index.js';
+
+import {
   ExecutionResult,
+  FallbackPriority,
 } from '../types/index.js';
 
 /**

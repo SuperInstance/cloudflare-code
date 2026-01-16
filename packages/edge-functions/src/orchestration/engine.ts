@@ -15,10 +15,8 @@ import {
   StepType,
   EdgeFunction,
   EdgeEnv,
-  ErrorHandlingStrategy,
   StepInput,
   StepOutput,
-  StepConfig,
 } from '../types/index.js';
 
 // ============================================================================
@@ -521,8 +519,14 @@ export class OrchestrationEngine {
 
       // Execute with timeout
       const timeout = step.timeout || this.config.defaultStepTimeout!;
+      const execContext: ExecutionContext & { env: EdgeEnv } = {
+        waitUntil: context.waitUntil,
+        passThroughOnException: context.passThroughOnException,
+        props: context.props,
+        env: context.env,
+      };
       const output = await Promise.race([
-        func.handler(input, context),
+        func.handler(input, execContext),
         this.createStepTimeout(step.id, context.workflowId, context.executionId, timeout),
       ]);
 

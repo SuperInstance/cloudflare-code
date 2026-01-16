@@ -78,7 +78,7 @@ export interface Notification {
   maxRetries?: number;
 }
 
-export interface NotificationMetadata {
+export interface NotificationMetadata extends Record<string, unknown> {
   source?: string;
   correlationId?: string;
   tags?: string[];
@@ -693,4 +693,30 @@ export class EscalationError extends NotificationError {
     super(message, 'ESCALATION_ERROR', details);
     this.name = 'EscalationError';
   }
+}
+
+// ============================================================================
+// Channel Types
+// ============================================================================
+
+export interface ChannelDeliveryResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+  errorCode?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ChannelStats {
+  totalSent: number;
+  totalDelivered: number;
+  totalFailed: number;
+  averageDeliveryTime: number;
+  lastDeliveryAt?: Date;
+}
+
+export interface ChannelDeliveryOptions {
+  timeout?: number;
+  priority?: number;
+  retryable?: boolean;
 }

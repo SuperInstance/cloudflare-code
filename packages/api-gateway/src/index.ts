@@ -48,6 +48,3 @@ export * from './config';
 
 // Middleware
 export * from './middleware';
-
-// Re-export main class
-export { APIGateway, createAPIGateway } from './gateway';

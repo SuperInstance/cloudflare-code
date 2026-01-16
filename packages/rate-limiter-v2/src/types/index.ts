@@ -330,32 +330,3 @@ export interface SyncMessage {
   timestamp: number;
   payload: unknown;
 }
-
-/**
- * Export all types
- */
-export type {
-  RateLimitResult,
-  RateLimitConfig,
-  StorageConfig,
-  KeyConfig,
-  RateLimitContext,
-  HierarchicalLimit,
-  AdaptiveConfig,
-  UserTierConfig,
-  DistributedConfig,
-  RateLimitMetrics,
-  PerformanceMetrics,
-  CostMetrics,
-  RateLimitEventPayload,
-  EventListener,
-  StateSnapshot,
-  RateLimitState,
-  TokenBucketState,
-  LeakyBucketState,
-  SlidingWindowState,
-  FixedWindowState,
-  RateLimiterOptions,
-  NodeInfo,
-  SyncMessage
-};

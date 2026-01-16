@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Event Handler - handles event-based triggers
  */

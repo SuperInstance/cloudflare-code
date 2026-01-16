@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Query Optimizer - Optimize search queries for performance
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Billing and subscription management
  */

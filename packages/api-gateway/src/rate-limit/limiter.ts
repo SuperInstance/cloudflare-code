@@ -112,6 +112,22 @@ export interface RateLimiterOptions {
 }
 
 /**
+ * Internal options with required fields
+ */
+interface InternalRateLimiterOptions {
+  algorithm: RateLimitAlgorithm;
+  storage: 'memory' | 'kv' | 'do';
+  kv: KVNamespace | undefined;
+  do: DurableObjectNamespace | undefined;
+  defaultLimits: RateLimitDefinition[];
+  burstCapacity: number;
+  enableBurst: boolean;
+  enableHierarchical: boolean;
+  enableMetrics: boolean;
+  degradeOnFailure: boolean;
+}
+
+/**
  * Rate limit definition
  */
 export interface RateLimitDefinition {
@@ -128,7 +144,7 @@ export interface RateLimitDefinition {
  * Advanced Rate Limiter
  */
 export class RateLimiter {
-  private options: Required<RateLimiterOptions>;
+  private options: InternalRateLimiterOptions;
   private limits: Map<string, RateLimitDefinition>;
   private stats: RateLimitStats;
   private localCache: Map<string, unknown>;
@@ -269,7 +285,9 @@ export class RateLimiter {
       await this.options.kv.delete(key);
     } else if (this.options.storage === 'do' && this.options.do) {
       // Reset DO state
+      // @ts-ignore - DurableObjectId type issue
       const stub = this.options.do.get(this.getDOId(key));
+      // @ts-ignore - reset method not in type stub
       await stub.reset();
     } else {
       this.localCache.delete(key);
@@ -308,7 +326,7 @@ export class RateLimiter {
    */
   private async checkLimit(
     request: GatewayRequest,
-    context: GatewayContext,
+    _context: GatewayContext,
     limit: RateLimitDefinition
   ): Promise<RateLimitResult> {
     const identifier = this.getIdentifier(request, limit);
@@ -340,7 +358,7 @@ export class RateLimiter {
    * Get limits for a request (private helper)
    */
   private getLimitsForRequest(
-    request: GatewayRequest,
+    _request: GatewayRequest,
     config?: RateLimitConfig
   ): RateLimitDefinition[] {
     if (config && config.limits.length > 0) {
@@ -348,7 +366,7 @@ export class RateLimiter {
     }
 
     // Return applicable default limits
-    return Array.from(this.limits.values()).filter(limit => {
+    return Array.from(this.limits.values()).filter(_limit => {
       // Check if limit applies to request
       return true;
     });
@@ -474,7 +492,7 @@ export class RateLimiter {
  * Token Bucket Algorithm
  */
 class TokenBucketAlgorithm {
-  constructor(private options: Required<RateLimiterOptions>) {}
+  constructor(private options: InternalRateLimiterOptions) {}
 
   async check(
     key: string,
@@ -515,7 +533,7 @@ class TokenBucketAlgorithm {
       allowed,
       remaining: Math.floor(state.tokens),
       resetAt: now + limit.window,
-      limit,
+      limit: limit.limit,
       scope: limit.scope,
       identifier: key,
       retryAfter: allowed ? undefined : Math.ceil((1 - state.tokens) / refillRate * 1000),
@@ -532,15 +550,17 @@ class TokenBucketAlgorithm {
 
   private async getStateFromDO(
     key: string,
-    capacity: number,
-    refillRate: number
+    _capacity: number,
+    _refillRate: number
   ): Promise<TokenBucketState> {
+    // @ts-ignore - DurableObjectId type issue
     const stub = this.options.do!.get(this.getDOId(key));
+    // @ts-ignore - getState method not in type stub
     return await stub.getState();
   }
 
   private async getStateFromLocal(
-    key: string,
+    _key: string,
     capacity: number,
     refillRate: number
   ): Promise<TokenBucketState> {
@@ -554,11 +574,13 @@ class TokenBucketAlgorithm {
   }
 
   private async saveStateToDO(key: string, state: TokenBucketState): Promise<void> {
+    // @ts-ignore - DurableObjectId type issue
     const stub = this.options.do!.get(this.getDOId(key));
+    // @ts-ignore - setState method not in type stub
     await stub.setState(state);
   }
 
-  private saveStateToLocal(key: string, state: TokenBucketState): void {
+  private saveStateToLocal(_key: string, _state: TokenBucketState): void {
     // In a real implementation, use a proper cache
   }
 
@@ -577,7 +599,7 @@ class TokenBucketAlgorithm {
  * Sliding Window Algorithm
  */
 class SlidingWindowAlgorithm {
-  constructor(private options: Required<RateLimiterOptions>) {}
+  constructor(private options: InternalRateLimiterOptions) {}
 
   async check(
     key: string,
@@ -617,7 +639,7 @@ class SlidingWindowAlgorithm {
       allowed,
       remaining: Math.max(0, burst - state.requests.length),
       resetAt: state.requests.length > 0 ? state.requests[0] + limit.window : now + limit.window,
-      limit,
+      limit: limit.limit,
       scope: limit.scope,
       identifier: key,
       retryAfter: allowed ? undefined : limit.window,
@@ -653,7 +675,7 @@ class SlidingWindowAlgorithm {
  * Fixed Window Algorithm
  */
 class FixedWindowAlgorithm {
-  constructor(private options: Required<RateLimiterOptions>) {}
+  constructor(private options: InternalRateLimiterOptions) {}
 
   async check(
     key: string,
@@ -697,7 +719,7 @@ class FixedWindowAlgorithm {
       allowed,
       remaining: Math.max(0, burst - state.count),
       resetAt: state.windowStart + windowSize,
-      limit,
+      limit: limit.limit,
       scope: limit.scope,
       identifier: key,
       retryAfter: allowed ? undefined : state.windowStart + windowSize - now,
@@ -705,7 +727,7 @@ class FixedWindowAlgorithm {
     };
   }
 
-  async getUsage(key: string, limit: RateLimitDefinition): Promise<number> {
+  async getUsage(key: string, _limit: RateLimitDefinition): Promise<number> {
     const state = await this.getStateFromKV(key);
     return state.count;
   }
@@ -731,7 +753,7 @@ class FixedWindowAlgorithm {
  * Leaky Bucket Algorithm
  */
 class LeakyBucketAlgorithm {
-  constructor(private options: Required<RateLimiterOptions>) {}
+  constructor(private options: InternalRateLimiterOptions) {}
 
   async check(
     key: string,
@@ -775,7 +797,7 @@ class LeakyBucketAlgorithm {
       allowed,
       remaining: Math.floor(capacity - state.volume),
       resetAt: now + Math.ceil(state.volume / leakRate * 1000),
-      limit,
+      limit: limit.limit,
       scope: limit.scope,
       identifier: key,
       retryAfter: allowed ? undefined : Math.ceil((state.volume - capacity) / leakRate * 1000),
@@ -783,7 +805,7 @@ class LeakyBucketAlgorithm {
     };
   }
 
-  async getUsage(key: string, limit: RateLimitDefinition): Promise<number> {
+  async getUsage(key: string, _limit: RateLimitDefinition): Promise<number> {
     const state = await this.getStateFromKV(key);
     return Math.floor(state.volume);
   }

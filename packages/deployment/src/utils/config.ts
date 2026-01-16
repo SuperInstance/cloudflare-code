@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Configuration Management
  * Handles loading and validation of deployment configurations

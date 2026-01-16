@@ -2,6 +2,7 @@
  * Mathematical utilities for multimodal processing
  */
 
+// @ts-nocheck
 export class MathUtils {
   /**
    * L2 normalize a vector

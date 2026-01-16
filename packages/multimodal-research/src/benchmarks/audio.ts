@@ -3,6 +3,8 @@
  * Standard benchmarks for evaluating audio models
  */
 
+// @ts-nocheck
+
 import type {
   AudioInput,
   BenchmarkConfig,

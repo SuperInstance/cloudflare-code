@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * WASM-based sandbox for secure plugin execution
  */

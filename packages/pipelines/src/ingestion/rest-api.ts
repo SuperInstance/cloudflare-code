@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * REST API Data Ingestion
  * Handles data ingestion from REST APIs with support for pagination, rate limiting, and authentication

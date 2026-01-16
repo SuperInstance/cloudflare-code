@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Presence System - Advanced user presence tracking
  * Manages online/offline status, activity tracking, and presence events

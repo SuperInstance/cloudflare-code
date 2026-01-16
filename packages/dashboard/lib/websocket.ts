@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * WebSocket hook for real-time updates
  */

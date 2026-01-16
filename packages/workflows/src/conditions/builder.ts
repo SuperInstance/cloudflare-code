@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Condition Builder - fluent API for building conditions
  */

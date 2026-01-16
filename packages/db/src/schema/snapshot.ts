@@ -93,7 +93,7 @@ export class SchemaSnapshotManager {
       const columns = (indexInfo.results || []).map((r: any) => r.name as string);
 
       indexes.push({
-        name: idxRow.name,
+        name: idxRow.name as string,
         columns,
         unique: !!idxRow.unique
       });
@@ -108,8 +108,8 @@ export class SchemaSnapshotManager {
       const column = columns.find((c) => c.name === fkRow.from);
       if (column) {
         column.references = {
-          table: fkRow.table,
-          column: fkRow.to,
+          table: fkRow.table as string,
+          column: fkRow.to as string,
           onDelete: fkRow.on_delete as any,
           onUpdate: fkRow.on_update as any
         };

@@ -143,11 +143,12 @@ export class GeographicMapper {
     let minDistance = Infinity;
 
     for (const [region, coords] of Object.entries(REGION_COORDINATES)) {
+      const coord = coords as { lat: number; lon: number };
       const distance = this.calculateDistance(
         location.latitude,
         location.longitude,
-        coords.lat,
-        coords.lon
+        coord.lat,
+        coord.lon
       );
 
       if (distance < minDistance) {

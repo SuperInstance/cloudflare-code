@@ -73,7 +73,7 @@ export class SlidingWindow {
   /**
    * Get current metrics from the window
    */
-  getMetrics(slowCallThreshold: number = 1000): CircuitMetrics {
+  getMetrics(_slowCallThreshold: number = 1000): CircuitMetrics {
     const totalRequests = this.count;
     const successfulRequests = this.successCount;
     const failedRequests = this.failureCount;

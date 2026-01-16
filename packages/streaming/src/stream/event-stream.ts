@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Real-time event streaming implementation
  * Supports SSE, WebSocket, batching, filtering, and multiplexing

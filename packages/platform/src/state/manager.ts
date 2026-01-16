@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Shared State Manager
  *

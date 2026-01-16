@@ -21,7 +21,6 @@ import type {
   RouteMatch,
   Upstream,
   UpstreamTarget,
-  LoadBalancingStrategy,
 } from '../types';
 
 /**
@@ -160,7 +159,7 @@ export class Router {
   /**
    * Match a request to a route
    */
-  async match(request: GatewayRequest, context: GatewayContext): Promise<RouteMatch | null> {
+  async match(request: GatewayRequest, _context: GatewayContext): Promise<RouteMatch | null> {
     const startTime = performance.now();
     this.stats.totalRequests++;
     this.stats.lastMatchTime = startTime;
@@ -304,13 +303,13 @@ export class Router {
       } else if (current.wildcard) {
         params[current.wildcardParam || 'wildcard'] = segment;
         current = current.wildcard;
-      } else if (current.regex) {
-        const match = segment.match(current.regex);
+      } else if (current.regexPattern) {
+        const match = segment.match(current.regexPattern);
         if (match) {
           if (current.regexParam) {
             params[current.regexParam] = segment;
           }
-          current = current.regex;
+          current = current.regexChild!;
         } else {
           return null;
         }
@@ -376,7 +375,7 @@ export class Router {
   /**
    * Weighted routing (private helper)
    */
-  private weightedRoute(upstream: Upstream, context: RoutingContext): UpstreamTarget {
+  private weightedRoute(upstream: Upstream, _context: RoutingContext): UpstreamTarget {
     const healthyTargets = upstream.targets.filter(
       t => t.healthStatus !== 'unhealthy'
     );
@@ -634,7 +633,7 @@ export class Router {
       route: null,
       wildcard: null,
       wildcardParam: null,
-      regex: null,
+      regexChild: null,
       regexParam: null,
     };
   }
@@ -666,12 +665,12 @@ export class Router {
         const match = pattern.match(/^(\w+):(.+)$/);
         if (match) {
           const [, paramName, regex] = match;
-          if (!current.regex) {
-            current.regex = this.createRouteTree();
+          if (!current.regexChild) {
+            current.regexChild = this.createRouteTree();
             current.regexParam = paramName;
+            current.regexPattern = new RegExp(regex);
           }
-          current.regex.regex = new RegExp(regex);
-          current = current.regex;
+          current = current.regexChild;
           continue;
         }
       }
@@ -712,7 +711,9 @@ export class Router {
     if (this.cache.size >= this.cacheMaxSize) {
       // Remove oldest entry
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
     }
 
     const cacheKey = this.getCacheKey(request);
@@ -758,9 +759,9 @@ interface RouteNode {
   route: Route | null;
   wildcard: RouteNode | null;
   wildcardParam: string | null;
-  regex: RouteNode | null;
+  regexChild: RouteNode | null;
   regexParam: string | null;
-  regex?: RegExp;
+  regexPattern?: RegExp;
 }
 
 /**

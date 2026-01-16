@@ -28,7 +28,7 @@ export class DataValidator {
 
   constructor(options?: {
     customValidators?: Map<string, (value: any, context: ValidationContext) => boolean>;
-    scoringWeights?: Partial<typeof this.scoringWeights>;
+    scoringWeights?: Partial<typeof DataValidator.prototype.scoringWeights>;
   }) {
     if (options?.customValidators) {
       this.customValidators = options.customValidators;
@@ -130,7 +130,7 @@ export class DataValidator {
             code: 'zod_validation',
             message: error.message,
             severity: 'error',
-            value: this.getValueByPath(record, error.path),
+            value: this.getValueByPath(record, error.path as string[]),
           });
         }
       }
@@ -418,13 +418,14 @@ export class DataValidator {
         break;
 
       case 'number':
-        zodSchema = z.number();
+        let numberSchema = z.number();
         if (schema.minimum !== undefined) {
-          zodSchema = zodSchema.min(schema.minimum);
+          numberSchema = (numberSchema as any).min(schema.minimum);
         }
         if (schema.maximum !== undefined) {
-          zodSchema = zodSchema.max(schema.maximum);
+          numberSchema = (numberSchema as any).max(schema.maximum);
         }
+        zodSchema = numberSchema;
         break;
 
       case 'integer':

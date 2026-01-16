@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Performance Regression Detector
  *

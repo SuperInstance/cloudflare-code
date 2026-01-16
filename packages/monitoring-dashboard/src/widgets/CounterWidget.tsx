@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import React, { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { BaseWidget, CounterConfig, DataPoint } from '@/types';

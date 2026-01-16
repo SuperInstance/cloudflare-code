@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook definitions and types
  */

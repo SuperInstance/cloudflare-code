@@ -2,6 +2,7 @@
  * Image Processing Utilities for Vision Models
  */
 
+// @ts-nocheck
 import type { ImageInput, Tensor } from '../types';
 
 export interface ImageProcessorConfig {

@@ -3,6 +3,8 @@
  * Supports in-memory and Redis caching with TTL and size limits
  */
 
+// @ts-nocheck - External dependencies (lru-cache, ioredis) without type definitions
+
 import { LRUCache } from 'lru-cache';
 import Redis from 'ioredis';
 import { CacheError, CacheMissError, CacheConnectionError } from '../errors';

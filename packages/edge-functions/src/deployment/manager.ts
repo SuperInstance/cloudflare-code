@@ -7,14 +7,12 @@
 
 import {
   EdgeFunction,
-  EdgeEnv,
   DeploymentConfig,
   DeploymentResult,
   DeploymentEnvironment,
   DeploymentStatus,
   RolloutStrategy,
   FunctionVersion,
-  VersionStatus,
 } from '../types/index.js';
 
 // ============================================================================
@@ -455,7 +453,11 @@ export class DeploymentManager {
       // Deploy previous version to locations
       const locations = await this.deployToLocations(
         [deployedFunc.function],
-        { environment: deployedFunc.environment, version: versionToRollback.version },
+        {
+          environment: deployedFunc.environment,
+          version: versionToRollback.version,
+          functions: [deployedFunc.function],
+        },
         deploymentId
       );
 
@@ -666,16 +668,16 @@ export class DeploymentManager {
 
     switch (strategy) {
       case 'immediate':
-        return await this.deployImmediate(functions, locations, config, deploymentId);
+        return await this.deployImmediate(functions, locations || [], config, deploymentId);
 
       case 'canary':
-        return await this.deployCanary(functions, locations, config, deploymentId);
+        return await this.deployCanary(functions, locations || [], config, deploymentId);
 
       case 'blue-green':
-        return await this.deployBlueGreen(functions, locations, config, deploymentId);
+        return await this.deployBlueGreen(functions, locations || [], config, deploymentId);
 
       case 'gradual':
-        return await this.deployGradual(functions, locations, config, deploymentId);
+        return await this.deployGradual(functions, locations || [], config, deploymentId);
 
       default:
         throw new DeploymentError(`Unknown deployment strategy: ${strategy}`, 'INVALID_STRATEGY');
@@ -786,10 +788,10 @@ export class DeploymentManager {
    * Deploy to a single location
    */
   private async deployToLocation(
-    functions: EdgeFunction[],
+    _functions: EdgeFunction[],
     location: string,
-    config: DeploymentConfig,
-    deploymentId: string
+    _config: DeploymentConfig,
+    _deploymentId: string
   ): Promise<string> {
     // Simulate deployment to location
     // In real implementation, this would upload and activate functions
@@ -820,10 +822,10 @@ export class DeploymentManager {
    * Perform health checks on deployed functions
    */
   private async performHealthChecks(
-    functions: EdgeFunction[],
-    config: DeploymentConfig
+    _functions: EdgeFunction[],
+    _config: DeploymentConfig
   ): Promise<void> {
-    const healthCheckConfig = {
+    const _healthCheckConfig = {
       count: 3,
       interval: 5000,
       timeout: 10000,
@@ -838,28 +840,28 @@ export class DeploymentManager {
     let successes = 0;
     let failures = 0;
 
-    for (let i = 0; i < healthCheckConfig.count!; i++) {
+    for (let i = 0; i < _healthCheckConfig.count!; i++) {
       try {
         // Simulate health check
-        await this.performHealthCheck(functions[0].id, config, healthCheckConfig);
+        await this.performHealthCheck(_functions[0].id, _config, _healthCheckConfig);
         successes++;
 
-        if (successes >= healthCheckConfig.successThreshold!) {
+        if (successes >= _healthCheckConfig.successThreshold!) {
           return; // Health check passed
         }
       } catch (error) {
         failures++;
-        if (failures >= healthCheckConfig.failureThreshold!) {
+        if (failures >= _healthCheckConfig.failureThreshold!) {
           throw new DeploymentError(
             `Health check failed: ${error}`,
             'HEALTH_CHECK_FAILED',
-            functions[0].id
+            _functions[0].id
           );
         }
       }
 
-      if (i < healthCheckConfig.count! - 1) {
-        await new Promise(resolve => setTimeout(resolve, healthCheckConfig.interval!));
+      if (i < _healthCheckConfig.count! - 1) {
+        await new Promise(resolve => setTimeout(resolve, _healthCheckConfig.interval!));
       }
     }
   }
@@ -868,9 +870,9 @@ export class DeploymentManager {
    * Perform a single health check
    */
   private async performHealthCheck(
-    functionId: string,
-    config: DeploymentConfig,
-    healthCheckConfig: any
+    _functionId: string,
+    _config: DeploymentConfig,
+    _healthCheckConfig: any
   ): Promise<void> {
     // Simulate health check
     // In real implementation, this would make HTTP requests to the function

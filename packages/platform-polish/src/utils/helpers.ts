@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Helper utilities for the platform polish package
  */

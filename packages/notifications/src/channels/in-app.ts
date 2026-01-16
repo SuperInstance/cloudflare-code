@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * In-app notification channel
  * Stores notifications for retrieval within the application

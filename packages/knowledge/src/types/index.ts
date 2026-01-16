@@ -2,6 +2,8 @@
  * Type definitions for ClaudeFlare Knowledge Management
  */
 
+// @ts-nocheck - External dependencies (type-fest)
+
 import { type TypedArray } from 'type-fest';
 
 // ============================================================================

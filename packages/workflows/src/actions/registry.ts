@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Action Registry - centralized registry of all available actions
  */

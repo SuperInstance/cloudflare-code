@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Service Registry Durable Object
  * Manages service registration, discovery, and health checking

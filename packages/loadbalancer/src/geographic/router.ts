@@ -7,6 +7,7 @@ import type {
   Region,
   GeoLocation,
   RegionInfo,
+  DatacenterInfo,
   ProximityInfo,
   RoutingContext,
   RoutingDecision,
@@ -28,7 +29,7 @@ const CONTINENT_REGIONS: Record<Continent, Region[]> = {
 };
 
 // Region coordinates for distance calculations
-const REGION_COORDINATES: Record<Region, { lat: number; lon: number }> = {
+export const REGION_COORDINATES: Record<Region, { lat: number; lon: number }> = {
   // North America
   'us-east-1': { lat: 38.13, lon: -78.45 },   // Virginia
   'us-east-2': { lat: 40.41, lon: -82.61 },   // Ohio

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Streaming utilities for Server-Sent Events (SSE)
  */

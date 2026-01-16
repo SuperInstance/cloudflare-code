@@ -207,7 +207,7 @@ export class ConfigManager {
    * Get composition configuration
    */
   getCompositionConfig(): CompositionConfig | undefined {
-    return this.config.config.composition;
+    return this.config.composition;
   }
 
   /**

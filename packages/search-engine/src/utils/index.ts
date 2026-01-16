@@ -50,16 +50,7 @@ export function calculateSimilarity(vec1: number[], vec2: number[]): number {
     throw new Error('Vectors must have the same length');
   }
 
-  switch ('cosine') {
-    case 'cosine':
-      return cosineSimilarity(vec1, vec2);
-    case 'euclidean':
-      return 1 / (1 + euclideanDistance(vec1, vec2));
-    case 'dotProduct':
-      return dotProduct(vec1, vec2);
-    default:
-      return cosineSimilarity(vec1, vec2);
-  }
+  return cosineSimilarity(vec1, vec2);
 }
 
 export function cosineSimilarity(vec1: number[], vec2: number[]): number {
@@ -120,7 +111,7 @@ export class LRUCache<K, V> {
     if (this.cache.has(key)) {
       this.cache.delete(key);
     } else if (this.cache.size >= this.maxSize) {
-      const firstKey = this.cache.keys().next().value;
+      const firstKey = this.cache.keys().next().value as K;
       this.cache.delete(firstKey);
     }
     this.cache.set(key, value);

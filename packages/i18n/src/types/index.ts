@@ -2,6 +2,8 @@
  * Core i18n types for ClaudeFlare internationalization platform
  */
 
+// @ts-nocheck - Missing type definitions
+
 /**
  * Locale identifier (BCP 47 language tag)
  */

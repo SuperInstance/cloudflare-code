@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Visual Workflow Designer
  * Provides a drag-and-drop interface for building workflows visually

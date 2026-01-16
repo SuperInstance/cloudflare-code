@@ -248,7 +248,14 @@ export class ConfigBuilder {
     this.config.thresholds = {
       ...this.config.thresholds,
       failureThreshold: threshold,
-    };
+      successThreshold: (this.config.thresholds as any)?.successThreshold ?? 2,
+      timeoutMs: (this.config.thresholds as any)?.timeoutMs ?? 60000,
+      windowSize: (this.config.thresholds as any)?.windowSize ?? 100,
+      minRequests: (this.config.thresholds as any)?.minRequests ?? 10,
+      errorRateThreshold: (this.config.thresholds as any)?.errorRateThreshold ?? 50,
+      slowCallThreshold: (this.config.thresholds as any)?.slowCallThreshold ?? 5000,
+      slowCallRateThreshold: (this.config.thresholds as any)?.slowCallRateThreshold ?? 50,
+    } as any;
     return this;
   }
 
@@ -256,7 +263,14 @@ export class ConfigBuilder {
     this.config.thresholds = {
       ...this.config.thresholds,
       successThreshold: threshold,
-    };
+      failureThreshold: (this.config.thresholds as any)?.failureThreshold ?? 5,
+      timeoutMs: (this.config.thresholds as any)?.timeoutMs ?? 60000,
+      windowSize: (this.config.thresholds as any)?.windowSize ?? 100,
+      minRequests: (this.config.thresholds as any)?.minRequests ?? 10,
+      errorRateThreshold: (this.config.thresholds as any)?.errorRateThreshold ?? 50,
+      slowCallThreshold: (this.config.thresholds as any)?.slowCallThreshold ?? 5000,
+      slowCallRateThreshold: (this.config.thresholds as any)?.slowCallRateThreshold ?? 50,
+    } as any;
     return this;
   }
 
@@ -264,7 +278,14 @@ export class ConfigBuilder {
     this.config.thresholds = {
       ...this.config.thresholds,
       timeoutMs: ms,
-    };
+      failureThreshold: (this.config.thresholds as any)?.failureThreshold ?? 5,
+      successThreshold: (this.config.thresholds as any)?.successThreshold ?? 2,
+      windowSize: (this.config.thresholds as any)?.windowSize ?? 100,
+      minRequests: (this.config.thresholds as any)?.minRequests ?? 10,
+      errorRateThreshold: (this.config.thresholds as any)?.errorRateThreshold ?? 50,
+      slowCallThreshold: (this.config.thresholds as any)?.slowCallThreshold ?? 5000,
+      slowCallRateThreshold: (this.config.thresholds as any)?.slowCallRateThreshold ?? 50,
+    } as any;
     return this;
   }
 
@@ -272,7 +293,14 @@ export class ConfigBuilder {
     this.config.thresholds = {
       ...this.config.thresholds,
       windowSize: size,
-    };
+      failureThreshold: (this.config.thresholds as any)?.failureThreshold ?? 5,
+      successThreshold: (this.config.thresholds as any)?.successThreshold ?? 2,
+      timeoutMs: (this.config.thresholds as any)?.timeoutMs ?? 60000,
+      minRequests: (this.config.thresholds as any)?.minRequests ?? 10,
+      errorRateThreshold: (this.config.thresholds as any)?.errorRateThreshold ?? 50,
+      slowCallThreshold: (this.config.thresholds as any)?.slowCallThreshold ?? 5000,
+      slowCallRateThreshold: (this.config.thresholds as any)?.slowCallRateThreshold ?? 50,
+    } as any;
     return this;
   }
 
@@ -280,7 +308,14 @@ export class ConfigBuilder {
     this.config.thresholds = {
       ...this.config.thresholds,
       errorRateThreshold: threshold,
-    };
+      failureThreshold: (this.config.thresholds as any)?.failureThreshold ?? 5,
+      successThreshold: (this.config.thresholds as any)?.successThreshold ?? 2,
+      timeoutMs: (this.config.thresholds as any)?.timeoutMs ?? 60000,
+      windowSize: (this.config.thresholds as any)?.windowSize ?? 100,
+      minRequests: (this.config.thresholds as any)?.minRequests ?? 10,
+      slowCallThreshold: (this.config.thresholds as any)?.slowCallThreshold ?? 5000,
+      slowCallRateThreshold: (this.config.thresholds as any)?.slowCallRateThreshold ?? 50,
+    } as any;
     return this;
   }
 
@@ -288,7 +323,14 @@ export class ConfigBuilder {
     this.config.thresholds = {
       ...this.config.thresholds,
       slowCallThreshold: threshold,
-    };
+      failureThreshold: (this.config.thresholds as any)?.failureThreshold ?? 5,
+      successThreshold: (this.config.thresholds as any)?.successThreshold ?? 2,
+      timeoutMs: (this.config.thresholds as any)?.timeoutMs ?? 60000,
+      windowSize: (this.config.thresholds as any)?.windowSize ?? 100,
+      minRequests: (this.config.thresholds as any)?.minRequests ?? 10,
+      errorRateThreshold: (this.config.thresholds as any)?.errorRateThreshold ?? 50,
+      slowCallRateThreshold: (this.config.thresholds as any)?.slowCallRateThreshold ?? 50,
+    } as any;
     return this;
   }
 
@@ -296,7 +338,14 @@ export class ConfigBuilder {
     this.config.thresholds = {
       ...this.config.thresholds,
       slowCallRateThreshold: threshold,
-    };
+      failureThreshold: (this.config.thresholds as any)?.failureThreshold ?? 5,
+      successThreshold: (this.config.thresholds as any)?.successThreshold ?? 2,
+      timeoutMs: (this.config.thresholds as any)?.timeoutMs ?? 60000,
+      windowSize: (this.config.thresholds as any)?.windowSize ?? 100,
+      minRequests: (this.config.thresholds as any)?.minRequests ?? 10,
+      errorRateThreshold: (this.config.thresholds as any)?.errorRateThreshold ?? 50,
+      slowCallThreshold: (this.config.thresholds as any)?.slowCallThreshold ?? 5000,
+    } as any;
     return this;
   }
 

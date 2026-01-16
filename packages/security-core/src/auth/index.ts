@@ -3,12 +3,12 @@
  * Provides secure authentication, authorization, and session management
  */
 
-export { default as AuthService } from './auth-service';
-export { default as OAuth2Service } from './oauth2-service';
-export { default as SAML2Service } from './saml2-service';
-export { default as JwtService } from './jwt-service';
-export { default as SessionService } from './session-service';
-export { default as MfaService } from './mfa-service';
+export { AuthService } from './auth-service';
+export { OAuth2Service } from './oauth2-service';
+export { SAML2Service } from './saml2-service';
+export { JwtService } from './jwt-service';
+export { SessionService } from './session-service';
+export { MfaService } from './mfa-service';
 
 export * from './types';
-export * from './utils';
+// export * from './utils'; // Commented out - utils has external dependencies

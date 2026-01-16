@@ -16,7 +16,6 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -24,15 +23,11 @@
     },
     "types": [
       "node",
-      "@playwright/test",
-      "vitest/globals",
-      "@pact-foundation/pact"
+      "vitest/globals"
     ]
   },
   "include": [
-    "src/**/*",
-    "config/**/*",
-    "scripts/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
@@ -40,6 +35,8 @@
     "test-results",
     "playwright-report",
     "coverage",
-    "reports"
+    "reports",
+    "config",
+    "scripts"
   ]
 }

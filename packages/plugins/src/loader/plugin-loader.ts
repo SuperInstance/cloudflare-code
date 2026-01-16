@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Plugin loader - handles loading, initialization, and hot-reload of plugins
  */

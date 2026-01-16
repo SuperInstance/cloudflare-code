@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Circuit Breaker Store Durable Object
  * Persistent storage for circuit breaker state across instances

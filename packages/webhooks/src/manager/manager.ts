@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Webhook Manager - handles webhook registration, validation, and lifecycle
  */

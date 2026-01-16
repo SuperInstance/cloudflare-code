@@ -171,7 +171,7 @@ export class ExecutionEngine {
     this.executionCount++;
 
     // Set timeout
-    const timeoutDuration = job.maxExecutionTime || this.config.defaultTimeout!;
+    const timeoutDuration = this.config.defaultTimeout!;
     let timeoutHandle: NodeJS.Timeout | undefined;
 
     if (timeoutDuration > 0) {

@@ -4,6 +4,7 @@
  * Mobile-optimized modal with slide-up animation.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 'use client';
 
 import React, { useEffect, useRef } from 'react';

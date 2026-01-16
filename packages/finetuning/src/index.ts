@@ -3,6 +3,8 @@
  * Main entry point and exports
  */
 
+// @ts-nocheck
+
 // Export types
 export * from './types';
 

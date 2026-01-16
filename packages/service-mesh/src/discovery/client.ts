@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Service Discovery Client
  * Client-side library for service discovery operations

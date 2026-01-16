@@ -13,8 +13,6 @@ import {
   ExecutionMetrics,
   ResponseStatus,
   ExecutionStatus,
-  FunctionHandler,
-  FunctionConfig,
 } from '../types/index.js';
 
 // ============================================================================
@@ -93,13 +91,16 @@ export class RuntimeError extends Error {
 export class TimeoutError extends RuntimeError {
   constructor(
     message: string,
+    timeout: number,
     functionId?: string,
-    executionId?: string,
-    public readonly timeout: number
+    executionId?: string
   ) {
     super(message, 'TIMEOUT', functionId, executionId);
     this.name = 'TimeoutError';
+    this.timeout = timeout;
   }
+
+  public readonly timeout: number;
 }
 
 /**
@@ -108,14 +109,19 @@ export class TimeoutError extends RuntimeError {
 export class MemoryLimitError extends RuntimeError {
   constructor(
     message: string,
+    memoryLimit: number,
+    memoryUsed: number,
     functionId?: string,
-    executionId?: string,
-    public readonly memoryLimit: number,
-    public readonly memoryUsed: number
+    executionId?: string
   ) {
     super(message, 'MEMORY_LIMIT_EXCEEDED', functionId, executionId);
     this.name = 'MemoryLimitError';
+    this.memoryLimit = memoryLimit;
+    this.memoryUsed = memoryUsed;
   }
+
+  public readonly memoryLimit: number;
+  public readonly memoryUsed: number;
 }
 
 /**
@@ -195,9 +201,9 @@ export class FunctionRuntime {
   /**
    * Register multiple functions
    */
-  registerFunctions(functions: EdgeFunction[]): void {
+  registerFunctions(functions: EdgeFunction<unknown, unknown>[]): void {
     for (const func of functions) {
-      this.registerFunction(func);
+      this.registerFunction(func as EdgeFunction<unknown, unknown>);
     }
   }
 
@@ -561,7 +567,7 @@ export class FunctionRuntime {
   private createExecutionState(
     executionId: string,
     request: EdgeRequest,
-    func: EdgeFunction
+    func: EdgeFunction<unknown, unknown>
   ): ExecutionState {
     return {
       executionId,

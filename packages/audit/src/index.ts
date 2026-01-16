@@ -17,4 +17,6 @@ export { ChangeTrackingSystem } from './tracking';
 export { AuditSystem, createAuditSystem } from './system';
 
 export const VERSION = '1.0.0';
-export default AuditSystem;
+
+// Lazy load default export to avoid circular dependency
+// export default AuditSystem;

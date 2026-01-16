@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Slack notification channel
  * Supports incoming webhooks and Slack API

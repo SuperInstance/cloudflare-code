@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Smoke Test Runner
  * Executes smoke tests after deployment

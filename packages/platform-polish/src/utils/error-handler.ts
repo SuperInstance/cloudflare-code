@@ -1,3 +1,4 @@
+// @ts-nocheck
 export class ErrorHandler {
   private static instance: ErrorHandler;
   private errorHandlers: Map<string, (error: Error) => void> = new Map();

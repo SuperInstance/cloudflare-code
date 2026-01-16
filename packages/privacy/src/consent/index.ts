@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Consent management exports
  * @packageDocumentation

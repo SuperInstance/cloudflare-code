@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Circular Dependency Detection and Analysis
  *

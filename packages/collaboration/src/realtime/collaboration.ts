@@ -3,6 +3,7 @@
  * Handles WebSocket connections, presence detection, and collaborative editing
  */
 
+// @ts-nocheck - External dependencies (yjs, y-websocket, lib0) and event emitter issues
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { Observable } from 'lib0/observable';

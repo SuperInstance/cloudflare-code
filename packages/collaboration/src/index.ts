@@ -8,13 +8,14 @@ export * from './types';
 // Core components (minimal exports)
 export { CRDTDocumentManager, CollaborationManager } from './realtime';
 export { PairProgrammingManager, WebRTCSessionManager } from './pair';
-export { CodeReviewManager, ReviewWorkflow } from './review';
-export { KnowledgeSharingManager } from './knowledge';
-export { TeamManager } from './team';
-export { ActivityFeedManager } from './activity';
+export { CodeReviewManager } from './review';
+export { KnowledgeManager } from './knowledge';
+export { TeamManager } from './teams';
+export { ActivityManager } from './activity';
 
 // Main system
 export { Collaboration, createCollaboration } from './system';
+import { Collaboration } from './system';
 
 export const VERSION = '1.0.0';
 export default Collaboration;

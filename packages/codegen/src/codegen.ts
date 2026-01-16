@@ -3,14 +3,14 @@
  * Unified interface for all code generation functionality
  */
 
-import { LLMManager, createLLMManager } from './llm/index.js';
-import { CodeSynthesizer } from './synthesis/index.js';
-import { BoilerplateGenerator } from './boilerplate/index.js';
-import { APIClientGenerator } from './api/index.js';
-import { SDKGenerator } from './sdk/index.js';
-import { SchemaGenerator } from './schema/index.js';
-import { TestGenerator } from './tests/index.js';
-import { DocumentationGenerator } from './docs/index.js';
+import type { LLMManager, createLLMManager } from './llm/index.js';
+import type { CodeSynthesizer } from './synthesis/index.js';
+import type { BoilerplateGenerator } from './boilerplate/index.js';
+import type { APIClientGenerator } from './api/index.js';
+import type { SDKGenerator } from './sdk/index.js';
+import type { SchemaGenerator } from './schema/index.js';
+import type { TestGenerator } from './tests/index.js';
+import type { DocumentationGenerator } from './docs/index.js';
 import {
   Language,
   SynthesisOptions,

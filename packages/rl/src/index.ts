@@ -13,7 +13,7 @@ export * from './envs/optimization.js';
 export * from './agents/dqn.js';
 export * from './agents/ppo.js';
 export * from './agents/a3c.js';
-export * from './agents/sac.js';
+export { SACConfig, SACAgent, SimpleSACPolicy, PolicyNetwork as SACPolicyNetwork } from './agents/sac.js';
 
 // Memory exports
 export * from './memory/replay-buffer.js';

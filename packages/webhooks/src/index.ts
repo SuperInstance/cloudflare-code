@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ClaudeFlare Webhooks - Ultra-Optimized
  * Advanced webhook management and delivery

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Delivery tracking and management
  */

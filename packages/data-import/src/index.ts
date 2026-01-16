@@ -7,14 +7,13 @@ export { ImportAnalytics } from './analytics';
 export * from './types';
 export * from './utils';
 
-export { createDataImportSystem } from './system';
-
 import { FormatParser } from './formats';
 import { DataValidator } from './validator';
 import { DataTransformer } from './transform';
 import { ImportProcessor } from './processor';
 import { ImportScheduler, BulkOperation } from './scheduler';
 import { ImportAnalytics } from './analytics';
+import { generateId } from './utils';
 
 export interface DataImportSystemConfig {
   processorOptions?: import('./processor').ProcessorOptions;
@@ -29,7 +28,7 @@ export class DataImportSystem {
   private transformer: DataTransformer;
   private processor: ImportProcessor;
   private scheduler: ImportScheduler;
-  private analytics: ImportAnalytics;
+  private analytics: ImportAnalytics | undefined;
 
   constructor(config: DataImportSystemConfig = {}) {
     this.parser = new FormatParser();
@@ -71,27 +70,27 @@ export class DataImportSystem {
     });
   }
 
-  get parser() {
+  get parserInstance() {
     return this.parser;
   }
 
-  get validator() {
+  get validatorInstance() {
     return this.validator;
   }
 
-  get transformer() {
+  get transformerInstance() {
     return this.transformer;
   }
 
-  get processor() {
+  get processorInstance() {
     return this.processor;
   }
 
-  get scheduler() {
+  get schedulerInstance() {
     return this.scheduler;
   }
 
-  get analytics() {
+  get analyticsInstance() {
     return this.analytics;
   }
 
@@ -101,6 +100,7 @@ export class DataImportSystem {
     config?: import('./types').ImportConfig
   ): Promise<string> {
     const job: import('./types').ImportJob = {
+      id: generateId(),
       name: `Import from ${filePath}`,
       source: {
         type: 'file',
@@ -136,6 +136,7 @@ export class DataImportSystem {
 
     files.forEach(file => {
       const job: import('./types').ImportJob = {
+        id: generateId(),
         name: `Import from ${file.path}`,
         source: {
           type: 'file',
@@ -174,6 +175,7 @@ export class DataImportSystem {
     }
   ): string {
     const job: import('./types').ImportJob = {
+      id: generateId(),
       name: `Scheduled Import from ${filePath}`,
       source: {
         type: 'file',

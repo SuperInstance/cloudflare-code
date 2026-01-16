@@ -4,6 +4,7 @@
  * Main app layout with PWA support and mobile optimization.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';

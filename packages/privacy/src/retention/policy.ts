@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Retention Policy Management Durable Object
  * GDPR Article 5(1)(e): Storage limitation

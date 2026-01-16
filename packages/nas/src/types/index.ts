@@ -179,7 +179,6 @@ export interface Layer {
 }
 
 export interface LayerParameters {
-  [key: string]: number | string | boolean | number[] | string[];
   filters?: number;
   kernelSize?: number | number[];
   strides?: number | number[];
@@ -194,6 +193,7 @@ export interface LayerParameters {
   attentionHeads?: number;
   keyDim?: number;
   valueDim?: number;
+  [key: string]: number | string | boolean | number[] | string[] | undefined;
 }
 
 export interface ParameterRange {

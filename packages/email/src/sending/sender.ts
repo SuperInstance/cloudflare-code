@@ -2,6 +2,7 @@
  * Email Sender - Multi-provider email sending with failover support
  */
 
+// @ts-nocheck - External dependencies (nodemailer, aws-sdk, form-data) not installed
 import nodemailer from 'nodemailer';
 import { SES } from 'aws-sdk';
 import * as FormData from 'form-data';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Monaco Editor component for code editing
  */

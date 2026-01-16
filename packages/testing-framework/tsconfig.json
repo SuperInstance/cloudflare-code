@@ -37,14 +37,12 @@
       "@claudeflare/testing-framework/*": ["./src/*"]
     },
     "skipLibCheck": true,
-    "incremental": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "types": ["node", "jest"]
+    "incremental": false,
+    "types": ["node"]
   },
   "include": [
     "src/**/*",
     "tests/**/*",
-    "examples/**/*",
     "scripts/**/*"
   ],
   "exclude": [
@@ -53,7 +51,8 @@
     "coverage",
     "test-results",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "src/cicd/generator.ts"
   ],
   "references": [
     {

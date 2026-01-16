@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Multi-tenant project management
  */

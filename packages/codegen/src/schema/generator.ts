@@ -3,8 +3,8 @@
  * Generates database schemas, TypeScript types, GraphQL schemas, Protobuf definitions, etc.
  */
 
-import { Language, SchemaOptions, GeneratedSchema, GeneratedFile, GeneratedType, TableSchema, ColumnSchema, Specification, ModelSpec } from '../types/index.js';
-import { FileManager } from '../utils/file-manager.js';
+import type { Language, SchemaOptions, GeneratedSchema, GeneratedFile, GeneratedType, TableSchema, ColumnSchema, Specification, ModelSpec } from '../types/index.js';
+import type { FileManager } from '../utils/file-manager.js';
 
 /**
  * Schema Generator class

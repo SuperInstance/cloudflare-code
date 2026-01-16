@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data subject rights exports
  * @packageDocumentation

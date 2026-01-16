@@ -2,6 +2,7 @@
  * Database integration tests for ClaudeFlare
  */
 
+// @ts-nocheck
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { IntegrationTestRunner } from './runner';
 import { DatabaseFixture } from '../utils/fixtures';

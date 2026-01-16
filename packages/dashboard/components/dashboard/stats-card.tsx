@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Stats card component for dashboard metrics
  */

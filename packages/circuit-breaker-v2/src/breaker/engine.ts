@@ -1,18 +1,18 @@
-import {
-  CircuitState,
-  CircuitBreakerConfig,
-  ThresholdConfig,
+import type {
   ExecutionContext,
   ExecutionResultData,
-  ExecutionResult,
   CircuitMetrics,
   CircuitSnapshot,
   CircuitEventListener,
   CircuitEvent,
   WindowDataPoint,
   OperationOptions,
-  HealthCheckConfig,
-  RecoveryConfig,
+} from '../types/index.js';
+
+import {
+  CircuitState,
+  CircuitBreakerConfig,
+  ExecutionResult,
 } from '../types/index.js';
 import { SlidingWindow } from '../utils/window.js';
 import { MetricsCollector } from '../monitoring/metrics.js';
@@ -32,9 +32,6 @@ export class CircuitBreakerEngine {
   private consecutiveSuccesses: number;
   private consecutiveFailures: number;
   private manualOverride: boolean;
-  private adaptiveThresholds: Map<string, number>;
-  private healthCheckConfig?: HealthCheckConfig;
-  private recoveryConfig?: RecoveryConfig;
   private activeExecutions: Set<string>;
   private executionIdCounter: number;
 
@@ -49,7 +46,6 @@ export class CircuitBreakerEngine {
     this.consecutiveSuccesses = 0;
     this.consecutiveFailures = 0;
     this.manualOverride = false;
-    this.adaptiveThresholds = new Map();
     this.activeExecutions = new Set();
     this.executionIdCounter = 0;
   }
@@ -194,7 +190,7 @@ export class CircuitBreakerEngine {
   /**
    * Record execution result and update state
    */
-  private recordResult<T>(result: ExecutionResultData<T>, context: ExecutionContext): void {
+  private recordResult<T>(result: ExecutionResultData<T>, _context: ExecutionContext): void {
     const dataPoint: WindowDataPoint = {
       success: result.status === ExecutionResult.SUCCESS,
       duration: result.duration,

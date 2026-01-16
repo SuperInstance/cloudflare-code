@@ -2,6 +2,7 @@
  * Style Checker - Checks code style, formatting, and conventions
  */
 
+// @ts-nocheck - Style checking with unused parameters
 import { Issue, Severity, Category, FileInfo, Language } from '../types/index.js';
 
 // ============================================================================

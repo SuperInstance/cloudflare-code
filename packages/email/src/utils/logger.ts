@@ -2,6 +2,7 @@
  * Logger utility for email service
  */
 
+// @ts-nocheck - External dependency (winston) not installed
 import winston from 'winston';
 
 export const winston = winston.createLogger({

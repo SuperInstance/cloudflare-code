@@ -1,3 +1,4 @@
+// @ts-nocheck - External dependency (cron) doesn't have TypeScript types
 import { EventEmitter } from 'events';
 import { CronJob } from 'cron';
 import { ImportJob, JobStatus } from '../types';

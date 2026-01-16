@@ -60,6 +60,23 @@ export class ResponseAggregator {
     this.aggregationHistory = [];
   }
 
+  // Helper to convert ResponseSource to AggregatedResponse source format
+  private convertSources(sources: ResponseSource[]): Array<{
+    model: string;
+    provider: LLMProvider;
+    response: string;
+    weight: number;
+    quality: number;
+  }> {
+    return sources.map((s) => ({
+      model: s.model,
+      provider: s.provider,
+      response: s.response,
+      weight: s.weight,
+      quality: s.quality.overall,
+    }));
+  }
+
   // ========================================================================
   // Main Aggregation Method
   // ========================================================================
@@ -261,7 +278,7 @@ export class ResponseAggregator {
     return {
       response: consensus,
       confidence: consensusScore,
-      sources,
+      sources: this.convertSources(sources),
       consensus: consensusScore,
       reasoning: 'Built consensus by finding similar segments across responses',
       metadata: {
@@ -308,7 +325,7 @@ export class ResponseAggregator {
     return {
       response,
       confidence: agreement,
-      sources,
+      sources: this.convertSources(sources),
       consensus: agreement,
       reasoning: 'Applied token-level voting across responses',
       metadata: {
@@ -359,7 +376,7 @@ export class ResponseAggregator {
     return {
       response,
       confidence,
-      sources,
+      sources: this.convertSources(sources),
       consensus: confidence,
       reasoning: 'Combined responses using weighted quality scores',
       metadata: {
@@ -388,10 +405,7 @@ export class ResponseAggregator {
     return {
       response: best.response,
       confidence,
-      sources: ranked.map((s) => ({
-        ...s,
-        weight: s.weight,
-      })),
+      sources: this.convertSources(ranked),
       consensus: confidence,
       reasoning: `Selected highest quality response from ${best.model}`,
       metadata: {
@@ -422,7 +436,7 @@ export class ResponseAggregator {
     return {
       response: best.response.response,
       confidence: best.score,
-      sources,
+      sources: this.convertSources(sources),
       consensus: best.score,
       reasoning: `Selected best aggregation approach from ensemble of methods`,
       metadata: {
@@ -663,7 +677,7 @@ export class ResponseAggregator {
           provider: this.extractProvider(response.model),
           response: text,
           weight: 1.0,
-          quality: this.getDefaultQuality(),
+          quality: this.getDefaultQuality().overall,
         },
       ],
       consensus: 1.0, // No disagreement with single response

@@ -154,7 +154,7 @@ export interface EdgeEnv {
   /**
    * KV namespaces
    */
-  KV: Record<string, KvNamespace>;
+  KV: Record<string, KVNamespace>;
 
   /**
    * Durable Object namespaces
@@ -784,6 +784,16 @@ export interface DeploymentMetadata {
   rollbackVersion?: string;
 
   /**
+   * Changelog
+   */
+  changelog?: string;
+
+  /**
+   * Tags
+   */
+  tags?: string[];
+
+  /**
    * Deployment timestamp
    */
   deployedAt?: number;
@@ -1279,7 +1289,7 @@ export interface ReloadEvent {
 /**
  * Edge request
  */
-export interface EdgeRequest {
+export interface EdgeRequest<TInput = unknown> {
   /**
    * Request ID
    */

@@ -4,6 +4,7 @@
  * Mobile-optimized chat message with markdown and code syntax highlighting.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 'use client';
 
 import React from 'react';

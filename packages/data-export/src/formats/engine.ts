@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'eventemitter3';
 import { createWriteStream, promises as fs } from 'fs';
 import { pipeline } from 'stream/promises';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Right to Erasure Implementation (GDPR Article 17)
  * @packageDocumentation

@@ -3,6 +3,8 @@
  * Handles detection from HTTP headers, cookies, query params, and storage
  */
 
+// @ts-nocheck - Browser API (navigator) not available in Node environment
+
 import type {
   Locale,
   LocaleComponents,

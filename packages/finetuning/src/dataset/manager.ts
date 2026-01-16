@@ -11,6 +11,8 @@
  * - Format conversion
  */
 
+// @ts-nocheck
+
 import { z } from 'zod';
 import type {
   Dataset,

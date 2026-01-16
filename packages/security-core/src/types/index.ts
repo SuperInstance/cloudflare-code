@@ -1075,6 +1075,26 @@ export interface AuthConfig {
   lockoutDurationMinutes: number;
 }
 
+export interface OAuth2Config {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  authorizationUrl: string;
+  tokenUrl: string;
+  userInfoUrl: string;
+  scopes: string[];
+}
+
+export interface SAML2Config {
+  entryPoint: string;
+  issuer: string;
+  callbackUrl: string;
+  cert: string;
+  privateCert?: string;
+  identifierFormat?: string;
+  acceptedClockSkewMs?: number;
+}
+
 export interface AuditConfig {
   enabled: boolean;
   retentionDays: number;

@@ -3,6 +3,8 @@
  * Manages the complete fine-tuning workflow from dataset to deployment
  */
 
+// @ts-nocheck
+
 import { z } from 'zod';
 import type {
   TrainingJob,

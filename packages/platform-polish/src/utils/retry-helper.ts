@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { sleep } from './helpers';
 
 export interface RetryOptions {

@@ -211,7 +211,7 @@ export interface TaskGraph {
 }
 
 export interface ResourceAllocation {
-  resources: Map<string, ResourceAllocationItem>;
+  resources: Map<string, ResourceAllocationItem[]>;
   conflicts: ResourceConflict[];
   utilization: number;
 }

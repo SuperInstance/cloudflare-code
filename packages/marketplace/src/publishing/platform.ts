@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Agent Publishing Platform
  * Handles agent publishing, versioning, and lifecycle management

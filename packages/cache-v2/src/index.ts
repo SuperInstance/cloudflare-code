@@ -144,13 +144,19 @@ export function createCacheSystem(
   const cache = createMultiTierCache(context, config);
 
   const warmer = config?.warming?.config?.enabled
-    ? createCacheWarmer(cache, config.warming.config)
+    ? createCacheWarmer(cache, config.warming.config as any)
     : null;
 
-  const invalidation = createInvalidationEngine(cache, config?.invalidation?.config);
+  const invalidation = createInvalidationEngine(cache, config?.invalidation?.config as any ?? {
+    propagateToAllTiers: true,
+    backgroundProcessing: true,
+    batchSize: 100,
+    retries: 3,
+    retryDelay: 1000,
+  });
 
   const prefetcher = config?.prefetch?.enabled
-    ? createCachePrefetcher(cache, config.prefetch)
+    ? createCachePrefetcher(cache, config.prefetch as any)
     : null;
 
   const analytics = config?.analytics?.enabled

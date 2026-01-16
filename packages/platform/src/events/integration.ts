@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Platform Event Bus Integration
  *

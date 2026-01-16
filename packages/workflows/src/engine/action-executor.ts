@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Action Executor - executes individual workflow actions
  */

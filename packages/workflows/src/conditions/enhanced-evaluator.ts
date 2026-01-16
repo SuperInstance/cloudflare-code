@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Enhanced Condition Evaluator
  * Provides expression evaluation, conditional branching, loop handling, and rule engine

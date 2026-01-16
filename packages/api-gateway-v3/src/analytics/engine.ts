@@ -484,19 +484,19 @@ export class AnalyticsEngine extends EventEmitter {
 
   private startTimers(): void {
     // Flush timer
-    this.flushTimer = window.setInterval(() => {
+    this.flushTimer = setInterval(() => {
       this.flush().catch((error) => {
         console.error('Failed to flush analytics:', error);
       });
-    }, this.config.flushInterval) as unknown as number;
+    }, this.config.flushInterval);
 
     // Aggregation timer
     if (this.config.aggregation.enabled) {
-      this.aggregationTimer = window.setInterval(() => {
+      this.aggregationTimer = setInterval(() => {
         this.aggregateMetrics().catch((error) => {
           console.error('Failed to aggregate metrics:', error);
         });
-      }, this.config.aggregation.interval) as unknown as number;
+      }, this.config.aggregation.interval);
     }
   }
 

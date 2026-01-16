@@ -4,6 +4,7 @@
  * Main chat interface with streaming support.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';

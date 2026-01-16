@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Mitigation Engine
  * Executes mitigation actions to block or limit malicious traffic

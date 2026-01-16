@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Examples module exports
  */

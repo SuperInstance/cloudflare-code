@@ -438,11 +438,11 @@ export class TreeOfThoughtsEngine {
     }
 
     const path: string[] = [];
-    let currentId = this.rootId;
+    let currentId: string | null = this.rootId;
 
     while (currentId) {
       path.push(currentId);
-      const currentNode = this.nodes.get(currentId)!;
+      const currentNode: ThoughtNode = this.nodes.get(currentId)!;
 
       // Find best child
       if (currentNode.children.length === 0) {
@@ -453,7 +453,7 @@ export class TreeOfThoughtsEngine {
       let bestScore = -1;
 
       for (const childId of currentNode.children) {
-        const childNode = this.nodes.get(childId)!;
+        const childNode: ThoughtNode = this.nodes.get(childId)!;
         if ((childNode.score ?? 0) > bestScore) {
           bestScore = childNode.score ?? 0;
           bestChildId = childId;

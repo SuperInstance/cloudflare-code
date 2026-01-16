@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Durable Object for coordinating webhook delivery across instances
  */

@@ -34,7 +34,6 @@
     "useDefineForClassFields": true,
     "types": [
       "node",
-      "jest",
       "@cloudflare/workers-types"
     ]
   },

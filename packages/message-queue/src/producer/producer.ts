@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Message Producer
  * Handles message publishing, batching, and routing

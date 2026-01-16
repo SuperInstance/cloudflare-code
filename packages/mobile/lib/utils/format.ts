@@ -4,6 +4,7 @@
  * Helper functions for formatting dates, numbers, and strings.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 
 /**

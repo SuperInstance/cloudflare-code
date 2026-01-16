@@ -3,7 +3,7 @@
  * Supports multiple algorithms: token-bucket, leaky-bucket, fixed-window, sliding-window
  */
 
-import { DurableObjectStorage } from '@cloudflare/workers-types';
+import { DurableObjectStorage as CfDurableObjectStorage } from '@cloudflare/workers-types';
 import {
   RateLimitConfig,
   RateLimitRule,
@@ -311,7 +311,7 @@ export class RateLimiter {
       case 'redis':
         return new RedisStorage(config.options);
       case 'durable-object':
-        return new DurableObjectStorage(config.options);
+        return new DurableObjectStorageBackend(config.options);
       default:
         return new MemoryStorage(config.options);
     }
@@ -402,8 +402,8 @@ class RedisStorage implements RateLimitStorageBackend {
   }
 }
 
-class DurableObjectStorage implements RateLimitStorageBackend {
-  private storage: DurableObjectStorage;
+class DurableObjectStorageBackend implements RateLimitStorageBackend {
+  private storage: CfDurableObjectStorage;
   private prefix: string;
 
   constructor(options?: Record<string, any>) {

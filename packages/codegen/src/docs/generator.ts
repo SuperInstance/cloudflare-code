@@ -3,9 +3,9 @@
  * Generates API documentation, code comments, README files, etc.
  */
 
-import { Language, DocsOptions, GeneratedDocumentation, DocumentationSection, APIDocumentation, TypeDocumentation, CodeExample, Diagram, TableOfContents, SearchIndex, CodeFile } from '../types/index.js';
-import { FileManager } from '../utils/file-manager.js';
-import { TemplateEngine } from '../templates/engine.js';
+import type { Language, DocsOptions, GeneratedDocumentation, DocumentationSection, APIDocumentation, TypeDocumentation, CodeExample, Diagram, TableOfContents, SearchIndex, CodeFile } from '../types/index.js';
+import type { FileManager } from '../utils/file-manager.js';
+import type { TemplateEngine } from '../templates/engine.js';
 
 /**
  * Documentation Generator class

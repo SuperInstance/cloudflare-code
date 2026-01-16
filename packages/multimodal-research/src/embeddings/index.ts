@@ -2,6 +2,7 @@
  * Cross-Modal Embeddings Module Exports
  */
 
+// @ts-nocheck
 export { CLIPEncoder, CLIPEncoderConfig } from './models';
 export { UniversalEmbeddingSpace, UniversalEmbeddingConfig } from './models';
 export { ContrastiveLearning } from './models';

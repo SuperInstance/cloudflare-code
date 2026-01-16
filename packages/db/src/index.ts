@@ -21,6 +21,33 @@
  * ```
  */
 
+// Cloudflare D1 type declarations
+export interface D1Result {
+  success: boolean;
+  meta?: {
+    duration?: number;
+    last_row_id?: number;
+    changes?: number;
+    served_by?: string;
+  };
+  error?: Error;
+}
+
+export interface D1Database {
+  prepare(query: string): D1Statement;
+  batch(statements: D1Statement[]): Promise<D1Result[]>;
+  exec(query: string): Promise<D1Result>;
+  dump(): Promise<ArrayBuffer>;
+  withSession<T>(callback: (session: D1Database) => T | Promise<T>): Promise<T>;
+}
+
+export interface D1Statement {
+  bind(...params: any[]): D1Statement;
+  first<T = any>(): Promise<T | null>;
+  all<T = any>(): Promise<{ results: T[]; success: boolean; meta?: any }>;
+  run(): Promise<D1Result>;
+}
+
 // Core migration system
 export * from './migrations';
 

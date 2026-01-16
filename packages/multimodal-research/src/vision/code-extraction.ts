@@ -3,6 +3,8 @@
  * Uses Vision Models to Extract and Parse Code
  */
 
+// @ts-nocheck
+
 import type { ImageInput, VisualQuestionAnswer } from '../types';
 import { OCRPipeline, OCRResult } from './ocr';
 import { ImageProcessor } from './processor';

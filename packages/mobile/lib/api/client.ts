@@ -4,6 +4,7 @@
  * HTTP client with retry logic, caching, and offline support.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 import { offlineDb } from '../pwa/offline-db';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';

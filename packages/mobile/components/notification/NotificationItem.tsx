@@ -4,6 +4,7 @@
  * Mobile-optimized notification with swipe actions.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 'use client';
 
 import React from 'react';

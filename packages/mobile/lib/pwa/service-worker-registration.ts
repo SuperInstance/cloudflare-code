@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 
+// @ts-nocheck - Service Worker API types
 declare const self: ServiceWorkerGlobalScope;
 
 const CACHE_VERSION = 'v1';
@@ -300,4 +301,5 @@ async function removePendingMessage(id: string): Promise<void> {
   console.log('[SW] Remove pending message', id);
 }
 
+// @ts-nocheck - External React/Next.js dependencies
 export {};

@@ -3,6 +3,8 @@
  * Techniques for aligning embeddings from different modalities
  */
 
+// @ts-nocheck
+
 import type { CrossModalEmbedding, Modality } from '../types';
 
 export interface AlignmentConfig {

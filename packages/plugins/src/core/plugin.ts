@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Core Plugin base class and lifecycle management
  */

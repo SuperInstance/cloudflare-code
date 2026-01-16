@@ -64,7 +64,7 @@ export class CacheInvalidationManager {
     const keysInvalidated: string[] = [];
     const tiersAffected: CacheTier[] = [];
     const errors: string[] = [];
-    const propagationResults = [];
+    const propagationResults: Array<{tier: CacheTier, success: boolean, keysInvalidated: number, duration: number, error?: string}> = [];
 
     try {
       switch (request.strategy) {
@@ -111,7 +111,7 @@ export class CacheInvalidationManager {
     const keysInvalidated: string[] = [];
     const tiersAffected: CacheTier[] = ['hot', 'warm'];
     const errors: string[] = [];
-    const propagationResults = [];
+    const propagationResults: Array<{tier: CacheTier, success: boolean, keysInvalidated: number, duration: number, error?: string}> = [];
 
     if (!request.keys || request.keys.length === 0) {
       return {
@@ -169,7 +169,7 @@ export class CacheInvalidationManager {
     const keysInvalidated: string[] = [];
     const tiersAffected: CacheTier[] = ['hot', 'warm'];
     const errors: string[] = [];
-    const propagationResults = [];
+    const propagationResults: Array<{tier: CacheTier, success: boolean, keysInvalidated: number, duration: number, error?: string}> = [];
 
     if (!request.tags || request.tags.length === 0) {
       return {
@@ -237,7 +237,7 @@ export class CacheInvalidationManager {
     const keysInvalidated: string[] = [];
     const tiersAffected: CacheTier[] = ['hot', 'warm'];
     const errors: string[] = [];
-    const propagationResults = [];
+    const propagationResults: Array<{tier: CacheTier, success: boolean, keysInvalidated: number, duration: number, error?: string}> = [];
 
     if (!request.pattern) {
       return {
@@ -293,7 +293,7 @@ export class CacheInvalidationManager {
     const keysInvalidated: string[] = [];
     const tiersAffected: CacheTier[] = [];
     const errors: string[] = [];
-    const propagationResults = [];
+    const propagationResults: Array<{tier: CacheTier, success: boolean, keysInvalidated: number, duration: number, error?: string}> = [];
 
     if (!request.keys || request.keys.length === 0) {
       return {
@@ -369,7 +369,7 @@ export class CacheInvalidationManager {
     const keysInvalidated = 0;
     const tiersAffected: CacheTier[] = ['hot', 'warm', 'cold'];
     const errors: string[] = [];
-    const propagationResults = [];
+    const propagationResults: Array<{tier: CacheTier, success: boolean, keysInvalidated: number, duration: number, error?: string}> = [];
 
     // Note: KV doesn't support purging all keys
     // In production, you'd use a prefix-based approach or maintain a key registry
@@ -394,7 +394,7 @@ export class CacheInvalidationManager {
     const keysInvalidated = 0;
     const tiersAffected: CacheTier[] = [];
     const errors: string[] = [];
-    const propagationResults = [];
+    const propagationResults: Array<{tier: CacheTier, success: boolean, keysInvalidated: number, duration: number, error?: string}> = [];
 
     // Time-based invalidation is handled automatically by KV TTL
     // This is a placeholder for any custom time-based logic
@@ -419,7 +419,7 @@ export class CacheInvalidationManager {
     const keysInvalidated = 0;
     const tiersAffected: CacheTier[] = [];
     const errors: string[] = [];
-    const propagationResults = [];
+    const propagationResults: Array<{tier: CacheTier, success: boolean, keysInvalidated: number, duration: number, error?: string}> = [];
 
     // Event-based invalidation would trigger based on external events
     // This is a placeholder for event-driven invalidation logic

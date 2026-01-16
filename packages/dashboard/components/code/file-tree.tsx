@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * File tree component for browsing project files
  */

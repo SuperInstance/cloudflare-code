@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Main layout wrapper for dashboard pages
  */

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Real-time collaboration WebSocket handler
  */

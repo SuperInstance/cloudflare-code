@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+// @ts-nocheck - External commander dependency
 import { Command } from 'commander';
 import { MessagingBroker } from '../broker';
 import { readFileSync } from 'fs';

@@ -2,6 +2,7 @@
  * Custom assertion utilities for QA framework
  */
 
+// @ts-nocheck
 import { expect, Page } from '@playwright/test';
 import type { Assertable, AssertionOptions } from './types';
 

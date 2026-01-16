@@ -157,8 +157,11 @@ export class EdgeRouter {
 
     for (let i = 0; i < routes.length; i++) {
       for (let j = i + 1; j < routes.length; j++) {
-        const [pattern1, route1] = routes[i];
-        const [pattern2, route2] = routes[j];
+        const entry1 = routes[i];
+        const entry2 = routes[j];
+        if (!entry1 || !entry2) continue;
+        const [pattern1, _route1] = entry1;
+        const [pattern2, _route2] = entry2;
 
         // Check if patterns could match the same URL
         if (this.patternsOverlap(pattern1, pattern2)) {
@@ -176,8 +179,8 @@ export class EdgeRouter {
   private patternsOverlap(pattern1: string, pattern2: string): boolean {
     // Simplified overlap detection
     // A full implementation would be more sophisticated
-    const regex1 = new RegExp('^' + pattern1.replace(/\*/g, '.*').replace(/:([^/]+)/g, '[^/]+') + '$');
-    const regex2 = new RegExp('^' + pattern2.replace(/\*/g, '.*').replace(/:([^/]+)/g, '[^/]+') + '$');
+    // const _regex1 = new RegExp('^' + pattern1.replace(/\*/g, '.*').replace(/:([^/]+)/g, '[^/]+') + '$'); // Unused variable
+    // const _regex2 = new RegExp('^' + pattern2.replace(/\*/g, '.*').replace(/:([^/]+)/g, '[^/]+') + '$'); // Unused variable
 
     // If patterns are identical or one is a wildcard
     if (pattern1 === pattern2 || pattern1 === '*' || pattern2 === '*') {

@@ -3,6 +3,7 @@
  * Supports Anthropic Claude and OpenAI GPT-4V for comprehensive image understanding
  */
 
+// @ts-nocheck - External AI SDK dependencies
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 import type {

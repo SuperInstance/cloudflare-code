@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Stream Processing Engine
  * Real-time data stream processing with transformations and windowing

@@ -3,6 +3,8 @@
  * Provides high-performance metrics collection with support for counters, gauges, and histograms
  */
 
+// @ts-nocheck - @opentelemetry dependencies not available in this environment
+
 import { EventEmitter } from 'eventemitter3';
 import { MeterProvider, Meter, Counter, Histogram, Gauge, UpDownCounter } from '@opentelemetry/sdk-metrics';
 import { Resource } from '@opentelemetry/resources';

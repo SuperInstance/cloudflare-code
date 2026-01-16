@@ -5,7 +5,7 @@
  */
 
 import { EventEmitter } from 'events';
-import type { DeploymentStatus, IDeploymentResult } from '../types/index.js';
+import type { IDeploymentResult } from '../types/index.js';
 
 interface IMonitoringConfig {
   checkInterval: number;

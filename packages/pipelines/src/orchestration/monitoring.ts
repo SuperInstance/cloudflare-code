@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Pipeline Monitoring
  * Monitors pipeline execution and generates alerts

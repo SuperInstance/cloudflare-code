@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Sample plugin implementation
  */

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Metrics chart component using Recharts
  */

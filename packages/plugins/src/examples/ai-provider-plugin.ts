@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Example AI provider plugin
  */

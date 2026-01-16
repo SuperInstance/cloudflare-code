@@ -2,6 +2,7 @@
  * Saga Choreography implementation
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type {
   ChoreographyDefinition,
   ChoreographyParticipant,

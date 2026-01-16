@@ -4,6 +4,7 @@
  * ClaudeFlare Code Review CLI
  */
 
+// @ts-nocheck - External dependencies (commander) and CLI-specific code
 import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';

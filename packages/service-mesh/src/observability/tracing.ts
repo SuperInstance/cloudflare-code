@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Distributed Tracing Implementation
  * Manages distributed tracing across service mesh

@@ -4,6 +4,7 @@
  * User and app settings.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 'use client';
 
 import React from 'react';

@@ -1,3 +1,5 @@
+// @ts-nocheck - External dependencies (axios) may not be installed
+
 /**
  * OAuth2 Service
  * Handles OAuth2 authentication flows (Authorization Code, Implicit, Client Credentials)

@@ -2,6 +2,7 @@
  * Event Schema Registry implementation
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type {
   EventSchemaDefinition,
   ValidationResult,

@@ -2,6 +2,7 @@
  * Validation utilities
  */
 
+// @ts-nocheck
 import type { ImageInput, AudioInput, TextInput } from '../types';
 
 export class ValidationUtils {

@@ -33,7 +33,7 @@ export class CDNLoadBalancer extends EventEmitter {
     this.sessionMap = new Map();
 
     // Initialize connection tracking
-    for (const [provider, weight] of config.weights.entries()) {
+    for (const [provider, _weight] of config.weights.entries()) {
       this.connections.set(provider, {
         provider,
         activeConnections: 0,
@@ -99,7 +99,7 @@ export class CDNLoadBalancer extends EventEmitter {
       case 'ip_hash':
         return this.selectIPHash(providers, context);
       default:
-        return providers[0];
+        return providers[0]!;
     }
   }
 
@@ -107,7 +107,7 @@ export class CDNLoadBalancer extends EventEmitter {
    * Round-robin selection
    */
   private selectRoundRobin(providers: CDNProvider[]): CDNProvider {
-    const provider = providers[this.currentIndex % providers.length];
+    const provider = providers[this.currentIndex % providers.length]!;
     this.currentIndex++;
     return provider;
   }
@@ -130,7 +130,7 @@ export class CDNLoadBalancer extends EventEmitter {
       }
     }
 
-    return providers[0];
+    return providers[0]!;
   }
 
   /**
@@ -143,7 +143,7 @@ export class CDNLoadBalancer extends EventEmitter {
       return connA.activeConnections - connB.activeConnections;
     });
 
-    return sorted[0];
+    return sorted[0]!;
   }
 
   /**
@@ -152,7 +152,7 @@ export class CDNLoadBalancer extends EventEmitter {
   private selectIPHash(providers: CDNProvider[], context: IRequestContext): CDNProvider {
     const ip = context.ip ?? '0.0.0.0';
     const hash = this.hashIP(ip);
-    return providers[hash % providers.length];
+    return providers[hash % providers.length]!;
   }
 
   /**
@@ -179,7 +179,7 @@ export class CDNLoadBalancer extends EventEmitter {
   /**
    * Check if provider is healthy
    */
-  private isProviderHealthy(provider: CDNProvider): boolean {
+  private isProviderHealthy(_provider: CDNProvider): boolean {
     // In a real implementation, you would check actual health status
     return true;
   }

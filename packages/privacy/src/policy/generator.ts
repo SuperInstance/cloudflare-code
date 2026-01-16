@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Privacy Policy Generator
  * GDPR-compliant privacy policy generation

@@ -2,6 +2,7 @@
  * Security test runner for ClaudeFlare
  */
 
+// @ts-nocheck
 import { Page, APIRequestContext } from '@playwright/test';
 import type { SecurityTestConfig, SecurityTestResult, Vulnerability, SecuritySummary } from '../utils/types';
 

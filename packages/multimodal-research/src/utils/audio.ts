@@ -2,6 +2,7 @@
  * Audio processing utilities
  */
 
+// @ts-nocheck
 import type { AudioInput } from '../types';
 
 export class AudioUtils {

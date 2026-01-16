@@ -4,7 +4,7 @@
  * Generate reports from CDN analytics data.
  */
 
-import type { ICDNAnalytics } from '../types/index.js';
+// import type { ICDNAnalytics } from '../types/index.js'; // Unused import
 import { CDNAnalytics } from './analytics.js';
 
 export interface IReportConfig {
@@ -28,7 +28,7 @@ export class AnalyticsReporter {
    * Generate performance report
    */
   public generatePerformanceReport(config?: IReportConfig): string {
-    const analytics = this.analytics.getAnalytics();
+    // const _analytics = this.analytics.getAnalytics(); // Unused variable
     const summary = this.analytics.getSummary();
 
     const report = {
@@ -67,7 +67,7 @@ export class AnalyticsReporter {
    */
   public generateSecurityReport(config?: IReportConfig): string {
     const analytics = this.analytics.getAnalytics();
-    const events = this.analytics.getEvents({ type: 'threat_detected', limit: 100 });
+    const events = this.analytics.getEvents({ type: 'threat_detected' as any, limit: 100 });
 
     const report = {
       title: 'CDN Security Report',
@@ -79,10 +79,10 @@ export class AnalyticsReporter {
       },
       recentThreats: events.map(e => ({
         timestamp: e.timestamp,
-        type: e.data.type,
-        source: e.data.source,
-        target: e.data.target,
-        blocked: e.data.blocked
+        type: e.data['type'],
+        source: e.data['source'],
+        target: e.data['target'],
+        blocked: e.data['blocked']
       }))
     };
 
@@ -210,7 +210,7 @@ export class AnalyticsReporter {
   public async exportToFile(
     report: string,
     filePath: string,
-    format: 'json' | 'txt' | 'csv' = 'txt'
+    _format: 'json' | 'txt' | 'csv' = 'txt'
   ): Promise<void> {
     const fs = await import('fs/promises');
     await fs.writeFile(filePath, report, 'utf-8');

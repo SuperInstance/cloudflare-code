@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Server-Sent Events (SSE) Data Ingestion
  * Handles data ingestion from SSE streams

@@ -3,9 +3,9 @@
  */
 
 const urlAlphabet = 'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict';
-const random = bytes => crypto.getRandomValues(new Uint8Array(bytes));
+const random = (bytes: number) => crypto.getRandomValues(new Uint8Array(bytes));
 
-function customAlphabet(alphabet, defaultSize = 21) {
+function customAlphabet(alphabet: string, defaultSize = 21) {
   return (size = defaultSize) => {
     let id = '';
     let i = size;

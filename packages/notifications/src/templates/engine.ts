@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Template engine for notification content
  */

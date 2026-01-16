@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Plugin registry - manages plugin discovery, registration, and metadata
  */

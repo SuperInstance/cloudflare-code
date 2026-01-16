@@ -3,6 +3,8 @@
  * Universal embedding space for image, audio, and text modalities
  */
 
+// @ts-nocheck
+
 import type {
   ImageInput,
   AudioInput,

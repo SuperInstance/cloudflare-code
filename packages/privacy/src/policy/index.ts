@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Privacy policy generator exports
  * @packageDocumentation

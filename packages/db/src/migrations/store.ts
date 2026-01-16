@@ -2,6 +2,8 @@
  * Migration store for tracking migration history
  */
 
+import type { D1Database } from '../index';
+
 export interface MigrationRecord {
   version: number;
   name: string;

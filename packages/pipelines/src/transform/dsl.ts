@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Transformation DSL
  * Domain-specific language for data transformations

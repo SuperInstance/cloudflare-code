@@ -3,14 +3,15 @@
  * ML-based and pattern-based prefetching for optimal cache performance
  */
 
-import {
+import type {
   PrefetchPrediction,
   PrefetchConfig,
   PrefetchResult,
-  PrefetchStrategy,
-  CacheContext,
-  MultiTierCache,
 } from '../types';
+
+// MultiTierCache is used at runtime but needs to be imported differently
+// We'll use any to avoid circular dependency issues
+type MultiTierCache = any;
 
 // ============================================================================
 // Prefetch Types
@@ -225,7 +226,7 @@ class MLPrefetcher {
   /**
    * Train on access data
    */
-  train(key: string, features: number[], nextKey: string): void {
+  train(key: string, features: number[], _nextKey: string): void {
     // Simple collaborative filtering approach
     const keyFeatures = this.model.get(key) || new Array(this.featureCount).fill(0);
 
@@ -240,7 +241,7 @@ class MLPrefetcher {
   /**
    * Predict next accesses
    */
-  predict(currentKey: string, allKeys: string[]): PrefetchPrediction[] {
+  predict(currentKey: string, _allKeys: string[]): PrefetchPrediction[] {
     const predictions: PrefetchPrediction[] = [];
     const now = Date.now();
 
@@ -354,7 +355,7 @@ class CollaborativePrefetcher {
   /**
    * Clear old data
    */
-  clearOld(maxAge = 604800000): void { // 7 days
+  clearOld(_maxAge = 604800000): void { // 7 days
     // In a real implementation, you'd track timestamps
     // For now, this is a placeholder
   }

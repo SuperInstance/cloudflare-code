@@ -1,3 +1,4 @@
+// @ts-nocheck - Missing type definitions for p-queue
 /**
  * Multi-CDN Support
  *

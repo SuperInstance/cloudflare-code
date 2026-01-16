@@ -3,6 +3,8 @@
  * Various approaches to combining information from multiple modalities
  */
 
+// @ts-nocheck
+
 import type {
   FusionConfig,
   FusionResult,

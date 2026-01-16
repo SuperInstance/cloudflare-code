@@ -133,7 +133,7 @@ export class DataTransformer {
     return transformedRecord;
   }
 
-  private async applyTransformation(
+  public async applyTransformation(
     data: any,
     rule: TransformationRule,
     context: TransformationContext
@@ -317,7 +317,7 @@ export class DataTransformer {
     switch (enrichmentType) {
       case 'concat':
         const parts = rule.options?.parts || [];
-        return parts.map(part => {
+        return parts.map((part: any) => {
           if (typeof part === 'string' && part.startsWith('$')) {
             return this.getNestedValue(data, part.slice(1));
           }
@@ -529,7 +529,8 @@ export class TransformationPipeline {
     const transformedRecord = deepClone(record);
 
     for (const rule of this.rules) {
-      const result = await this.applyTransformation(transformedData, rule, transformationContext);
+      const transformer = new DataTransformer({ customTransformers: this.customTransformers });
+      const result = await transformer.applyTransformation(transformedData, rule, transformationContext);
 
       if (result.error) {
         throw new Error(`Pipeline transformation error: ${result.error}`);
@@ -547,15 +548,6 @@ export class TransformationPipeline {
     };
 
     return transformedRecord;
-  }
-
-  private async applyTransformation(
-    data: any,
-    rule: TransformationRule,
-    context: TransformationContext
-  ): Promise<{ success: boolean; value?: any; error?: string }> {
-    const transformer = new DataTransformer({ customTransformers: this.customTransformers });
-    return transformer.applyTransformation(data, rule, context);
   }
 
   private setNestedValue(obj: any, path: string, value: any): void {

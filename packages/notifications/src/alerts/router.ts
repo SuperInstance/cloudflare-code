@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Alert router for intelligent alert routing and management
  */

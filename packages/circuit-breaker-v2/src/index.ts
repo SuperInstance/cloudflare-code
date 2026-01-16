@@ -11,7 +11,7 @@ export { FallbackManager } from './fallback/manager.js';
 
 // Recovery
 export { RecoveryEngine } from './recovery/engine.js';
-export type { RecoveryState, RecoveryAttempt, RecoveryResult } from './recovery/engine.js';
+export type { RecoveryResult } from './recovery/engine.js';
 
 // Monitoring
 export { MetricsCollector } from './monitoring/metrics.js';

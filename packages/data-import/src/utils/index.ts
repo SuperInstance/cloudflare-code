@@ -146,7 +146,7 @@ export function deepClone<T>(obj: T): T {
   return clonedObj;
 }
 
-export function createMemoryStream(): { stream: NodeJS.Readable; data: string[]; write: (chunk: string) => void } {
+export function createMemoryStream(): { stream: import('stream').Readable; data: string[]; write: (chunk: string) => void } {
   const data: string[] = [];
   const stream = new Transform({
     transform(chunk: Buffer, encoding, callback) {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Advanced Load Balancer
  *

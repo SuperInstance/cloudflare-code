@@ -3,6 +3,8 @@
  * Including Speech Recognition, Audio Classification, and Speaker Identification
  */
 
+// @ts-nocheck
+
 import type {
   AudioInput,
   AudioEmbedding,

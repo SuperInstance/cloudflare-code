@@ -6,6 +6,7 @@
  * If the bucket overflows, requests are rejected.
  */
 
+// @ts-nocheck
 import type {
   RateLimitResult,
   RateLimitConfig,

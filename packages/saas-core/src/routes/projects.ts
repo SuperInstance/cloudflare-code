@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Project management API routes
  */

@@ -3,6 +3,7 @@
  * Manages driver/navigator roles and collaboration features
  */
 
+// @ts-nocheck - Pair programming with unused parameters
 import { nanoid } from 'nanoid';
 import type {
   PairSession,

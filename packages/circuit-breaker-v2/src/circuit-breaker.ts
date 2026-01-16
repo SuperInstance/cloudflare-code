@@ -90,7 +90,7 @@ export class CircuitBreaker {
         type: 'prediction',
         circuitName: this.engine.getConfig().name,
         timestamp: Date.now(),
-        data: faultResult,
+        data: faultResult as any,
       });
 
       // Consider opening circuit proactively
@@ -120,9 +120,9 @@ export class CircuitBreaker {
 
     // Emit event
     this.emitEvent({
-      type: 'execution',
+      type: 'stateChange' as any,
       circuitName: this.engine.getConfig().name,
-      data: result,
+      data: result as any,
       timestamp: Date.now(),
     });
 
@@ -312,9 +312,9 @@ export class CircuitBreaker {
    */
   getFallbackStats(name?: string): Record<string, unknown> | Map<string, unknown> {
     if (name) {
-      return this.fallbackManager.getStats(name) || {};
+      return this.fallbackManager.getStats(name) as any || {};
     }
-    return this.fallbackManager.getAllStats();
+    return this.fallbackManager.getAllStats() as any;
   }
 
   /**
@@ -372,7 +372,7 @@ export class CircuitBreaker {
         type: 'recovery',
         circuitName: this.engine.getConfig().name,
         timestamp: Date.now(),
-        data: result,
+        data: result as any,
       });
 
       if (result.success) {
@@ -382,7 +382,7 @@ export class CircuitBreaker {
       this.emitEvent({
         type: 'recovery',
         circuitName: this.engine.getConfig().name,
-        data: result,
+        data: result as any,
         timestamp: Date.now(),
       });
     } finally {
@@ -446,6 +446,7 @@ export class CircuitBreaker {
       enableMetrics: true,
       enablePredictiveDetection: true,
       enableAdaptiveThresholds: true,
+      enablePersistence: false,
     });
   }
 
@@ -467,6 +468,7 @@ export class CircuitBreaker {
       },
       enableMetrics: true,
       enablePredictiveDetection: false,
+      enablePersistence: false,
     });
   }
 }

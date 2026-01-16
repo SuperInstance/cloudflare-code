@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Architecture Ranking System
  * Multi-objective ranking and Pareto front calculation

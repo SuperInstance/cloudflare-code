@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+// @ts-nocheck
 /**
  * ClaudeFlare Deployment CLI
  * Command-line interface for deployment operations

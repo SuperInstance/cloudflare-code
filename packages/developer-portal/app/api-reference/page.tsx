@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Search, Book, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

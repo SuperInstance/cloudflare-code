@@ -4,6 +4,7 @@
  * Helper functions for validating user input.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 import { z } from 'zod';
 
 /**

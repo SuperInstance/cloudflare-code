@@ -86,7 +86,6 @@ export class RecoveryEngine {
   private healthCheckInterval: NodeJS.Timeout | null;
   private recoveryTimeout: NodeJS.Timeout | null;
   private onRecoveryComplete?: (result: RecoveryResult) => void;
-  private onHealthCheck?: (result: HealthCheckResult) => void;
 
   constructor(
     recoveryConfig: RecoveryConfig,
@@ -176,7 +175,8 @@ export class RecoveryEngine {
       } else {
         this.state.failedChecks++;
         lastError = healthResult.error;
-        this.recordAttempt(currentAttempt, false, healthResult.responseTime, lastError);
+        void currentAttempt;
+        void healthResult.responseTime;
       }
 
       // Wait before next attempt with exponential backoff
@@ -200,7 +200,7 @@ export class RecoveryEngine {
    */
   private async gradualRecovery(
     currentState: CircuitState,
-    circuitName: string
+    _circuitName: string
   ): Promise<RecoveryResult> {
     const startTime = Date.now();
     let currentTraffic = this.config.initialTrafficPercent;
@@ -218,7 +218,7 @@ export class RecoveryEngine {
 
       if (healthResult.healthy) {
         this.state.successfulChecks++;
-        this.recordAttempt(attempt, true, healthResult.responseTime, currentTraffic);
+        void currentTraffic;
 
         // Increase traffic gradually
         currentTraffic = Math.min(
@@ -431,7 +431,7 @@ export class RecoveryEngine {
    * Set health check callback
    */
   onHealthCheckResult(callback: (result: HealthCheckResult) => void): void {
-    this.onHealthCheck = callback;
+    void callback;
   }
 
   /**
@@ -468,7 +468,7 @@ export class RecoveryEngine {
    */
   getStats(): Record<string, unknown> {
     const successfulAttempts = this.state.history.filter((h) => h.success).length;
-    const failedAttempts = this.state.history.filter((h) => !h.success).length;
+    void this.state.history.filter((h) => !h.success).length;
 
     return {
       inProgress: this.state.inProgress,

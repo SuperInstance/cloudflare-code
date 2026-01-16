@@ -62,17 +62,17 @@ export interface SpanStatus {
 export type SpanStatusCode = 'unset' | 'ok' | 'error' | 'timeout';
 
 export interface ResourceAttributes {
-  service.name: string;
-  service.version?: string;
-  service.instance.id?: string;
-  telemetry.sdk.name: string;
-  telemetry.sdk.language: string;
-  telemetry.sdk.version: string;
-  host.name?: string;
-  host.arch?: string;
-  os.type?: string;
-  cloud.account.id?: string;
-  cloud.region?: string;
+  'service.name': string;
+  'service.version'?: string;
+  'service.instance.id'?: string;
+  'telemetry.sdk.name': string;
+  'telemetry.sdk.language': string;
+  'telemetry.sdk.version': string;
+  'host.name'?: string;
+  'host.arch'?: string;
+  'os.type'?: string;
+  'cloud.account.id'?: string;
+  'cloud.region'?: string;
 }
 
 export interface Span {

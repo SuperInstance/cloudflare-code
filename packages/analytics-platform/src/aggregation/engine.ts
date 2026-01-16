@@ -8,7 +8,6 @@ import type {
   AggregationConfig,
   AggregationMetric,
   AggregationOperation,
-  AggregationGrouping,
   AggregationResult,
   TimeWindow,
 } from '../types/index.js';
@@ -44,7 +43,6 @@ export class AggregationEngine {
   private config: AggregationEngineConfig;
   private tasks: Map<string, AggregationTask> = new Map();
   private cache: Map<string, CachedAggregation> = new Map();
-  private timeSeriesData: Map<string, TimeSeriesData[]> = new Map();
   private metrics: AggregationMetrics;
 
   constructor(config: Partial<AggregationEngineConfig> = {}) {
@@ -713,7 +711,7 @@ export class RealtimeAggregator {
     const now = Date.now();
     const cutoff = now - this.config.windowSize;
 
-    for (const [seriesId, window] of this.windows.entries()) {
+    for (const [_seriesId, window] of this.windows.entries()) {
       window.slide(cutoff);
     }
   }
@@ -724,10 +722,10 @@ export class RealtimeAggregator {
  */
 class RollingWindow {
   private events: AnalyticsEvent[] = [];
-  private windowSize: number;
 
-  constructor(windowSize: number) {
-    this.windowSize = windowSize;
+  constructor(_windowSize: number) {
+    // Window size is stored but not used in current implementation
+    // Kept for future use and API compatibility
   }
 
   /**

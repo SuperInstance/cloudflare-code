@@ -51,7 +51,7 @@ export interface CacheLayerConfig {
    * Default stale-while-revalidate time (seconds)
    * @default 60
    */
-  staleWhileRevalidate?: number;
+  staleWhileRevalidateTime?: number;
 
   /**
    * Enable cache warming
@@ -150,7 +150,20 @@ export class CacheFullError extends CacheError {
  * Advanced edge caching layer with multiple strategies
  */
 export class CacheLayer {
-  private readonly config: Required<CacheLayerConfig>;
+  private readonly config: {
+    defaultTTL: number;
+    maxSize: number;
+    maxEntrySize: number;
+    enableStaleWhileRevalidate: number;
+    staleWhileRevalidate: number;
+    enableCacheWarming: boolean;
+    cacheWarmingInterval: number;
+    enableMetrics: boolean;
+    keyStrategy: CacheKeyStrategy;
+    storage: CacheStorage;
+    customKeyGenerator: (functionId: string, input: unknown) => string;
+    kvNamespace: string;
+  };
   private readonly memoryCache: Map<string, CacheEntry>;
   private readonly stats: Map<string, CacheStats>;
   private readonly warmingTasks: Map<string, ReturnType<typeof setInterval>>;
@@ -162,16 +175,15 @@ export class CacheLayer {
       maxSize: 1000,
       maxEntrySize: 1048576,
       enableStaleWhileRevalidate: true,
-      staleWhileRevalidate: 60,
+      staleWhileRevalidate: config.staleWhileRevalidateTime ?? 60,
       enableCacheWarming: true,
       cacheWarmingInterval: 60000,
       enableMetrics: true,
       keyStrategy: 'default',
       storage: 'memory',
-      customKeyGenerator: () => '',
+      customKeyGenerator: config.customKeyGenerator || this.defaultKeyGenerator,
       kvNamespace: 'CACHE',
       ...config,
-      customKeyGenerator: config.customKeyGenerator || this.defaultKeyGenerator,
     };
 
     this.memoryCache = new Map();
@@ -244,7 +256,7 @@ export class CacheLayer {
   ): Promise<void> {
     const key = this.generateKey(functionId, input);
     const ttl = config?.ttl ?? this.config.defaultTTL;
-    const staleWhileRevalidate = config?.staleWhileRevalidate ?? this.config.staleWhileRevalidate;
+    const _staleWhileRevalidate = config?.staleWhileRevalidate ?? this.config.staleWhileRevalidate;
 
     // Check if value should be cached
     if (config?.bypassCache && config.bypassCache(input)) {
@@ -384,7 +396,7 @@ export class CacheLayer {
     const results = await Promise.allSettled(
       inputs.map(async (input) => {
         try {
-          const output = await func.handler(input, { ctx: {} as any, env });
+          const output = await func.handler(input, { env, ctx: {} as any });
           await this.set(func.id, input, output, func.config.cache, env);
         } catch (error) {
           console.error(`Cache warming failed for ${func.id}:`, error);
@@ -426,11 +438,11 @@ export class CacheLayer {
   /**
    * Stop cache warming for a function
    */
-  stopCacheWarming(functionId: string): void {
-    const intervalId = this.warmingTasks.get(functionId);
+  stopCacheWarming(_functionId: string): void {
+    const intervalId = this.warmingTasks.get(_functionId);
     if (intervalId) {
       clearInterval(intervalId);
-      this.warmingTasks.delete(functionId);
+      this.warmingTasks.delete(_functionId);
     }
   }
 
@@ -438,7 +450,7 @@ export class CacheLayer {
    * Stop all cache warming
    */
   stopAllCacheWarming(): void {
-    for (const [functionId, intervalId] of this.warmingTasks) {
+    for (const [_functionId, intervalId] of this.warmingTasks) {
       clearInterval(intervalId);
     }
     this.warmingTasks.clear();
@@ -479,9 +491,9 @@ export class CacheLayer {
   /**
    * Invalidate expired entries
    */
-  async invalidateExpired(env?: EdgeEnv): Promise<number> {
+  async invalidateExpired(_env?: EdgeEnv): Promise<number> {
     let invalidated = 0;
-    const now = Date.now();
+    const _now = Date.now();
 
     // Invalidate from memory cache
     for (const [key, entry] of this.memoryCache.entries()) {
@@ -602,10 +614,10 @@ export class CacheLayer {
    * Revalidate cache entry in background
    */
   private async revalidateInBackground(
-    functionId: string,
-    input: unknown,
-    key: string,
-    env?: EdgeEnv
+    _functionId: string,
+    _input: unknown,
+    _key: string,
+    _env?: EdgeEnv
   ): Promise<void> {
     // In real implementation, would call the function to revalidate
     // This is a placeholder
@@ -747,7 +759,7 @@ export class CacheLayer {
     // KV doesn't have a direct clear method, so we need to list and delete
     const list = await kv.list();
     await Promise.all(
-      list.keys.map(key => kv.delete(key.name))
+      list.keys.map((key: any) => kv.delete(key.name))
     );
   }
 
@@ -765,7 +777,7 @@ export class CacheLayer {
 
     const list = await kv.list({ prefix: functionId });
     await Promise.all(
-      list.keys.map(key => kv.delete(key.name))
+      list.keys.map((key: any) => kv.delete(key.name))
     );
 
     return list.keys.length;
@@ -784,10 +796,10 @@ export class CacheLayer {
     }
 
     const list = await kv.list();
-    const toDelete = list.keys.filter(key => pattern.test(key.name));
+    const toDelete = list.keys.filter((key: any) => pattern.test(key.name));
 
     await Promise.all(
-      toDelete.map(key => kv.delete(key.name))
+      toDelete.map((key: any) => kv.delete(key.name))
     );
 
     return toDelete.length;

@@ -23,7 +23,6 @@ import type {
   GatewayResponse,
   GatewayContext,
   AnalyticsEvent,
-  AnalyticsConfig,
 } from '../types';
 
 /**
@@ -123,7 +122,15 @@ export interface AnalyticsEngineOptions {
  * Analytics Engine
  */
 export class AnalyticsEngine {
-  private options: Required<AnalyticsEngineOptions>;
+  private options: AnalyticsEngineOptions & {
+    enabled: boolean;
+    sampleRate: number;
+    storage: 'memory' | 'kv' | 'r2' | 'd1';
+    bufferSize: number;
+    flushInterval: number;
+    enableRealTime: boolean;
+    retentionDays: number;
+  };
   private eventBuffer: AnalyticsEventData[];
   private requestMetrics: Map<string, RequestMetrics>;
   private errorStats: ErrorStatistics;
@@ -197,7 +204,7 @@ export class AnalyticsEngine {
    */
   async recordRequest(
     request: GatewayRequest,
-    context: GatewayContext
+    _context: GatewayContext
   ): Promise<void> {
     if (!this.options.enabled || Math.random() > this.options.sampleRate) {
       return;
@@ -242,8 +249,8 @@ export class AnalyticsEngine {
     }
 
     if (request.route) {
-      this.usageStats.requestsByVersion[request.route.version || 'default'] =
-        (this.usageStats.requestsByVersion[request.route.version || 'default'] || 0) + 1;
+      this.usageStats.requestsByVersion[request.route.route.version || 'default'] =
+        (this.usageStats.requestsByVersion[request.route.route.version || 'default'] || 0) + 1;
     }
   }
 
@@ -610,7 +617,7 @@ export class AnalyticsEngine {
   /**
    * Query analytics (private helper)
    */
-  private async queryAnalytics(options: QueryOptions): Promise<unknown[]> {
+  private async queryAnalytics(_options: QueryOptions): Promise<unknown[]> {
     // Implement query logic based on storage backend
     return [];
   }

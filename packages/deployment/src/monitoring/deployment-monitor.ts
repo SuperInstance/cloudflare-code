@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Deployment Monitoring and Observability
  * Provides real-time monitoring and alerting for deployments

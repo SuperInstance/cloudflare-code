@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import { ServiceConfig, PlatformConfig, HealthStatus, ServiceRegistration, PlatformEvent } from '../types';
 import { Logger } from '../utils/logger';

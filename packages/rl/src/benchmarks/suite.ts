@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * RL Benchmark Suite
  * Comprehensive benchmarks for evaluating RL agents

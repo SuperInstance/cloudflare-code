@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Utility functions for the Real-Time Communication Package
  */

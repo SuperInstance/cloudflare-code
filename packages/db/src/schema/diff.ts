@@ -6,8 +6,7 @@ import type {
   DatabaseSchema,
   SchemaDiff,
   TableDefinition,
-  ColumnDefinition,
-  IndexDefinition
+  ColumnDefinition
 } from './types';
 
 export class SchemaDiffer {

@@ -306,7 +306,7 @@ export class L1Cache {
    */
   getHotKeys(limit = 10): Array<{ key: string; frequency: number }> {
     const entries = Array.from(this.accessLog.entries())
-      .map(([key, accesses]) => ({
+      .map(([key, _accesses]) => ({
         key,
         frequency: this.getAccessFrequency(key),
       }))

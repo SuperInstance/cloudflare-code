@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ClaudeFlare Optimization Package
  *

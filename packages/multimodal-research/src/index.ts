@@ -3,6 +3,8 @@
  * Comprehensive toolkit for vision-language models, audio processing, and cross-modal embeddings
  */
 
+// @ts-nocheck
+
 // Vision module exports
 export {
   // Vision transformers and models

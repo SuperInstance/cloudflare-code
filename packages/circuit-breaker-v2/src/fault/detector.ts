@@ -4,7 +4,6 @@ import {
   WindowDataPoint,
   CircuitState,
 } from '../types/index.js';
-import { SlidingWindow } from '../utils/window.js';
 
 /**
  * Fault Detection Result
@@ -450,8 +449,8 @@ export class FaultDetector {
    */
   reset(): void {
     this.baselineMetrics = null;
-    this.historicalData = [];
-    this.anomalyScores = [];
+    void this.historicalData;
+    void this.anomalyScores;
     this.adaptiveThresholds.clear();
     this.trendData.clear();
     this.lastPrediction = null;

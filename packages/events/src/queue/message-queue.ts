@@ -2,6 +2,7 @@
  * Message Queue implementation with Durable Objects
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject and R2EventStorage types not fully available
 import type {
   QueueMessage,
   QueueConfig,

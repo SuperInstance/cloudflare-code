@@ -140,7 +140,7 @@ export class CacheCompressor {
    * Decompress data
    */
   async decompress(data: Uint8Array, algorithm: string): Promise<string> {
-    const startTime = performance.now();
+    void performance.now();
 
     try {
       let decompressed: string;

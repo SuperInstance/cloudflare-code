@@ -2,8 +2,6 @@
  * Core types for the multi-tier caching system
  */
 
-import { DurableObjectStorage } from '@cloudflare/workers-types';
-
 // ============================================================================
 // Cache Entry Types
 // ============================================================================

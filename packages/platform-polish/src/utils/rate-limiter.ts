@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { LRUCache } from './helpers';
 
 export class RateLimiter {

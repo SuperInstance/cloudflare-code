@@ -3,10 +3,10 @@
  * Generates unit, integration, and E2E tests
  */
 
-import { Language, TestOptions, GeneratedTestSuite, GeneratedTest, TestCase, GeneratedFixture, MockReference, CodeFile } from '../types/index.js';
-import { FileManager } from '../utils/file-manager.js';
-import { TemplateEngine } from '../templates/engine.js';
-import { readFileSync } from 'fs';
+import type { Language, TestOptions, GeneratedTestSuite, GeneratedTest, TestCase, GeneratedFixture, MockReference, CodeFile } from '../types/index.js';
+import type { FileManager } from '../utils/file-manager.js';
+import type { TemplateEngine } from '../templates/engine.js';
+import type { readFileSync } from 'fs';
 
 /**
  * Test Generator class

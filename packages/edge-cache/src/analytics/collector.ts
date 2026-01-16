@@ -107,9 +107,9 @@ export class CacheAnalyticsCollector {
         misses: 0,
         latency,
         size: metadata?.size || 0,
-        feature: metadata.feature,
-        endpoint: metadata.endpoint,
-        geography: metadata.geography,
+        feature: metadata?.feature,
+        endpoint: metadata?.endpoint,
+        geography: metadata?.geography,
       });
     }
   }
@@ -147,9 +147,9 @@ export class CacheAnalyticsCollector {
         misses: 1,
         latency,
         size: 0,
-        feature: metadata.feature,
-        endpoint: metadata.endpoint,
-        geography: metadata.geography,
+        feature: metadata?.feature,
+        endpoint: metadata?.endpoint,
+        geography: metadata?.geography,
       });
     }
   }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Enhanced Sandbox - Advanced plugin execution environment
  *

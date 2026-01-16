@@ -10,7 +10,6 @@ import { AuthManager, createAuthManager } from './auth';
 import { Transformer, createTransformer } from './transformer';
 import { CircuitBreaker, createCircuitBreaker } from './circuit';
 import { AnalyticsEngine, createAnalyticsEngine } from './analytics';
-import { ConfigManager, createConfigManager } from './config';
 import { MiddlewareChain, createMiddlewareChain, Middleware } from './middleware';
 
 interface GatewayMetrics {
@@ -180,7 +179,9 @@ export class APIGateway {
         body: upstreamResponse.body,
         timestamp: Date.now(),
         duration: 0,
-        metadata: {}
+        metadata: {
+          tags: {}
+        }
       };
 
       if (this.transformer) await this.transformer.transformResponse(gatewayResponse, gatewayContext, gatewayRequest);

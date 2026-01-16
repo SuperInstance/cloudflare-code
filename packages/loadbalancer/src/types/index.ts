@@ -338,6 +338,7 @@ export interface TrafficShapingPolicy {
   defaultAction: TrafficAction;
   createdAt: number;
   updatedAt: number;
+  enabled?: boolean;
 }
 
 export interface ThrottlingConfig {
@@ -411,6 +412,7 @@ export interface RoutePolicy {
   match: RouteMatch;
   action: RouteAction;
   priority: number;
+  med?: number;
 }
 
 export interface RouteMatch {
@@ -598,3 +600,6 @@ export class ThrottledError extends LoadBalancerError {
     this.name = 'ThrottledError';
   }
 }
+
+// Re-export LoadBalancerConfig for convenience
+export type { LoadBalancerConfig } from '../loadbalancer.js';

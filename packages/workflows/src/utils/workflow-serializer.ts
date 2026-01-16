@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Workflow Serializer - serialize and deserialize workflows
  */

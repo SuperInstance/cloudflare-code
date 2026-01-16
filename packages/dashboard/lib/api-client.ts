@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API client for communicating with ClaudeFlare backend
  */

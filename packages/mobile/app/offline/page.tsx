@@ -4,6 +4,7 @@
  * Displayed when the user is offline.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 'use client';
 
 import React from 'react';

@@ -898,8 +898,4 @@ export class AlertingSystem {
   }
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
-export { AuditLogger, InMemoryAuditStorage, AuditEventBuilder, AuditMiddleware, AlertingSystem };
+// All classes are already exported inline - no duplicate export needed

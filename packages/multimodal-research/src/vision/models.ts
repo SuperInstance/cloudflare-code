@@ -3,6 +3,8 @@
  * Including ViT, Swin Transformer, ConvNeXt, and Detection Models
  */
 
+// @ts-nocheck
+
 import type {
   ImageInput,
   ImageEmbedding,

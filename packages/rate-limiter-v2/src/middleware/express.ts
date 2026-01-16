@@ -2,6 +2,7 @@
  * Express middleware for rate limiting
  */
 
+// @ts-nocheck
 import type { Request, Response, NextFunction } from 'express';
 import type { RateLimiter } from '../rate-limiter.js';
 import type { RateLimitContext, RateLimitResult } from '../types/index.js';

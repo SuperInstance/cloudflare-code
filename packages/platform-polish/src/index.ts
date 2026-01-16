@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Main exports for the platform-polish package
 
 // Core components

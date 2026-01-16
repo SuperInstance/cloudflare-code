@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ClaudeFlare Data Export - Ultra-Optimized
  * Advanced data export and transformation

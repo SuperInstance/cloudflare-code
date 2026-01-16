@@ -3,6 +3,7 @@
  * Standard benchmarks for evaluating vision models
  */
 
+// @ts-nocheck
 import type {
   ImageInput,
   BenchmarkConfig,

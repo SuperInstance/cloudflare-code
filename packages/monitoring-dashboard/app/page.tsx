@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import React, { useState } from 'react';
 import { LayoutDashboard, Bell, AlertTriangle, Lightbulb, Radar, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';

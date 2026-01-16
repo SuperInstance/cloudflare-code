@@ -336,7 +336,7 @@ class ShardRouter {
   }
 
   private routeConsistentHash(key: any): ShardConfig {
-    const shardKey = this.strategy.shardKey];
+    const shardKey = this.strategy.shardKey;
     const algorithm = shardKey.algorithm || 'md5';
     const hashFn = this.hashAlgorithms.get(algorithm);
 

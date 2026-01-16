@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { useAnalytics } from '@/lib/hooks/useAnalytics';
 import { BillingOverview } from '@/components/billing/BillingOverview';

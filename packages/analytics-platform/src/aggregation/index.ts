@@ -20,16 +20,12 @@ export type {
   AggregationMetrics,
   CachedAggregation,
   TimeSeriesData,
+} from './engine.js';
+
+export type {
   PipelineConfig,
   PipelineStage,
   PipelineResult,
   PipelineMetrics,
   PipelineError,
-} from './engine.js';
-
-export type {
-  PipelineConfig as PipelineConfigType,
-  PipelineStage as PipelineStageType,
-  PipelineResult as PipelineResultType,
-  PipelineMetrics as PipelineMetricsType,
 } from './pipeline.js';

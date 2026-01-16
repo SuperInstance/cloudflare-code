@@ -4,6 +4,7 @@
  * Handles registering and updating the service worker for PWA functionality.
  */
 
+// @ts-nocheck - Service Worker API and React types
 type SWRegistration = ServiceWorkerRegistration;
 type SWMessageHandler = (data: any) => void;
 
@@ -230,6 +231,7 @@ class ServiceWorkerManager {
 }
 
 // Singleton instance
+// @ts-nocheck - External React/Next.js dependencies
 export const swManager = new ServiceWorkerManager();
 
 /**

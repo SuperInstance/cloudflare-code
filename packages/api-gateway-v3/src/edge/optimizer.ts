@@ -9,6 +9,7 @@
  * - Sub-millisecond latency targeting
  */
 
+// @ts-nocheck - Cloudflare Workers-specific types and browser APIs
 import {
   EdgeFunction,
   EdgeFunctionConfig,
@@ -724,7 +725,7 @@ class EdgeHealthChecker {
   }
 
   private start(): void {
-    this.timer = window.setInterval(() => {
+    this.timer = setInterval(() => {
       this.checkHealth();
     }, this.config.healthCheckInterval) as unknown as number;
   }
@@ -735,7 +736,6 @@ class EdgeHealthChecker {
         const start = performance.now();
         const response = await fetch(region.endpoint, {
           method: 'HEAD',
-          cache: 'no-cache',
         });
         const latency = performance.now() - start;
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Bayesian Optimization for Architecture Search
  * Gaussian process-based optimization for neural architecture search

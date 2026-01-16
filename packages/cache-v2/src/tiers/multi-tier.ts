@@ -5,17 +5,16 @@
 
 import {
   CacheTier,
-  CacheEntry,
+  CacheError,
+} from '../types';
+
+import type {
   CacheMetadata,
   CacheOptions,
   CacheResult,
-  CacheStats,
   TierInfo,
-  TierTransition,
-  TransitionReason,
   MultiTierCacheConfig,
   CacheContext,
-  CacheError,
   DeepPartial,
 } from '../types';
 import { L1Cache } from './l1-tier';
@@ -64,7 +63,7 @@ const DEFAULT_CONFIG: MultiTierCacheConfig = {
       maxEntries: 1000,
       priority: 'medium',
       sourceTier: CacheTier.L3,
-    },
+    } as const,
   },
   invalidation: {
     type: 'ttl',
@@ -74,7 +73,7 @@ const DEFAULT_CONFIG: MultiTierCacheConfig = {
       batchSize: 100,
       retries: 3,
       retryDelay: 1000,
-    },
+    } as const,
   },
   prefetch: {
     enabled: true,
@@ -146,7 +145,7 @@ export class MultiTierCache {
   /**
    * Get a value from the cache
    */
-  async get<T>(key: string, options?: CacheOptions): Promise<CacheResult<T>> {
+  async get<T>(key: string, _options?: CacheOptions): Promise<CacheResult<T>> {
     const startTime = performance.now();
     const result: CacheResult<T> = {
       hit: false,
@@ -305,7 +304,7 @@ export class MultiTierCache {
             from: CacheTier.L1, // Virtual starting tier
             to: targetTier,
             timestamp: Date.now(),
-            reason: 'initial_write',
+            reason: 'access_frequency',
           }],
           promotionCount: 0,
           demotionCount: 0,
@@ -380,7 +379,7 @@ export class MultiTierCache {
   /**
    * Get cache statistics
    */
-  getStats(): CacheStats {
+  getStats() {
     return this.metrics.getStats();
   }
 
@@ -437,70 +436,6 @@ export class MultiTierCache {
     }
   }
 
-  /**
-   * Demote a value to a lower tier
-   */
-  private async demote(
-    key: string,
-    fromTier: CacheTier,
-    toTier: CacheTier,
-    reason: TransitionReason
-  ): Promise<void> {
-    try {
-      let value: any = null;
-
-      // Get value from current tier
-      switch (fromTier) {
-        case CacheTier.L1:
-          value = await this.l1.get(key);
-          await this.l1.delete(key);
-          break;
-
-        case CacheTier.L2:
-          if (this.l2) {
-            value = await this.l2.get(key);
-            await this.l2.delete(key);
-          }
-          break;
-      }
-
-      if (value === null) {
-        return;
-      }
-
-      // Set in target tier
-      const ttl = this.config.tiers[toTier].ttl;
-
-      switch (toTier) {
-        case CacheTier.L2:
-          if (this.l2) {
-            await this.l2.set(key, value, ttl);
-          }
-          break;
-
-        case CacheTier.L3:
-          if (this.l3) {
-            await this.l3.set(key, value, ttl);
-          }
-          break;
-      }
-
-      // Update tier history
-      const info = this.tierHistory.get(key);
-      if (info) {
-        info.currentTier = toTier;
-        info.tierHistory.push({
-          from: fromTier,
-          to: toTier,
-          timestamp: Date.now(),
-          reason,
-        });
-        info.demotionCount++;
-      }
-    } catch (error) {
-      console.error(`Failed to demote ${key} from ${fromTier} to ${toTier}:`, error);
-    }
-  }
 
   /**
    * Determine the best tier for a value based on size
@@ -558,8 +493,8 @@ export class MultiTierCache {
         L2: { ...defaults.tiers.L2, ...config.tiers?.L2 },
         L3: { ...defaults.tiers.L3, ...config.tiers?.L3 },
       },
-      warming: { ...defaults.warming, ...config.warming },
-      invalidation: { ...defaults.invalidation, ...config.invalidation },
+      warming: { ...defaults.warming, ...config.warming } as any,
+      invalidation: { ...defaults.invalidation, ...config.invalidation } as any,
       prefetch: { ...defaults.prefetch, ...config.prefetch },
       compression: { ...defaults.compression, ...config.compression },
       analytics: { ...defaults.analytics, ...config.analytics },

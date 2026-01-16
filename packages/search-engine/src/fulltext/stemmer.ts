@@ -52,7 +52,7 @@ export class Stemmer {
     { suffix: 'iti', replacement: '' },
     { suffix: 'ous', replacement: '' },
     { suffix: 'ive', replacement: '' },
-    { suffix: 'ize', representation: '' }
+    { suffix: 'ize', replacement: '' }
   ];
 
   stem(word: string): string {

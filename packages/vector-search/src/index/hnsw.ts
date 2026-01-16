@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * HNSW (Hierarchical Navigable Small World) Index Implementation
  *

@@ -25,7 +25,7 @@ import {
  * State machine engine class
  */
 export class StateMachineEngine<TData = any> {
-  private definition: StateMachineDefinition<TData>;
+  protected definition: StateMachineDefinition<TData>;
   private currentState: State;
   private stateHistory: State[] = [];
   private stateStack: Map<State, State[]> = new Map();

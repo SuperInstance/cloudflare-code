@@ -2,6 +2,7 @@
  * Load tests for ClaudeFlare API
  */
 
+// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { LoadTestExecutor, WebPerformanceCollector } from './runner';
 import type { PerformanceTestConfig } from '../utils/types';

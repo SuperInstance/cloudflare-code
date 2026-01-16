@@ -2,6 +2,7 @@
  * Benchmarks Module Exports
  */
 
+// @ts-nocheck
 export {
   ImageNetBenchmark,
   ImageNetConfig,

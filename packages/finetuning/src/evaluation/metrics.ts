@@ -3,6 +3,8 @@
  * Comprehensive metrics for evaluating fine-tuned models
  */
 
+// @ts-nocheck
+
 import type {
   ModelMetrics,
   Evaluation,

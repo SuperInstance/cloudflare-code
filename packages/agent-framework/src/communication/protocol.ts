@@ -7,8 +7,7 @@
 
 import type {
   AgentId,
-  MessageId,
-  ConversationId
+  MessageId
 } from '../types';
 import {
   Message,
@@ -27,7 +26,7 @@ import {
   JsonPayload
 } from '../types';
 import { createLogger } from '../utils/logger';
-import { generateId, isExpired } from '../utils/helpers';
+import { generateId } from '../utils/helpers';
 import { EventEmitter } from 'eventemitter3';
 
 /**
@@ -303,7 +302,6 @@ export class MessageBroker extends EventEmitter<MessageBrokerEvents> {
    */
   private async waitForAck(message: Message): Promise<void> {
     const timeout = message.ttl || this.config.defaultTimeout;
-    const startTime = Date.now();
 
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
@@ -324,7 +322,7 @@ export class MessageBroker extends EventEmitter<MessageBrokerEvents> {
    * Handle delivery failure
    */
   private async handleDeliveryFailure(messageId: MessageId, error: Error): Promise<void> {
-    this.logger.error('Message delivery failed', { messageId, error: error.message });
+    this.logger.error('Message delivery failed', error, { messageId });
 
     this.deliveryStatus.set(messageId, DeliveryStatus.FAILED);
     this.messageStats.totalFailed++;
@@ -543,7 +541,7 @@ export class MessageBroker extends EventEmitter<MessageBrokerEvents> {
           if (message.type === MessageType.RESPONSE) {
             resolve((message.payload as JsonPayload).data as T);
           } else if (message.type === MessageType.ERROR) {
-            reject(new Error((message.payload as JsonPayload).data as string));
+            reject(new Error((message.payload as JsonPayload).data as unknown as string));
           }
         }
       };
@@ -597,7 +595,7 @@ export class MessageBroker extends EventEmitter<MessageBrokerEvents> {
 
     if (filter.headers) {
       for (const [key, value] of Object.entries(filter.headers)) {
-        if ((message.headers as Record<string, unknown>)[key] !== value) {
+        if ((message.headers as unknown as Record<string, unknown>)[key] !== value) {
           return false;
         }
       }
@@ -686,7 +684,8 @@ export class MessageBroker extends EventEmitter<MessageBrokerEvents> {
     this.logger.info('Shutting down message broker');
 
     // Clear all retry timers
-    for (const timer of this.retryTimers.values()) {
+    const timers = Array.from(this.retryTimers.values());
+    for (const timer of timers) {
       clearTimeout(timer);
     }
     this.retryTimers.clear();

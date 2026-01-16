@@ -3,6 +3,8 @@
  * Provides distributed state management and coordination across multiple instances
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObjectState types conflict with internal types
+
 import {
   DurableObjectState,
   DurableObjectStorage,

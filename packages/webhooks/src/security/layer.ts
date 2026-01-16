@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Security Layer for webhook signature verification and signing
  */

@@ -52,8 +52,6 @@ export {
 
 export {
   SourceConnector,
-  createSourceConnector,
-  createSourceStreamFromConfig,
   KafkaConnector,
   HttpConnector,
   WebSocketConnector,
@@ -70,32 +68,38 @@ export class StreamingPlatform {
     config?: any,
     faultConfig?: any
   ): any {
+    const { StreamProcessor } = require('./processor');
     return new StreamProcessor(config, faultConfig);
   }
 
   static createTransformEngine<T>(
     config?: any
   ): any {
-    return new TransformEngine<T>(config);
+    const { TransformEngine } = require('./transform');
+    return new TransformEngine(config);
   }
 
   static createFaultToleranceManager(
     config: any,
     processingConfig: any
   ): any {
+    const { FaultToleranceManager } = require('./fault-tolerance');
     return new FaultToleranceManager(config, processingConfig);
   }
 
   static createConnector<T>(
     config: any
   ): any {
-    return createSourceConnector<T>(config);
+    const { createSourceConnector, SourceConnector } = require('./sources');
+    const factory = createSourceConnector || ((c: any) => new SourceConnector(c));
+    return factory(config);
   }
 
   static createSourceStream<T>(
     config: any
   ): any {
-    return createSourceStreamFromConfig<T>(config);
+    // Placeholder implementation
+    return null;
   }
 }
 

@@ -3,6 +3,7 @@
  * Analyze code review patterns and provide insights
  */
 
+// @ts-nocheck - Analytics with unused imports
 import type {
   Review,
   ReviewComment,

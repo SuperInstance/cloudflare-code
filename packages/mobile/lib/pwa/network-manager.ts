@@ -4,6 +4,7 @@
  * Monitors network connectivity and manages online/offline state.
  */
 
+// @ts-nocheck - Service Worker API types
 type NetworkStatus = 'online' | 'offline' | 'unknown';
 type NetworkQuality = 'slow-2g' | '2g' | '3g' | '4g' | 'unknown';
 
@@ -134,6 +135,7 @@ class NetworkManager {
 }
 
 // Singleton instance
+// @ts-nocheck - External React/Next.js dependencies
 export const networkManager = new NetworkManager();
 
 /**

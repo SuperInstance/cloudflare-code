@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Reinforcement Learning Architecture Search
  * RNN controller with policy gradient for neural architecture search

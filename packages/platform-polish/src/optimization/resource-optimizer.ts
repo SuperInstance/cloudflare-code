@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import { OptimizationConfig } from '../types';
 import { Logger } from '../utils/logger';

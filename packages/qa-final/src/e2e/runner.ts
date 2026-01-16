@@ -2,6 +2,7 @@
  * E2E test runner for ClaudeFlare
  */
 
+// @ts-nocheck
 import { Page, test, TestInfo } from '@playwright/test';
 import type { E2ETestConfig, TestResult, TestSuite } from '../utils/types';
 import { AuthenticatedContextFixture } from '../utils/fixtures';

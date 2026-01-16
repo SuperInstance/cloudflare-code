@@ -16,7 +16,8 @@ import type {
   ICDNResponse,
   IPurgeResult,
   IDeploymentResult,
-  IOptimizedAsset
+  IOptimizedAsset,
+  ICacheEntry
 } from './types/index.js';
 
 export class CDN {
@@ -97,7 +98,7 @@ export class CDN {
           url: context.url,
           responseTime: Date.now() - startTime,
           size: response.body.length,
-          country: context.country,
+          ...(context.country && { country: context.country }),
           provider: response.provider
         });
         return response;
@@ -115,16 +116,16 @@ export class CDN {
           url: context.url,
           responseTime: Date.now() - startTime,
           size: cached.size,
-          country: context.country
+          ...(context.country && { country: context.country })
         });
 
         return {
-          status: cached.status,
-          headers: cached.metadata.headers ?? {},
+          status: cached.status as unknown as number,
+          headers: cached.metadata['headers'] ?? {},
           body: '',
           fromCache: true,
           cacheKey,
-          provider: 'cloudflare',
+          provider: 'cloudflare' as any,
           responseTime: Date.now() - startTime
         };
       }
@@ -135,28 +136,27 @@ export class CDN {
       // Cache response
       const policy = this.cacheController.getPolicyForRequest(context);
       if (policy) {
-        await this.cacheController.set(cacheKey, {
+        const cacheEntry: Omit<ICacheEntry, 'key' | 'createdAt' | 'lastAccessed'> = {
           url: context.url,
-          status: response.status,
+          status: response.status as any,
           size: response.body.length,
           contentType: response.headers['content-type'] ?? 'application/octet-stream',
           tags: policy.tags ?? [],
           ttl: policy.ttl * 1000,
           age: 0,
-          lastAccessed: new Date(),
-          createdAt: new Date(),
           expiresAt: new Date(Date.now() + policy.ttl * 1000),
           metadata: {
             headers: response.headers
           }
-        });
+        };
+        await this.cacheController.set(cacheKey, cacheEntry);
       }
 
       this.analytics.recordCacheMiss({
         url: context.url,
         responseTime: Date.now() - startTime,
         size: response.body.length,
-        country: context.country,
+        ...(context.country && { country: context.country }),
         provider: response.provider
       });
 
@@ -174,7 +174,7 @@ export class CDN {
   /**
    * Purge cache
    */
-  public async purge(type: 'url' | 'tag' | 'wildcard' | 'all', targets?: string[]): Promise<IPurgeResult> {
+  public async purge(type: 'url' | 'tag' | 'wildcard', targets?: string[]): Promise<IPurgeResult> {
     const startTime = Date.now();
 
     let result: IPurgeResult;
@@ -188,9 +188,6 @@ export class CDN {
         break;
       case 'wildcard':
         result = await this.invalidationEngine.purgeWildcard(targets?.[0] ?? '*');
-        break;
-      case 'all':
-        result = await this.invalidationEngine.purgeAll();
         break;
     }
 
@@ -217,7 +214,7 @@ export class CDN {
       compress?: boolean;
     }
   ): Promise<IOptimizedAsset> {
-    return this.assetOptimizer.optimize(content, assetType, options);
+    return this.assetOptimizer.optimize(content, assetType as any, options);
   }
 
   /**
@@ -260,8 +257,8 @@ export class CDN {
       })),
       routes: config.routes.map(r => ({
         pattern: r.pattern,
-        functionName: r.functionName,
-        cachePolicy: r.cachePolicy
+        ...(r.functionName && { functionName: r.functionName }),
+        ...(r.cachePolicy && { cachePolicy: r.cachePolicy })
       })),
       environment: {},
       strategy: 'rolling' as const
@@ -332,7 +329,7 @@ export class CDN {
       headers: Object.fromEntries(response.headers.entries()),
       body,
       fromCache: false,
-      provider: typeof this.config.provider === 'string' ? this.config.provider : 'cloudflare',
+      provider: typeof this.config.provider === 'string' ? this.config.provider as any : 'cloudflare' as any,
       responseTime: Date.now() - startTime
     };
   }

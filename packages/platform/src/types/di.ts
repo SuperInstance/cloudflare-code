@@ -7,12 +7,12 @@
 /**
  * DI token - can be a string, symbol, or constructor
  */
-export type DIToken<T = unknown> = string | symbol | abstract new (...args: unknown[]) => T;
+export type DIToken<T = unknown> = string | symbol | (abstract new (...args: unknown[]) => T);
 
 /**
  * DI factory or constructor
  */
-export type DIFactory<T> = (container: DIContainer) => T | Promise<T>;
+export type DIFactory<T> = (container: any) => T | Promise<T>;
 
 /**
  * DI constructor

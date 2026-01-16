@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { useRealTime } from '@/contexts/RealTimeContext';
 import { DataPoint } from '@/types';

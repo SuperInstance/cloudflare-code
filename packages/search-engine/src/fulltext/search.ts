@@ -10,12 +10,12 @@ export interface FullTextSearchOptions {
 }
 
 export class FullTextSearch {
-  private index: FullTextIndex;
+  private indexInstance: FullTextIndex;
   private cache: LRUCache<string, SearchResult[]>;
   private options: FullTextSearchOptions;
 
   constructor(options: FullTextSearchOptions = {}) {
-    this.index = options.index || new FullTextIndex();
+    this.indexInstance = options.index || new FullTextIndex();
     this.cache = new LRUCache(options.cacheSize || 1000);
     this.options = {
       useCache: true,
@@ -54,10 +54,10 @@ export class FullTextSearch {
       fuzzyThreshold = 0.8
     } = query;
 
-    let rawResults = this.index.search(searchQuery, {
+    let rawResults = this.indexInstance.search(searchQuery, {
       limit,
       offset,
-      sortBy,
+      sortBy: sortBy as 'relevance' | 'documentLength',
       sortOrder
     });
 
@@ -195,19 +195,19 @@ export class FullTextSearch {
   }
 
   index(document: { id: string; content: string }): void {
-    this.index.index(document);
+    this.indexInstance.index(document);
   }
 
   batchIndex(documents: Array<{ id: string; content: string }>): void {
-    this.index.batchIndex(documents);
+    this.indexInstance.batchIndex(documents);
   }
 
   remove(documentId: string): boolean {
-    return this.index.remove(documentId);
+    return this.indexInstance.remove(documentId);
   }
 
   getStats(): IndexStats {
-    return this.index.getStats();
+    return this.indexInstance.getStats();
   }
 
   clearCache(): void {

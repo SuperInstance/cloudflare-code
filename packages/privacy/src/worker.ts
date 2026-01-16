@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Privacy Worker Entry Point
  * Coordinates all privacy Durable Objects

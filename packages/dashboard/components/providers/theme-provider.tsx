@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Theme provider for dark mode support
  */

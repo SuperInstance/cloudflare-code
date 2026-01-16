@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Multiplexer - Advanced channel multiplexing system
  * Handles message routing to channels with subscription management

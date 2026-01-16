@@ -2,6 +2,7 @@
  * Aggregate root implementation for event sourcing
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type {
   AggregateRoot,
   StoredEvent,

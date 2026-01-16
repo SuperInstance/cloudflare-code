@@ -2,6 +2,7 @@
  * Saga Orchestrator implementation
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type {
   SagaDefinition,
   SagaInstance,

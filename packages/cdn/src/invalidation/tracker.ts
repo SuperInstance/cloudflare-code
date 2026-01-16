@@ -83,10 +83,17 @@ export class PurgeTracker extends EventEmitter {
    * Get purge by ID
    */
   public getPurge(requestId: string): IPurgeHistoryEntry | null {
-    return (
-      this.history.find(h => h.request.id === requestId) ??
-      this.activePurges.get(requestId)
-    ) ?? null;
+    const historyEntry = this.history.find(h => h.request.id === requestId);
+    if (historyEntry) {
+      return historyEntry;
+    }
+
+    const activeRequest = this.activePurges.get(requestId);
+    if (activeRequest) {
+      return { request: activeRequest, timestamp: new Date() };
+    }
+
+    return null;
   }
 
   /**

@@ -99,7 +99,7 @@ export interface ABTestConfig {
  * Configuration override
  */
 interface ConfigOverride {
-  routes?: Partial<Route>[];
+  routes?: Route[];
   auth?: Partial<AuthConfig>;
   rateLimit?: Partial<RateLimitConfig>;
   cache?: Partial<CacheConfig>;
@@ -119,7 +119,7 @@ interface ABCriteria {
  * Configuration manager options
  */
 export interface ConfigManagerOptions {
-  kv?: KVNamespace;
+  kv?: KVNamespace | undefined;
   enableValidation?: boolean;
   enableVersioning?: boolean;
   enableHotReload?: boolean;
@@ -131,7 +131,7 @@ export interface ConfigManagerOptions {
  * Configuration Manager
  */
 export class ConfigManager {
-  private options: Required<ConfigManagerOptions>;
+  private options: ConfigManagerOptions;
   private currentConfig: GatewayConfig;
   private configVersions: ConfigurationVersion[];
   private abTests: Map<string, ABTestConfig>;
@@ -225,7 +225,6 @@ export class ConfigManager {
     }
 
     // Apply updates
-    const oldConfig = this.currentConfig;
     this.currentConfig = newConfig;
 
     // Create version
@@ -483,7 +482,7 @@ export class ConfigManager {
     this.configVersions.push(configVersion);
 
     // Keep only max versions
-    if (this.configVersions.length > this.options.maxVersions) {
+    if (this.configVersions.length > (this.options.maxVersions ?? 10)) {
       this.configVersions.shift();
     }
 

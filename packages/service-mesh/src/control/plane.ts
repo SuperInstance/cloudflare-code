@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Service Mesh Control Plane
  * Central management plane for service mesh configuration

@@ -91,10 +91,10 @@ export class CacheMetrics extends EventEmitter {
         ? this.currentSnapshot.totalResponseTime / this.currentSnapshot.responseTimes.length
         : 0;
 
-    const responseTimes = [...this.currentSnapshot.responseTimes].sort((a, b) => a - b);
-    const p50 = this.getPercentile(responseTimes, 50);
-    const p95 = this.getPercentile(responseTimes, 95);
-    const p99 = this.getPercentile(responseTimes, 99);
+    // const responseTimes = [...this.currentSnapshot.responseTimes].sort((a, b) => a - b); // Unused variable
+    // const _p50 = this.getPercentile(responseTimes, 50); // Unused variable
+    // const _p95 = this.getPercentile(responseTimes, 95); // Unused variable
+    // const _p99 = this.getPercentile(responseTimes, 99); // Unused variable
 
     return {
       hits: this.currentSnapshot.hits,
@@ -156,7 +156,8 @@ export class CacheMetrics extends EventEmitter {
    * Get historical snapshots
    */
   public getSnapshots(count?: number): ICacheMetricsSnapshot[] {
-    const snapshots = this.snapshots.slice(-count ?? this.snapshots.length);
+    const _count = count ?? this.snapshots.length;
+    const snapshots = this.snapshots.slice(-_count);
     return snapshots;
   }
 
@@ -208,7 +209,7 @@ export class CacheMetrics extends EventEmitter {
   private getPercentile(sortedValues: number[], percentile: number): number {
     if (sortedValues.length === 0) return 0;
     const index = Math.ceil((percentile / 100) * sortedValues.length) - 1;
-    return sortedValues[Math.max(0, index)];
+    return sortedValues[Math.max(0, index)] ?? 0;
   }
 
   /**

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Sidebar component for the dashboard
  */

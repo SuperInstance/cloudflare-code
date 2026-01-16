@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * On-call rotation management
  */

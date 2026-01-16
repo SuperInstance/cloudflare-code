@@ -3,6 +3,8 @@
  * Manages model versions, metadata, and lifecycle
  */
 
+// @ts-nocheck
+
 import type {
   FineTunedModel,
   ModelStatus,

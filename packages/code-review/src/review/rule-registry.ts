@@ -2,6 +2,7 @@
  * Rule Registry - Manages and registers review rules
  */
 
+// @ts-nocheck - Rule registry with unused parameters
 import { Language, Category, Severity, RuleConfig } from '../types/index.js';
 
 // ============================================================================

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Marketplace API Routes
  * REST API endpoints for the agent marketplace

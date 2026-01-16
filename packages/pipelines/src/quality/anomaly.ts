@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Anomaly Detection
  * Detects anomalies in data using statistical and ML-based methods

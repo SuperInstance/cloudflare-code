@@ -313,7 +313,7 @@ export class TrafficShaper {
         action: {
           type: 'block',
           reason: 'IP blacklisted',
-          statusCode: 403,
+          statusCode: 429,
         } as BlockAction,
         reason: 'IP address is blacklisted',
       };

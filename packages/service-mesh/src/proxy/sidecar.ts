@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Sidecar Proxy Implementation
  * Implements sidecar proxy pattern for service mesh

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Vector Index - Main interface for vector indexing
  *

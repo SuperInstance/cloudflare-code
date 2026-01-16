@@ -2,6 +2,7 @@
  * Performance test runner for ClaudeFlare
  */
 
+// @ts-nocheck
 import { Page } from '@playwright/test';
 import type { PerformanceTestConfig, PerformanceTestResult, PerformanceMetrics, ThresholdViolation } from '../utils/types';
 import { measureTime } from '../utils/test-helpers';

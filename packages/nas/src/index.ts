@@ -92,7 +92,6 @@ export {
   rankByWeightedSum,
   findParetoFront,
   calculateHypervolume,
-  createRankingConfig,
 } from './ranking/ranker';
 
 // ============================================================================
@@ -126,7 +125,7 @@ export {
  * console.log('Best architecture:', result.bestArchitecture);
  * ```
  */
-export async function quickStartNAS(
+export async function quickStartNASWrapper(
   searchSpace?: any,
   iterations: number = 50
 ) {
@@ -148,7 +147,7 @@ export async function quickStartNAS(
  * const result = await runNAS(config);
  * ```
  */
-export async function runNAS(config: any) {
+export async function runNASWrapper(config: any) {
   const { runNAS: _runNAS } = await import('./search/nas-search');
   return _runNAS(config);
 }
@@ -169,7 +168,7 @@ export async function runNAS(config: any) {
  * );
  * ```
  */
-export function createSearchSpace(name: string, builder: (dsl: any) => any) {
+export function createSearchSpaceWrapper(name: string, builder: (dsl: any) => any) {
   const { createSearchSpace: _createSearchSpace } = require('./search/nas-search');
   return _createSearchSpace(name, builder);
 }
@@ -181,7 +180,7 @@ export function createSearchSpace(name: string, builder: (dsl: any) => any) {
  * @param format - Export format ('json' or 'yaml')
  * @returns Formatted result string
  */
-export function exportResult(result: any, format: 'json' | 'yaml' = 'json') {
+export function exportResultWrapper(result: any, format: 'json' | 'yaml' = 'json') {
   const { exportResult: _exportResult } = require('./search/nas-search');
   return _exportResult(result, format);
 }

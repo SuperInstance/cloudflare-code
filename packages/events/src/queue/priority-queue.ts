@@ -2,6 +2,7 @@
  * Priority Queue implementation
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type { PrioritizedMessage, QueueMessage } from '../types';
 import { generateMessageId } from '../utils/id';
 

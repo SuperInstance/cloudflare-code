@@ -11,7 +11,6 @@ import {
   TierMovementEntry,
   PredictionAccuracy,
   CacheTier,
-  CacheStats,
 } from '../types';
 
 // ============================================================================
@@ -395,7 +394,7 @@ export class AnalyticsCollector {
   private getAllAccessPatterns(): AccessPattern[] {
     const patterns: AccessPattern[] = [];
 
-    for (const [key, analytics] of this.keyAnalytics.entries()) {
+    for (const [key, _analytics] of this.keyAnalytics.entries()) {
       const pattern = this.getAccessPattern(key);
       if (pattern) {
         patterns.push(pattern);
@@ -440,7 +439,6 @@ export class AnalyticsCollector {
 
     // Look for clusters of accesses
     const clusters: number[] = [];
-    let clusterStart = accesses[0];
     let clusterCount = 1;
 
     for (let i = 1; i < accesses.length; i++) {
@@ -450,7 +448,6 @@ export class AnalyticsCollector {
         clusterCount++;
       } else {
         clusters.push(clusterCount);
-        clusterStart = accesses[i];
         clusterCount = 1;
       }
     }

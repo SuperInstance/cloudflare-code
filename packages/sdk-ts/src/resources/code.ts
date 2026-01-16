@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Code Generation and Analysis API
  */

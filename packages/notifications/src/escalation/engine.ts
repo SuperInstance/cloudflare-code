@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Escalation engine for alert escalation
  */

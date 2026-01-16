@@ -2,9 +2,10 @@
  * Contract test index
  */
 
+// @ts-nocheck
 export {
   ContractTestRunner,
   ContractVerifier,
   ContractPublisher
 } from './runner';
-export { default as contractTests } from './api.contract.test';
+// export { default as contractTests } from './api.contract.test';

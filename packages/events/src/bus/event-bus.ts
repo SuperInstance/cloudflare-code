@@ -2,6 +2,7 @@
  * Event Bus implementation using Durable Objects
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type {
   EventEnvelope,
   EventHandler,

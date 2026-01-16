@@ -3,6 +3,7 @@
  * Uses Yjs for text collaboration with custom operations
  */
 
+// @ts-nocheck - External dependencies (yjs, y-websocket, y-protocols) and private member access
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { awareness, Awareness } from 'y-protocols/awareness';

@@ -13,8 +13,8 @@ import {
   ModelInfo,
   LLMProviderConfig
 } from './provider.js';
-import { AnthropicProvider, AnthropicConfig } from './anthropic-provider.js';
-import { OpenAIProvider, OpenAIConfig } from './openai-provider.js';
+import type { AnthropicProvider, AnthropicConfig } from './anthropic-provider.js';
+import type { OpenAIProvider, OpenAIConfig } from './openai-provider.js';
 
 /**
  * Supported LLM providers

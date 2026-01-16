@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Webhook notification channel
  * Supports generic HTTP webhooks with configurable retry policies

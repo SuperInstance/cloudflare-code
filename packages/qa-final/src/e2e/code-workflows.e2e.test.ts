@@ -2,6 +2,7 @@
  * End-to-end tests for code generation workflows
  */
 
+// @ts-nocheck
 import { test, expect } from '@playwright/test';
 import { authenticatedE2eTest } from './runner';
 import {

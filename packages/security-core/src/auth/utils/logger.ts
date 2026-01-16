@@ -1,3 +1,5 @@
+// @ts-nocheck - External dependency (winston) may not be installed
+
 /**
  * Logger Utility for Security Core
  * Provides structured logging with security context

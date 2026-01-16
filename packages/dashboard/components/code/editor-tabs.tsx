@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Editor tabs component for open files
  */

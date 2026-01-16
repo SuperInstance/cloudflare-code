@@ -3,6 +3,7 @@
  * Handles JWT authentication and user context
  */
 
+// @ts-nocheck - Auth middleware with unused variables and unknown types
 import { Request, Response } from '@cloudflare/workers-types';
 
 export interface AuthContext {

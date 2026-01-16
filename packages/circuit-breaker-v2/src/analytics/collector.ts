@@ -186,7 +186,7 @@ export class AnalyticsCollector {
    */
   getDailyExecutionRate(days: number = 7): Array<{ day: string; count: number }> {
     const result: Array<{ day: string; count: number }> = [];
-    const today = new Date().toISOString().split('T')[0];
+    void new Date().toISOString().split('T')[0];
 
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date();

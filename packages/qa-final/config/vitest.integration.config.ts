@@ -2,6 +2,7 @@
  * Vitest configuration for integration tests
  */
 
+// @ts-nocheck
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({

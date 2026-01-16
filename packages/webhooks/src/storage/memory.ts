@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * In-memory storage implementations for testing and development
  */

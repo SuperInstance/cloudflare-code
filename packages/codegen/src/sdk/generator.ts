@@ -3,9 +3,9 @@
  * Generates SDKs for REST, GraphQL, gRPC, and WebSocket APIs
  */
 
-import { Language, SDKOptions, GeneratedSDK, GeneratedFile, GeneratedType, GeneratedClass, GeneratedFunction, CodeExample, APISpec } from '../types/index.js';
-import { FileManager } from '../utils/file-manager.js';
-import { TemplateEngine } from '../templates/engine.js';
+import type { Language, SDKOptions, GeneratedSDK, GeneratedFile, GeneratedType, GeneratedClass, GeneratedFunction, CodeExample, APISpec } from '../types/index.js';
+import type { FileManager } from '../utils/file-manager.js';
+import type { TemplateEngine } from '../templates/engine.js';
 
 /**
  * SDK Generator class
@@ -501,7 +501,7 @@ npm install ${spec.name.toLowerCase()}
 ## Usage
 
 \`\`\`${language === Language.TypeScript ? 'typescript' : 'python'}
-import { ${spec.name}Client } from '${spec.name.toLowerCase()}';
+import type { ${spec.name}Client } from '${spec.name.toLowerCase()}';
 
 const client = new ${spec.name}Client({
   baseURL: '${spec.baseUrl}',

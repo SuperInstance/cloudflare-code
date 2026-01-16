@@ -19,73 +19,17 @@
  * - Compression algorithms
  */
 
-import type { GatewayRequest, GatewayResponse, GatewayContext } from '../types';
-
-/**
- * Transformer configuration
- */
-export interface TransformerConfig {
-  requestHeaders?: HeaderTransform[];
-  responseHeaders?: HeaderTransform[];
-  requestBody?: BodyTransform[];
-  responseBody?: BodyTransform[];
-  protocolTranslation?: ProtocolTranslation;
-  compression?: CompressionConfig;
-}
-
-/**
- * Header transformation
- */
-export interface HeaderTransform {
-  action: 'add' | 'set' | 'remove' | 'rename' | 'copy';
-  header: string;
-  value?: string;
-  fromHeader?: string;
-  condition?: TransformCondition;
-  append?: boolean;
-}
-
-/**
- * Body transformation
- */
-export interface BodyTransform {
-  type: 'json' | 'xml' | 'form' | 'text';
-  action: 'modify' | 'replace' | 'filter' | 'merge' | 'template';
-  operations: TransformOperation[];
-  condition?: TransformCondition;
-}
-
-/**
- * Transform operation
- */
-export interface TransformOperation {
-  path: string;
-  action: 'set' | 'remove' | 'rename' | 'move' | 'copy' | 'merge';
-  value?: unknown;
-  fromPath?: string;
-  template?: string;
-}
-
-/**
- * Transform condition
- */
-export interface TransformCondition {
-  field: string;
-  operator: 'equals' | 'contains' | 'matches' | 'exists' | 'in' | 'not_in';
-  value?: unknown;
-  scope?: 'header' | 'query' | 'body' | 'context';
-}
-
-/**
- * Protocol translation
- */
-export interface ProtocolTranslation {
-  type: 'rest_to_graphql' | 'graphql_to_rest' | 'grpc_to_rest' | 'rest_to_grpc';
-  schema?: string;
-  queryMapping?: Record<string, string>;
-  mutationMapping?: Record<string, string>;
-  defaultOperation?: string;
-}
+import type {
+  GatewayRequest,
+  GatewayResponse,
+  GatewayContext,
+  TransformerConfig,
+  HeaderTransform,
+  BodyTransform,
+  TransformOperation,
+  TransformCondition,
+  ProtocolTranslation
+} from '../types';
 
 /**
  * Compression configuration
@@ -96,6 +40,13 @@ export interface CompressionConfig {
   level?: number;
   threshold?: number;
   contentType?: string[];
+}
+
+/**
+ * Extended transformer config with compression
+ */
+export interface ExtendedTransformerConfig extends TransformerConfig {
+  compression?: CompressionConfig;
 }
 
 /**
@@ -114,11 +65,9 @@ export interface TransformResult {
  */
 export class Transformer {
   private config: TransformerConfig;
-  private interpolationCache: Map<string, RegExp>;
 
   constructor(config: TransformerConfig = {}) {
     this.config = config;
-    this.interpolationCache = new Map();
   }
 
   /**
@@ -228,10 +177,11 @@ export class Transformer {
       }
 
       // Apply compression
-      if (this.config.compression?.enabled) {
+      const compressionConfig = (this.config as ExtendedTransformerConfig).compression;
+      if (compressionConfig?.enabled) {
         const compressionResult = await this.compressResponse(
           response,
-          this.config.compression
+          compressionConfig
         );
 
         if (compressionResult.transformed) {
@@ -283,11 +233,7 @@ export class Transformer {
         case 'set':
           if (transform.value !== undefined) {
             const value = this.interpolateValue(transform.value, request, context);
-            if (transform.append && headers.has(transform.header)) {
-              headers.append(transform.header, value);
-            } else {
-              headers.set(transform.header, value);
-            }
+            headers.set(transform.header, value);
             transformed = true;
           }
           break;
@@ -305,16 +251,6 @@ export class Transformer {
             if (value) {
               headers.delete(transform.header);
               headers.set(transform.value, value);
-              transformed = true;
-            }
-          }
-          break;
-
-        case 'copy':
-          if (transform.fromHeader && headers.has(transform.fromHeader)) {
-            const value = headers.get(transform.fromHeader);
-            if (value) {
-              headers.set(transform.header, value);
               transformed = true;
             }
           }
@@ -337,7 +273,6 @@ export class Transformer {
     let body: any = null;
 
     // Parse body
-    const contentType = request.headers.get('Content-Type') || '';
     let bodyText = '';
 
     if (request.body) {
@@ -372,7 +307,6 @@ export class Transformer {
             body = Object.fromEntries(new URLSearchParams(bodyText));
             break;
 
-          case 'text':
           case 'xml':
             body = bodyText;
             break;
@@ -449,9 +383,7 @@ export class Transformer {
     switch (operation.action) {
       case 'set':
         let value = operation.value;
-        if (operation.template) {
-          value = this.interpolateValue(operation.template, request, context);
-        } else if (typeof value === 'string') {
+        if (typeof value === 'string') {
           value = this.interpolateValue(value, request, context);
         }
 
@@ -470,7 +402,8 @@ export class Transformer {
 
       case 'rename':
         if (operation.value && current[finalKey] !== undefined) {
-          current[operation.value] = current[finalKey];
+          const renameValue = String(operation.value);
+          current[renameValue] = current[finalKey];
           delete current[finalKey];
           return { success: true, transformed: true, data: body, metadata: {} };
         }
@@ -496,33 +429,6 @@ export class Transformer {
           }
         }
         break;
-
-      case 'copy':
-        if (operation.fromPath) {
-          const fromParts = operation.fromPath.split('.');
-          let fromCurrent = body;
-
-          for (const part of fromParts.slice(0, -1)) {
-            if (fromCurrent[part] === undefined) {
-              return { success: true, transformed: false, metadata: {} };
-            }
-            fromCurrent = fromCurrent[part];
-          }
-
-          const fromKey = fromParts[fromParts.length - 1];
-          if (fromCurrent[fromKey] !== undefined) {
-            current[finalKey] = JSON.parse(JSON.stringify(fromCurrent[fromKey]));
-            return { success: true, transformed: true, data: body, metadata: {} };
-          }
-        }
-        break;
-
-      case 'merge':
-        if (operation.value && typeof operation.value === 'object') {
-          current[finalKey] = { ...current[finalKey], ...operation.value };
-          return { success: true, transformed: true, data: body, metadata: {} };
-        }
-        break;
     }
 
     return { success: true, transformed: false, metadata: {} };
@@ -534,7 +440,7 @@ export class Transformer {
   private async translateProtocol(
     request: GatewayRequest,
     config: ProtocolTranslation,
-    context: GatewayContext
+    _context: GatewayContext
   ): Promise<TransformResult> {
     if (config.type === 'rest_to_graphql') {
       return await this.restToGraphQL(request, config);
@@ -636,10 +542,10 @@ export class Transformer {
   private mapRestToGraphQL(
     method: string,
     path: string,
-    body: any,
+    _body: any,
     config: ProtocolTranslation
   ): string {
-    const operationName = config.queryMapping?.[`${method}:${path}`] || config.defaultOperation;
+    const operationName = config.queryMapping?.[`${method}:${path}`] || 'defaultOperation';
 
     if (method === 'GET') {
       return `query ${operationName} { ${operationName} }`;
@@ -652,9 +558,9 @@ export class Transformer {
    * Map GraphQL to REST (private helper)
    */
   private mapGraphQLToRest(
-    query: string,
+    _query: string,
     variables: any,
-    config: ProtocolTranslation
+    _config: ProtocolTranslation
   ): any {
     // Parse GraphQL query and extract operation
     // This is simplified - a proper implementation would use a GraphQL parser
@@ -698,31 +604,12 @@ export class Transformer {
   private evaluateCondition(
     condition: TransformCondition,
     request: GatewayRequest,
-    context: GatewayContext
+    _context: GatewayContext
   ): boolean {
     let value: unknown;
 
-    switch (condition.scope) {
-      case 'header':
-        value = request.headers.get(condition.field);
-        break;
-
-      case 'query':
-        value = request.query.get(condition.field);
-        break;
-
-      case 'body':
-        // Would parse body and extract field
-        value = undefined;
-        break;
-
-      case 'context':
-        value = (context as any)[condition.field];
-        break;
-
-      default:
-        value = undefined;
-    }
+    // Default to header-based condition checking
+    value = request.headers.get(condition.field);
 
     switch (condition.operator) {
       case 'equals':
@@ -741,12 +628,6 @@ export class Transformer {
       case 'exists':
         return value !== undefined && value !== null;
 
-      case 'in':
-        return Array.isArray(condition.value) && condition.value.includes(value);
-
-      case 'not_in':
-        return Array.isArray(condition.value) && !condition.value.includes(value);
-
       default:
         return false;
     }
@@ -758,7 +639,7 @@ export class Transformer {
   private interpolateValue(
     template: string,
     request: GatewayRequest,
-    context: GatewayContext
+    _context: GatewayContext
   ): string {
     // Simple template interpolation
     // Supports {{variable}} syntax
@@ -772,7 +653,7 @@ export class Transformer {
 
     // Replace metadata variables
     result = result.replace(/\{\{metadata\.(\w+)\}\}/g, (_, key) => {
-      return String(request.metadata[key] || '');
+      return String((request.metadata as Record<string, any>)[key] || '');
     });
 
     // Replace header variables

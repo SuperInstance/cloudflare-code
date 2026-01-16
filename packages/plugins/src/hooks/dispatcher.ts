@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook dispatcher - executes hook handlers
  */

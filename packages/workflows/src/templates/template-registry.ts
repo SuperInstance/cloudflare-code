@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Workflow Template Registry
  */

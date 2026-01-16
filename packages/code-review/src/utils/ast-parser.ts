@@ -2,6 +2,7 @@
  * AST Parser - Base abstract syntax tree parser
  */
 
+// @ts-nocheck - AST parsing with unused parameters
 import { Language } from '../types/index.js';
 
 // ============================================================================

@@ -478,12 +478,12 @@ export class PostgreSQLAdapter extends DatabaseAdapter {
     table: string,
     when: 'BEFORE' | 'AFTER' | 'INSTEAD OF',
     event: 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE',
-    function: string
+    functionName: string
   ): Promise<void> {
     const sql = `
       CREATE TRIGGER ${this.quoteIdentifier(name)}
       ${when} ${event} ON ${this.quoteIdentifier(table)}
-      FOR EACH ROW EXECUTE FUNCTION ${function}()
+      FOR EACH ROW EXECUTE FUNCTION ${functionName}()
     `;
     await this.execute(sql);
   }

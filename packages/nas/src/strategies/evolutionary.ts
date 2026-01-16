@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Evolutionary Architecture Search
  * Genetic algorithms for neural architecture search

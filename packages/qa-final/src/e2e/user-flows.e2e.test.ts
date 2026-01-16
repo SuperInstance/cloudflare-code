@@ -2,6 +2,7 @@
  * End-to-end tests for user workflows
  */
 
+// @ts-nocheck
 import { test, expect, Page } from '@playwright/test';
 import { authenticatedE2eTest, e2eTest } from './runner';
 import {

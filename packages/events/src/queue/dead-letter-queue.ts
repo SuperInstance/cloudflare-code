@@ -2,6 +2,7 @@
  * Dead Letter Queue implementation
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type { DeadLetterEntry, QueueMessage } from '../types';
 import { generateMessageId } from '../utils/id';
 

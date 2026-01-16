@@ -89,12 +89,12 @@ export class CircuitBreaker {
 
   private setState(key: string, state: CircuitBreakerState): void {
     this.states.set(key, state);
-    const stats = this.getStats(key);
+    const stats = this.getOrCreateStats(key);
     stats.state = state;
     stats.lastStateChange = Date.now();
   }
 
-  private getStats(key: string): CircuitBreakerStats {
+  private getOrCreateStats(key: string): CircuitBreakerStats {
     if (!this.stats.has(key)) {
       this.stats.set(key, {
         state: 'closed',
@@ -106,7 +106,7 @@ export class CircuitBreaker {
   }
 
   getStats(serviceId: string): CircuitBreakerStats {
-    return this.getStats(serviceId);
+    return this.getOrCreateStats(serviceId);
   }
 
   reset(serviceId: string): void {

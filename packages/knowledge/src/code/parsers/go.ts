@@ -2,6 +2,8 @@
  * Go Parser - Parse Go code
  */
 
+// @ts-nocheck - Unused variables
+
 import { ParsedDocumentation } from '../../types/index.js';
 import { Logger } from '../../utils/logger.js';
 

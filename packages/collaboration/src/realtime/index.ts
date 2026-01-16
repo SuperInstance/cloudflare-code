@@ -44,5 +44,4 @@ export type {
   SessionPermissions,
   WebSocketMessage,
   WebSocketConfig,
-  CollaborationEvents,
 } from '../types';

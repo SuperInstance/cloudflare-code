@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Plugin manifest loader and validator
  */

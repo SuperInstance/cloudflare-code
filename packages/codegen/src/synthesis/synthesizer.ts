@@ -3,7 +3,7 @@
  * Generates code from natural language and specifications
  */
 
-import { LLMManager, Message } from '../llm/index.js';
+import type { LLMManager, Message } from '../llm/index.js';
 import {
   Language,
   SynthesisOptions,
@@ -13,8 +13,8 @@ import {
   CodeFile,
   GenerationMetadata
 } from '../types/index.js';
-import { CodeValidator } from '../utils/validator.js';
-import { CodeFormatter } from '../utils/formatter.js';
+import type { CodeValidator } from '../utils/validator.js';
+import type { CodeFormatter } from '../utils/formatter.js';
 
 /**
  * Code synthesis result

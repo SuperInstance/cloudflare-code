@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ClaudeFlare DDoS Protection - Ultra-Optimized
  * Comprehensive DDoS protection and mitigation

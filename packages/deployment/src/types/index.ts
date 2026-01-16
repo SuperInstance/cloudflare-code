@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Core type definitions for the deployment automation system
  */

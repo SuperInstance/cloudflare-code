@@ -12,6 +12,17 @@
  * - Sub-millisecond latency
  */
 
+import {
+  ServiceUnavailableError,
+  TimeoutError,
+  CircuitBreakerOpenError,
+  RateLimitExceededError,
+  ValidationError as ValidError,
+  AuthenticationError as AuthError,
+  AuthorizationError,
+  GatewayConfig,
+} from './types/index.js';
+
 // ============================================================================
 // Core Gateway
 // ============================================================================
@@ -40,7 +51,6 @@ export {
   ServiceRegistry,
   HealthCheckConfig,
   RetryPolicy,
-  CircuitBreakerConfig,
   CachePolicy,
   RateLimitPolicy,
   ServiceAuth,
@@ -177,8 +187,6 @@ export type {
   EdgeCacheEntry,
   CacheMetadata,
   EdgeMetrics,
-  OptimizedRequest,
-  CacheOptions,
 } from './edge/optimizer.js';
 
 // ============================================================================
@@ -214,7 +222,6 @@ export {
 export type {
   OrchestrationConfig,
   WorkflowContext,
-  OrchestrationMetrics,
 } from './orchestration/gateway.js';
 
 // ============================================================================
@@ -274,7 +281,7 @@ export { CircuitBreaker } from './circuit-breaker/breaker.js';
 
 export type {
   CircuitBreakerState,
-  CircuitBreakerConfig as CircuitBreakerConfigType,
+  CircuitBreakerConfigType,
   CircuitBreakerStats,
 } from './circuit-breaker/breaker.js';
 
@@ -336,11 +343,11 @@ export class Errors {
   }
 
   static validation(message: string, details?: unknown) {
-    return new ValidationError(message, details);
+    return new ValidError(message, details);
   }
 
   static authentication(message?: string) {
-    return new AuthenticationError(message);
+    return new AuthError(message);
   }
 
   static authorization(message?: string) {
@@ -539,8 +546,6 @@ export function createDefaultConfig(): Partial<GatewayConfig> {
       routing: {
         strategy: 'latency',
         regions: [],
-        healthCheck: true,
-        healthCheckInterval: 30000,
       },
     },
     caching: {

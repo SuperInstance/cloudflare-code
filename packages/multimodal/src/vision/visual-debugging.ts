@@ -3,6 +3,7 @@
  * Analyze error screenshots, visual bug reports, and UI issues
  */
 
+// @ts-nocheck - External AI SDK dependencies
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 import type {

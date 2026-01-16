@@ -222,7 +222,7 @@ export class VersionManager {
   private async transformRequest(
     request: Request,
     transformation: any
-  ): Promise<Response> {
+  ): Promise<Request> {
     // Apply request transformation logic
     // This would use the schema to transform the request
     return request;
@@ -376,7 +376,7 @@ export function createVersioningMiddleware(config: VersioningConfig) {
 
   return async (request: Request): Promise<Request> => {
     const versioned = await manager.createVersionedRequest(request);
-    return versioned.transformedRequest;
+    return versioned.transformedRequest ?? request;
   };
 }
 

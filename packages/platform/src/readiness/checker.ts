@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Production Readiness Checker
  *

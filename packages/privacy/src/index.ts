@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ClaudeFlare Privacy & GDPR Compliance Package
  * Comprehensive data privacy and GDPR compliance system

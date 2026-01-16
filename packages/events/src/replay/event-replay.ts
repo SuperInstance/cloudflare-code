@@ -2,6 +2,7 @@
  * Event Replay implementation
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type {
   StoredEvent,
   ReplayConfig,

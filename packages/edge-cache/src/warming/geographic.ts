@@ -223,21 +223,21 @@ export class GeographicWarmer {
       cacheKey: '',
       tier: 'warm',
       size: 0,
-      metadata: { error: lastError },
+      metadata: {},
     };
   }
 
   /**
    * Get status for all regions
    */
-  getRegionStatus(): RegionWarmingStatus[] {
+  getAllRegionStatus(): RegionWarmingStatus[] {
     return Array.from(this.regionStatus.values());
   }
 
   /**
    * Get status for a specific region
    */
-  getRegionStatus(countryCode: string): RegionWarmingStatus | undefined {
+  getRegionStatusByCode(countryCode: string): RegionWarmingStatus | undefined {
     return this.regionStatus.get(countryCode);
   }
 

@@ -357,7 +357,7 @@ export class SchedulingAnalytics {
     const metrics = this.getSchedulingMetrics();
     const perfMetrics = this.getPerformanceMetrics();
 
-    const currentCapacity = this.config.maxConcurrentExecutions || 100;
+    const currentCapacity = 100; // Default capacity
     const projectedCapacity = currentCapacity;
     const utilization = metrics.nodeUtilization;
 

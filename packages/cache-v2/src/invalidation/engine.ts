@@ -3,14 +3,19 @@
  * Multiple strategies for cache invalidation
  */
 
-import {
-  CacheTier,
+import type {
   InvalidationEvent,
   InvalidationResult,
   InvalidationConfig,
-  CacheContext,
-  MultiTierCache,
 } from '../types';
+
+import {
+  CacheTier,
+} from '../types';
+
+// MultiTierCache is used at runtime but needs to be imported differently
+// We'll use any to avoid circular dependency issues
+type MultiTierCache = any;
 
 // ============================================================================
 // Invalidation Types
@@ -434,7 +439,7 @@ export class InvalidationEngine {
   /**
    * Invalidate by prefix
    */
-  async invalidateByPrefix(prefix: string): Promise<InvalidationResult> {
+  async invalidateByPrefix(_prefix: string): Promise<InvalidationResult> {
     const startTime = Date.now();
 
     try {

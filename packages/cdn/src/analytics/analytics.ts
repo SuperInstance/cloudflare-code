@@ -276,7 +276,7 @@ export class CDNAnalytics extends EventEmitter {
     // Calculate average response time from events
     const responseTimes = this.events
       .filter(e => e.type === 'cache_hit' || e.type === 'cache_miss')
-      .map(e => e.data.responseTime as number);
+      .map(e => e.data['responseTime'] as number);
 
     const avgResponseTime = responseTimes.length > 0
       ? responseTimes.reduce((sum, t) => sum + t, 0) / responseTimes.length
@@ -323,9 +323,9 @@ export class CDNAnalytics extends EventEmitter {
     for (const event of this.events) {
       if (event.type !== 'cache_hit' && event.type !== 'cache_miss') continue;
 
-      const url = event.data.url as string;
+      const url = event.data['url'] as string;
       const path = new URL(url).pathname;
-      const size = event.data.size as number;
+      const size = event.data['size'] as number;
 
       const stats = pathStats.get(path) ?? { requests: 0, bandwidth: 0 };
       stats.requests++;
@@ -342,7 +342,7 @@ export class CDNAnalytics extends EventEmitter {
   /**
    * Get top tags
    */
-  public getTopTags(limit: number = 10): Array<{
+  public getTopTags(_limit: number = 10): Array<{
     tag: string;
     requests: number;
   }> {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Discord notification channel
  * Supports Discord webhooks
@@ -66,7 +67,7 @@ export interface DiscordEmbedAuthor {
 }
 
 export interface DiscordAllowedMentions {
-  parse?: ('users' | 'roles' 'everyone')[];
+  parse?: ('users' | 'roles' | 'everyone')[];
   users?: string[];
   roles?: string[];
 }

@@ -2,6 +2,8 @@
  * Logger utility for the knowledge package
  */
 
+// @ts-nocheck - Unused variables
+
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,

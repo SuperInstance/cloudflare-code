@@ -28,7 +28,7 @@
       "@/storage/*": ["storage/*"],
       "@/integrations/*": ["integrations/*"]
     },
-    "types": ["jest", "node"],
+    "types": ["node"],
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

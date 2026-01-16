@@ -5,11 +5,13 @@
 
 import {
   CacheTier,
-  CacheEntry,
-  CacheMetadata,
-  TierConfig,
   CacheError,
   CacheCapacityError,
+} from '../types';
+
+import type {
+  CacheMetadata,
+  TierConfig,
 } from '../types';
 import { R2Bucket } from '@cloudflare/workers-types';
 import {

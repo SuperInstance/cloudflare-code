@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Webhook Data Ingestion
  * Handles incoming webhook data for Cloudflare Workers

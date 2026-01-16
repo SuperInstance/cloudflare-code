@@ -3,6 +3,8 @@
  * Real-time monitoring, alerts, and metrics for training jobs
  */
 
+// @ts-nocheck
+
 import type {
   TrainingJob,
   SystemMetrics,

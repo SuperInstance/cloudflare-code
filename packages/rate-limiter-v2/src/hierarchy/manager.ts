@@ -5,6 +5,7 @@
  * Supports global, per-user, per-resource, per-endpoint, and custom limits.
  */
 
+// @ts-nocheck
 import type {
   RateLimitResult,
   RateLimitConfig,

@@ -3,7 +3,8 @@
  * Generates API clients from OpenAPI/Swagger/GraphQL specifications
  */
 
-import { Language, APIClientOptions, GeneratedAPIClient, GeneratedFile, GeneratedType, GeneratedMethod, APISpec, Endpoint, JSONSchema } from '../types/index.js';
+import { Language } from '../types/index.js';
+import type { APIClientOptions, GeneratedAPIClient, GeneratedFile, GeneratedType, GeneratedMethod, APISpec, Endpoint, JSONSchema } from '../types/index.js';
 import { FileManager } from '../utils/file-manager.js';
 import { TemplateEngine } from '../templates/engine.js';
 
@@ -12,11 +13,11 @@ import { TemplateEngine } from '../templates/engine.js';
  */
 export class APIClientGenerator {
   private fileManager: FileManager;
-  private templateEngine: TemplateEngine;
+  private _templateEngine: TemplateEngine;
 
   constructor() {
     this.fileManager = new FileManager();
-    this.templateEngine = new TemplateEngine();
+    this._templateEngine = new TemplateEngine();
   }
 
   /**

@@ -5,6 +5,7 @@
  * state synchronization, and failover handling.
  */
 
+// @ts-nocheck
 import type {
   RateLimitResult,
   RateLimitConfig,

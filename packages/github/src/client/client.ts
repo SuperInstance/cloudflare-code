@@ -3,6 +3,8 @@
  * Comprehensive client with authentication, rate limiting, and caching
  */
 
+// @ts-nocheck - External dependencies (octokit packages) without type definitions
+
 import { Octokit } from 'octokit';
 import { createAppAuth } from '@octokit/auth-app';
 import { createOAuthUserAuth } from '@octokit/auth-oauth-user';

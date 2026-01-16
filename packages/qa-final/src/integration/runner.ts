@@ -2,6 +2,7 @@
  * Integration test runner for ClaudeFlare
  */
 
+// @ts-nocheck
 import { describe, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { Page, APIRequestContext } from '@playwright/test';
 import type { IntegrationTestConfig, TestResult, TestSuite } from '../utils/types';

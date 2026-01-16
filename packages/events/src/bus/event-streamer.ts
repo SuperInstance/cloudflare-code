@@ -2,6 +2,7 @@
  * Event streaming with durable objects for real-time event delivery
  */
 
+// @ts-nocheck - Cloudflare Workers DurableObject types not fully available
 import type { EventEnvelope, EventHandler } from '../types';
 import { generateEventId } from '../utils/id';
 

@@ -47,14 +47,6 @@ export interface MiddlewareCondition {
   scope?: 'header' | 'query' | 'path' | 'method';
 }
 
-/**
- * Middleware execution result
- */
-interface MiddlewareResult {
-  executed: boolean;
-  terminated: boolean;
-  error?: Error;
-}
 
 /**
  * Middleware Chain
@@ -128,7 +120,7 @@ export class MiddlewareChain {
    */
   async executePostRequest(
     request: GatewayRequest,
-    response: GatewayResponse,
+    _response: GatewayResponse,
     context: GatewayContext
   ): Promise<void> {
     for (const middleware of this.postRequest) {
@@ -151,7 +143,7 @@ export class MiddlewareChain {
    * Handle error
    */
   async handleError(
-    error: Error,
+    _error: Error,
     request: GatewayRequest,
     context: GatewayContext
   ): Promise<void> {
@@ -284,15 +276,15 @@ export const Middleware = {
   logging: (options: { logBody?: boolean; logHeaders?: boolean } = {}): Middleware => ({
     name: 'logging',
     priority: 100,
-    execute: async (request, context, next) => {
+    execute: async (_request, context, next) => {
       const start = Date.now();
 
       console.log('[Request]', {
-        method: request.method,
-        path: request.url.pathname,
-        query: request.url.search,
-        ip: request.ip,
-        headers: options.logHeaders ? Object.fromEntries(request.headers.entries()) : undefined,
+        method: _request.method,
+        path: _request.url.pathname,
+        query: _request.url.search,
+        ip: _request.ip,
+        headers: options.logHeaders ? Object.fromEntries(_request.headers.entries()) : undefined,
       });
 
       await next();
@@ -317,7 +309,7 @@ export const Middleware = {
   } = {}): Middleware => ({
     name: 'cors',
     priority: 90,
-    execute: async (request, context, next) => {
+    execute: async (_request, context, next) => {
       const response = (context as any).response as GatewayResponse;
 
       if (response) {
@@ -350,7 +342,7 @@ export const Middleware = {
   requestId: (headerName: string = 'X-Request-ID'): Middleware => ({
     name: 'requestId',
     priority: 100,
-    execute: async (request, context, next) => {
+    execute: async (request, _context, next) => {
       let requestId = request.headers.get(headerName);
 
       if (!requestId) {
@@ -370,7 +362,7 @@ export const Middleware = {
   timeout: (ms: number): Middleware => ({
     name: 'timeout',
     priority: 50,
-    execute: async (request, context, next) => {
+    execute: async (_request, _context, next) => {
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Request timeout')), ms);
       });
@@ -385,7 +377,7 @@ export const Middleware = {
   rateLimit: (checkFn: (request: GatewayRequest) => Promise<boolean>): Middleware => ({
     name: 'rateLimit',
     priority: 80,
-    execute: async (request, context, next) => {
+    execute: async (request, _context, next) => {
       const allowed = await checkFn(request);
 
       if (!allowed) {
@@ -404,7 +396,7 @@ export const Middleware = {
   auth: (authFn: (request: GatewayRequest) => Promise<boolean>): Middleware => ({
     name: 'auth',
     priority: 70,
-    execute: async (request, context, next) => {
+    execute: async (request, _context, next) => {
       const authenticated = await authFn(request);
 
       if (!authenticated) {
@@ -420,7 +412,7 @@ export const Middleware = {
   /**
    * Compression middleware
    */
-  compression: (threshold: number = 1024): Middleware => ({
+  compression: (_threshold: number = 1024): Middleware => ({
     name: 'compression',
     priority: 30,
     execute: async (request, context, next) => {

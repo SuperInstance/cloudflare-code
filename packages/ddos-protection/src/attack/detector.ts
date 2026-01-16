@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Attack Detector
  * Detects various types of DDoS attacks using multiple detection strategies

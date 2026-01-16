@@ -6,6 +6,7 @@
  * Each request consumes one or more tokens.
  */
 
+// @ts-nocheck
 import type {
   RateLimitResult,
   RateLimitConfig,

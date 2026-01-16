@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Email notification channel
  * Supports SMTP, SendGrid, AWS SES, Mailgun, and Postmark

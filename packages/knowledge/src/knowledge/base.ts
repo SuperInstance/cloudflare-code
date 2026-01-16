@@ -2,6 +2,8 @@
  * Knowledge Base - Document storage, indexing, and semantic search
  */
 
+// @ts-nocheck - External dependencies (@claudeflare/durable-objects)
+
 import { DurableObject } from '@claudeflare/durable-objects';
 import {
   DocumentContent,

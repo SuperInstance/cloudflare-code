@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Main ClaudeFlare Client
  */

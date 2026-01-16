@@ -3,29 +3,24 @@
  * Predictive and scheduled cache warming for optimal performance
  */
 
-import {
-  CacheTier,
-  WarmupStrategy,
-  WarmupConfig,
+import type {
   WarmupPrediction,
   WarmupResult,
-  ScheduleConfig,
   AccessPattern,
-  CacheContext,
-  MultiTierCache,
 } from '../types';
+
+import {
+  WarmupConfig,
+  ScheduleConfig,
+} from '../types';
+
+// MultiTierCache is used at runtime but needs to be imported differently
+// We'll use any to avoid circular dependency issues
+type MultiTierCache = any;
 
 // ============================================================================
 // Warmup Types
 // ============================================================================
-
-interface WarmupTask {
-  key: string;
-  priority: number;
-  predictedAccess: number;
-  confidence: number;
-  reason: string;
-}
 
 interface WarmupSchedule {
   id: string;
@@ -523,7 +518,7 @@ export class CacheWarmer {
   /**
    * Run event-driven warmup
    */
-  async runEventDrivenWarmup(event: string, keys: string[]): Promise<WarmupResult> {
+  async runEventDrivenWarmup(_event: string, keys: string[]): Promise<WarmupResult> {
     const startTime = Date.now();
 
     const result: WarmupResult = {

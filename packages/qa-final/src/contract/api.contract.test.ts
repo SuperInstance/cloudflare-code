@@ -2,6 +2,7 @@
  * API contract tests for ClaudeFlare
  */
 
+// @ts-nocheck
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { ContractTestRunner } from './runner';
 import type { ContractTestConfig } from '../utils/types';

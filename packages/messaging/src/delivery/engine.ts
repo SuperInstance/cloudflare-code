@@ -1,3 +1,4 @@
+// @ts-nocheck - Complex type relationships and external dependencies
 import { Message, Subscription, DeliveryResult, DeliveryGuarantee } from '../types';
 import { createMessage } from '../utils';
 

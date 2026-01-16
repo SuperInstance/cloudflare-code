@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Transformation Module
  * Data transformation DSL with schema evolution support

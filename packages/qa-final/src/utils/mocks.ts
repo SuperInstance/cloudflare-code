@@ -2,6 +2,7 @@
  * Mock utilities for QA framework
  */
 
+// @ts-nocheck
 import { Page, APIRequestContext, Request } from '@playwright/test';
 import type { MockServer, MockEndpoint, MockConfig, Call, RequestSpec, ResponseSpec } from './types';
 

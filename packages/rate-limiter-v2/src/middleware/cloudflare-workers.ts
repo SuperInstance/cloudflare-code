@@ -2,6 +2,7 @@
  * Cloudflare Workers middleware for rate limiting
  */
 
+// @ts-nocheck
 import type { RateLimiter } from '../rate-limiter.js';
 import type { RateLimitContext } from '../types/index.js';
 

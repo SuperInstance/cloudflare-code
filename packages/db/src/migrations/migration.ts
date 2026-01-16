@@ -2,6 +2,8 @@
  * Migration base class and interfaces for D1 database migrations
  */
 
+import type { D1Database, D1Result } from '../index';
+
 export interface MigrationContext {
   db: D1Database;
   env: string;

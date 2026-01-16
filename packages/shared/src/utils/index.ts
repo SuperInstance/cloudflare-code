@@ -2,7 +2,7 @@
  * Utility functions for ClaudeFlare
  */
 
-import type { CostMetrics, TokenUsage, AIProvider } from '../types';
+import type { TokenUsage, AIProvider } from '../types';
 
 // ============================================================================
 // Token Counting Utilities

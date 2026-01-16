@@ -88,6 +88,7 @@ export interface MetricData {
   value: number;
   labels: Record<string, string>;
   timestamp: number;
+  unit?: string;
 }
 
 export type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary';
@@ -138,6 +139,9 @@ export interface LogEntry {
   traceId?: string;
   spanId?: string;
   metadata?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
+  requestId?: string;
+  stackTrace?: string;
 }
 
 export interface LogContext {
@@ -192,6 +196,7 @@ export interface AlertRule {
   severity: AlertSeverity;
   cooldown?: number;
   labels?: Record<string, string>;
+  tags?: string[];
 }
 
 export interface AlertCondition {
@@ -260,7 +265,7 @@ export interface Alert {
   status: AlertStatus;
 }
 
-export type AlertStatus = 'firing' | 'resolved' | 'acknowledged' | 'suppressed';
+export type AlertStatus = 'firing' | 'resolved' | 'acknowledged' | 'suppressed' | 'triggered';
 
 export interface AlertEscalationPolicy {
   levels: EscalationLevel[];
@@ -287,6 +292,16 @@ export interface RotationSchedule {
   startDate: number;
 }
 
+export interface AlertingHistory {
+  alertId: string;
+  ruleId: string;
+  timestamp: number;
+  status: AlertStatus;
+  duration?: number;
+  notified: boolean;
+  metadata?: Record<string, unknown>;
+}
+
 // ============================================================================
 // Dashboard Types
 // ============================================================================
@@ -304,6 +319,7 @@ export interface Dashboard {
   version: number;
   createdAt: number;
   updatedAt: number;
+  tags?: string[];
 }
 
 export interface Widget {
@@ -343,6 +359,8 @@ export interface WidgetConfig {
   gridLines?: boolean;
   thresholds?: WidgetThreshold[];
   customOptions?: Record<string, unknown>;
+  timeRange?: TimeRange;
+  unit?: string;
 }
 
 export interface WidgetThreshold {
@@ -531,6 +549,7 @@ export interface HealthCheck {
   duration?: number;
   metadata?: Record<string, unknown>;
   dependencies?: string[];
+  data?: Record<string, unknown>;
 }
 
 export type HealthCheckStatus = 'pass' | 'fail' | 'warn';
@@ -605,4 +624,392 @@ export interface TelemetryData {
   metrics: MetricData[];
   logs: LogEntry[];
   metadata: Record<string, unknown>;
+}
+
+// ============================================================================
+// Business Metrics Types
+// ============================================================================
+
+export interface BusinessMetric {
+  name: string;
+  value: number;
+  timestamp: number;
+  labels: Record<string, string>;
+}
+
+export interface MetricAggregator {
+  name: string;
+  type: 'sum' | 'avg' | 'min' | 'max' | 'count';
+}
+
+export interface MetricThreshold {
+  name: string;
+  operator: 'gt' | 'lt' | 'eq';
+  value: number;
+}
+
+export interface MetricTarget {
+  name: string;
+  value: number;
+}
+
+// ============================================================================
+// RUM (Real User Monitoring) Types
+// ============================================================================
+
+export interface WebVitals {
+  LCP?: number;
+  FID?: number;
+  CLS?: number;
+  FCP?: number;
+  TTFB?: number;
+}
+
+export interface PageViewData {
+  sessionId: string;
+  pageViewId: string;
+  url: string;
+  title: string;
+  referrer: string;
+  timestamp: number;
+  timing: {
+    loadTime: number;
+    domInteractive: number;
+    domComplete: number;
+  };
+}
+
+export interface UserInteractionEvent {
+  type: string;
+  timestamp: number;
+  element: string;
+  elementId: string;
+  elementClass: string;
+  x: number;
+  y: number;
+  text: string;
+  pageUrl?: string;
+}
+
+export interface RUMSession {
+  sessionId: string;
+  startTime: number;
+  endTime: number;
+  userAgent: string;
+  viewport?: {
+    width: number;
+    height: number;
+  };
+  device: string;
+  location?: {
+    country: string;
+    language: string;
+  };
+  interactions: UserInteractionEvent[];
+  pageViews: PageViewData[];
+  customMetrics: Record<string, number>[];
+}
+
+// ============================================================================
+// Inspection Types
+// ============================================================================
+
+export interface RequestInspection {
+  headers: Record<string, string>;
+  method: string;
+  url: string;
+  body?: unknown;
+}
+
+export interface ResponseInspection {
+  status: number;
+  headers: Record<string, string>;
+  body?: unknown;
+}
+
+export interface RequestResponsePair {
+  request: RequestInspection;
+  response: ResponseInspection;
+  timestamp: number;
+  duration: number;
+}
+
+export interface InspectionFilter {
+  urlPattern?: string;
+  method?: string;
+  statusCode?: number;
+}
+
+export interface TimingInfo {
+  start: number;
+  end: number;
+  duration: number;
+}
+
+// ============================================================================
+// Memory & Profiling Types
+// ============================================================================
+
+export interface HeapSnapshot {
+  nodeId: number;
+  name: string;
+  type: string;
+  size: number;
+  children: HeapSnapshot[];
+}
+
+export interface HeapNode {
+  id: number;
+  name: string;
+  size: number;
+  retainedSize: number;
+}
+
+export interface HeapEdge {
+  from: number;
+  to: number;
+  type: string;
+}
+
+export interface MemoryLeak {
+  description: string;
+  severity: 'low' | 'medium' | 'high';
+  objects: HeapNode[];
+}
+
+export interface RetainedSizeAnalysis {
+  total: number;
+  nodes: HeapNode[];
+}
+
+export interface RetainingPath {
+  path: HeapNode[];
+  totalSize: number;
+}
+
+export interface MemoryTimelinePoint {
+  timestamp: number;
+  used: number;
+  total: number;
+}
+
+export interface CPUProfile {
+  samples: ProfileSample[];
+  startTime: number;
+  endTime: number;
+}
+
+export interface ProfileSample {
+  timestamp: number;
+  stack: string[];
+}
+
+export interface FlameGraphFrame {
+  name: string;
+  value: number;
+  children: FlameGraphFrame[];
+}
+
+export interface HotPath {
+  frames: FlameGraphFrame[];
+  totalTime: number;
+}
+
+export interface Bottleneck {
+  function: string;
+  totalTime: number;
+  percentage: number;
+}
+
+// ============================================================================
+// Additional Missing Types
+// ============================================================================
+
+export interface LogFilter {
+  level?: LogLevel;
+  pattern?: string;
+  startTime?: number;
+  endTime?: number;
+}
+
+export interface LogAggregation {
+  byLevel: Record<LogLevel, number>;
+  byPattern: Record<string, number>;
+}
+
+export type Attributes = Record<string, string | number | boolean>;
+
+export interface CustomMetricData {
+  name: string;
+  value: number;
+  timestamp: number;
+  labels?: Record<string, string>;
+}
+
+export interface ServiceHealth {
+  service: string;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  timestamp: number;
+  metrics?: PerformanceMetrics;
+}
+
+// ============================================================================
+// Error Tracking Types
+// ============================================================================
+
+export interface ErrorRecord {
+  id: string;
+  error: ErrorInfo;
+  timestamp: number;
+  count: number;
+  firstSeen: number;
+  lastSeen: number;
+  tags?: string[];
+}
+
+export interface ErrorGroup {
+  id: string;
+  fingerprint: string;
+  errors: ErrorRecord[];
+  pattern: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
+export interface UserReport {
+  id: string;
+  userId: string;
+  errorId: string;
+  description: string;
+  email?: string;
+  timestamp: number;
+  resolved?: boolean;
+}
+
+export interface ErrorSession {
+  id: string;
+  userId?: string;
+  startTime: number;
+  endTime?: number;
+  errors: string[];
+  breadcrumbs: Breadcrumb[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface Breadcrumb {
+  timestamp: number;
+  message: string;
+  category?: string;
+  level?: LogLevel;
+  data?: Record<string, unknown>;
+}
+
+// ============================================================================
+// Visualization Types
+// ============================================================================
+
+export interface TraceTreeNode {
+  span: SpanData;
+  children: TraceTreeNode[];
+  depth: number;
+}
+
+export interface SpanMetadata {
+  name: string;
+  startTime: number;
+  duration: number;
+  tags: Record<string, string>;
+  status: 'ok' | 'error';
+}
+
+export interface SpanData {
+  traceId: string;
+  spanId: string;
+  parentSpanId?: string;
+  name: string;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  tags: Record<string, string>;
+  logs: SpanLog[];
+}
+
+export interface SpanLog {
+  timestamp: number;
+  message: string;
+  fields?: Record<string, unknown>;
+}
+
+// ============================================================================
+// Recording/Debug Types
+// ============================================================================
+
+export interface DebugRecording {
+  id: string;
+  sessionId: string;
+  startTime: number;
+  endTime: number;
+  frames: DebugFrame[];
+  metadata: Record<string, unknown>;
+}
+
+export interface DebugFrame {
+  timestamp: number;
+  stackTrace: string;
+  variables: Record<string, unknown>;
+  context?: Record<string, unknown>;
+}
+
+export interface ReplayState {
+  currentFrame: number;
+  isPlaying: boolean;
+  speed: number;
+  filters: ReplayFilter;
+}
+
+export interface ReplayFilter {
+  startTime?: number;
+  endTime?: number;
+  function?: string;
+}
+
+export interface DebugSession {
+  id: string;
+  breakpoints: Breakpoint[];
+  variables: Map<string, VariableInspection>;
+  callStack: CallFrame[];
+}
+
+export interface Breakpoint {
+  id: string;
+  file: string;
+  line: number;
+  condition?: string;
+  enabled: boolean;
+}
+
+export interface VariableInspection {
+  name: string;
+  value: unknown;
+  type: string;
+  properties?: Record<string, VariableInspection>;
+}
+
+export interface CallFrame {
+  functionName: string;
+  fileName: string;
+  lineNumber: number;
+  column: number;
+}
+
+export interface MemoryStatistics {
+  total: number;
+  used: number;
+  free: number;
+  percentage: number;
+}
+
+export interface ObjectReference {
+  id: string;
+  type: string;
+  value?: unknown;
 }

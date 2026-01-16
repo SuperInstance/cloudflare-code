@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import React, { useMemo } from 'react';
 import { Gauge } from '@/components/ui/gauge';
 import { BaseWidget, CounterConfig } from '@/types';

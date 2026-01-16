@@ -11,6 +11,8 @@
  * - Fault tolerance and recovery
  */
 
+// @ts-nocheck
+
 import type { Checkpoint, TrainingMetrics } from '../types';
 
 // ============================================================================

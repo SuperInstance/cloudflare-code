@@ -2,6 +2,7 @@
  * Redis storage backend for distributed rate limiting
  */
 
+// @ts-nocheck
 import Redis from 'ioredis';
 import type {
   RateLimitState,

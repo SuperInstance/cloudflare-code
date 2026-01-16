@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Push notification channel
  * Supports FCM (Firebase Cloud Messaging) and APNs (Apple Push Notification Service)

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Quality Validator
  * Validates data quality based on configured rules

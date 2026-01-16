@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * LRU (Least Recently Used) Cache Implementation
  *

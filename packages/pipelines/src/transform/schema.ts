@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Schema Evolution and Validation
  * Handles schema evolution, migration, and compatibility

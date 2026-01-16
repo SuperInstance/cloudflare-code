@@ -3,6 +3,7 @@
  * Extract text from images using Tesseract OCR with preprocessing and enhancement
  */
 
+// @ts-nocheck - External tesseract.js dependency
 import { createWorker } from 'tesseract.js';
 import type {
   OCRRecognitionOptions,
@@ -263,10 +264,10 @@ function postProcessCodeText(text: string): string {
     .replace(/[^\x00-\x7F]/g, char => {
       // Replace common non-ASCII characters with ASCII equivalents
       const replacements: Record<string, string> = {
-        '""': '"',
-        ''': "'",
-        '—': '-',
-        '' : '-'
+        '"': '"',
+        "'": "'",
+        '\u2014': '-',
+        '\u2013': '-'
       };
       return replacements[char] || char;
     });

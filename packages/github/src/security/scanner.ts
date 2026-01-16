@@ -3,6 +3,8 @@
  * Code scanning, secret scanning, Dependabot, and vulnerability management
  */
 
+// @ts-nocheck - Missing type exports
+
 import {
   CodeScanningAlert,
   SecretScanningAlert,

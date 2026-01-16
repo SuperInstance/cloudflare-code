@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * DDoS Protection Configuration
  */

@@ -1,3 +1,4 @@
+export { ObservableConfig } from '../types';
 import { ObservableConfig, ExportResult, TelemetryData } from '../types';
 
 /**

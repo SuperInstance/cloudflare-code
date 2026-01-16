@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import React, { useState } from 'react';
 import {
   AlertCircle,

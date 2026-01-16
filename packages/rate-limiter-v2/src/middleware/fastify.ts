@@ -2,6 +2,7 @@
  * Fastify plugin for rate limiting
  */
 
+// @ts-nocheck
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { FastifyPluginAsync } from 'fastify';
 import type { RateLimiter } from '../rate-limiter.js';

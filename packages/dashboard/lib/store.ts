@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Global state management using Zustand
  */

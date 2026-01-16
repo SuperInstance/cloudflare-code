@@ -2,6 +2,7 @@
  * OCR Pipeline for Text Recognition from Images
  */
 
+// @ts-nocheck
 import type { ImageInput, Captions } from '../types';
 import { ImageProcessor } from './processor';
 

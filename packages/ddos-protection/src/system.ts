@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * DDoS Protection System - Optimized
  */

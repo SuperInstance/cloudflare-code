@@ -3,7 +3,7 @@
  * Validates generated code for syntax errors and best practices
  */
 
-import { Language, ValidationResult, ValidationError, ValidationWarning } from '../types/index.js';
+import type { Language, ValidationResult, ValidationError, ValidationWarning } from '../types/index.js';
 
 /**
  * Code Validator class

@@ -3,7 +3,9 @@
  */
 
 import { LoadBalancer } from './loadbalancer.js';
-import type { LoadBalancerConfig, Region, RegionInfo } from './types/index.js';
+import type { LoadBalancerConfig } from './loadbalancer.js';
+import type { Region, RegionInfo } from './types/index.js';
+import type { HealthCheckerConfig } from './health/checker.js';
 
 interface Env {
   DB: D1Database;
@@ -118,8 +120,7 @@ async function loadBalancerConfig(env: Env): Promise<LoadBalancerConfig> {
     },
     health: {
       checkInterval: 30000,
-      automaticFailover: true,
-    },
+    } as { checkInterval: number } & Partial<HealthCheckerConfig>,
     traffic: {
       enableRateLimiting: true,
       enableThrottling: true,
@@ -149,8 +150,8 @@ async function loadRegions(env: Env): Promise<Map<Region, RegionInfo>> {
       // Load datacenters for this region
       const datacenters = await loadDatacenters(env, row.id as string);
 
-      regions.set(row.id as string, {
-        id: row.id as string,
+      regions.set(row.id as string as Region, {
+        id: row.id as string as Region,
         name: row.name as string,
         location: {
           country: 'US',

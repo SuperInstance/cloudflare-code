@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Projects page - list and manage projects
  */

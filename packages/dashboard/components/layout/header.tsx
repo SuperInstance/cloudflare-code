@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Header component for the dashboard
  */

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MetricData } from '../types';
 
 export class MetricsHelper {

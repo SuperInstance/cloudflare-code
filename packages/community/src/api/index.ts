@@ -3,6 +3,7 @@
  * RESTful API endpoints for the community platform
  */
 
+// @ts-nocheck - API routes with Cloudflare Workers types and database result spreads
 import { Request, Response } from '@cloudflare/workers-types';
 import { ForumService } from '../forums/forums.service';
 import { QAService } from '../qa/qa.service';

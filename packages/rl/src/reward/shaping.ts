@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Reward Shaping System
  * Converts sparse rewards to dense, normalizes rewards, and adds auxiliary rewards

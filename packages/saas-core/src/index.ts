@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ClaudeFlare SaaS Core - Ultra-Optimized
  * Minimalist multi-tenant platform

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * PPO (Proximal Policy Optimization) Agent Implementation
  * State-of-the-art policy gradient method with clipped objective

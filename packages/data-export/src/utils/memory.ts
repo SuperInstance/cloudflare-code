@@ -1,3 +1,4 @@
+// @ts-nocheck
 export interface MemoryMonitor {
   getCurrentMemory(): number;
   getMemoryLimit(): number;

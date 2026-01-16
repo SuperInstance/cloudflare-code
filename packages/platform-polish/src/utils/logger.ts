@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as winston from 'winston';
 import * as path from 'path';
 

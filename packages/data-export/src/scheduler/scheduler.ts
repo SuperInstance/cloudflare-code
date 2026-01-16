@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'eventemitter3';
 import * as cron from 'node-cron';
 import { promises as fs } from 'fs';

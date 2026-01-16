@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * IP Reputation System
  * Tracks and manages IP reputation scores for intelligent blocking

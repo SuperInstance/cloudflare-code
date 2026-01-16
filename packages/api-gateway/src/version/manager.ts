@@ -165,7 +165,7 @@ export class VersionManager {
    */
   async routeToVersion(
     request: GatewayRequest,
-    context: GatewayContext,
+    _context: GatewayContext,
     requestedVersion?: string
   ): Promise<VersionRoutingResult> {
     // Detect version

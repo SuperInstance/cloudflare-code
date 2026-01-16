@@ -28,6 +28,7 @@ import {
   ThrottledError,
   RegionUnavailableError,
 } from './types/index.js';
+import type { HealthCheckerConfig } from './health/checker.js';
 
 export interface LoadBalancerConfig {
   regions: Map<Region, RegionInfo>;
@@ -48,8 +49,7 @@ export interface LoadBalancerConfig {
   };
   health: {
     checkInterval: number;
-    automaticFailover: boolean;
-  };
+  } & Partial<HealthCheckerConfig>;
   traffic: {
     enableRateLimiting: boolean;
     enableThrottling: boolean;

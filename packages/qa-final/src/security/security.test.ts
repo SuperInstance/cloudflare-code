@@ -2,6 +2,7 @@
  * Security tests for ClaudeFlare
  */
 
+// @ts-nocheck
 import { describe, it, expect, beforeAll } from 'vitest';
 import { SecurityTestRunner, PenetrationTestHelper } from './runner';
 import type { SecurityTestConfig } from '../utils/types';

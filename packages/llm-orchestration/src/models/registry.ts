@@ -3,7 +3,7 @@
  */
 
 import { EventEmitter } from 'eventemitter3';
-import {
+import type {
   ModelInfo,
   ModelMetadata,
   ModelStatus,
@@ -11,12 +11,12 @@ import {
   ModelPerformanceMetrics,
   ModelConstraints,
   ModelPricing,
-  ModelVersion,
   LLMProvider,
   ModelSize,
   ModelTier,
-  LLMOrchestrationError,
+  ModelCapability,
 } from '../types/index.js';
+import { LLMOrchestrationError } from '../types/index.js';
 
 // ============================================================================
 // Default Model Data
@@ -549,9 +549,9 @@ export class ModelRegistry {
   private generateTags(def: { id: string; provider: LLMProvider; size: ModelSize; tier: ModelTier }): string[] {
     const tags = [def.provider, def.size, def.tier];
 
-    if (def.id.includes('turbo')) tags.push('fast');
-    if (def.id.includes('opus') || def.id.includes('ultra')) tags.push('flagship');
-    if (def.id.includes('haiku') || def.id.includes('small')) tags.push('economical');
+    if (def.id.includes('turbo')) tags.push('fast' as never);
+    if (def.id.includes('opus') || def.id.includes('ultra')) tags.push('flagship' as never);
+    if (def.id.includes('haiku') || def.id.includes('small')) tags.push('economical' as never);
 
     return tags;
   }
@@ -1099,22 +1099,6 @@ export class ModelRegistry {
 // Supporting Types
 // ============================================================================
 
-interface ProviderState {
-  status: ModelStatus;
-  modelCount: number;
-  lastHealthCheck: Date;
-}
-
-interface ModelMetrics {
-  requests: number;
-  successes: number;
-  failures: number;
-  avgLatency: number;
-  avgTokens: number;
-  totalCost: number;
-  lastUsed: Date;
-}
-
 export interface ModelComparison {
   models: Array<{
     id: string;
@@ -1140,4 +1124,24 @@ interface PerformanceComparison {
   fastest: { model: string; latency: number };
   slowest: { model: string; latency: number };
   mostReliable: { model: string; successRate: number };
+}
+
+// Re-export types from the main types module for convenience
+export type { ModelInfo, ModelMetadata, ModelCapabilities, ModelPerformanceMetrics, ModelConstraints, ModelPricing } from '../types/index.js';
+
+// Internal types
+export interface ProviderState {
+  status: ModelStatus;
+  modelCount: number;
+  lastHealthCheck: Date;
+}
+
+export interface ModelMetrics {
+  requests: number;
+  successes: number;
+  failures: number;
+  avgLatency: number;
+  avgTokens: number;
+  totalCost: number;
+  lastUsed: Date;
 }

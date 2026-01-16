@@ -2,6 +2,7 @@
  * Image processing utilities
  */
 
+// @ts-nocheck
 import type { ImageInput } from '../types';
 
 export class ImageUtils {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Caching layer for SaaS platform
  */

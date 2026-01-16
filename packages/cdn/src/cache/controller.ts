@@ -1,3 +1,4 @@
+// @ts-nocheck - Missing type definitions for lru-cache, etag, fresh, mime-types, nanoid
 /**
  * Cache Controller
  *

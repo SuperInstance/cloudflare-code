@@ -1,6 +1,6 @@
 export * from './processor';
 
-export { StreamProcessorImpl } from './processor';
+export { StreamProcessor as StreamProcessorImpl } from './processor';
 export {
   TimeWindow,
   CountWindow,

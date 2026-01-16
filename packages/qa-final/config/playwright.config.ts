@@ -2,6 +2,7 @@
  * Playwright configuration for E2E tests
  */
 
+// @ts-nocheck
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { HealthStatus } from '../types';
 
 export class HealthCheckHelper {

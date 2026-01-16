@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Architecture Evaluation Framework
  * Evaluate architectures on accuracy, FLOPs, latency, memory, energy

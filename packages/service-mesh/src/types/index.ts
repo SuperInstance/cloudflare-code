@@ -23,11 +23,7 @@ export interface ServiceInstance {
 }
 
 export interface ServiceMetadata {
-  [key: string]: string | number | boolean;
-  cpuThreshold?: number;
-  memoryThreshold?: number;
-  requestThreshold?: number;
-  custom?: Record<string, any>;
+  [key: string]: string | number | boolean | Record<string, any>;
 }
 
 export type HealthStatus = 'healthy' | 'unhealthy' | 'draining' | 'unknown';

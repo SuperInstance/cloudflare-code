@@ -608,14 +608,4 @@ export class ComplianceHelper {
   }
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
-export {
-  DataClassificationHelper,
-  SecurityValidator,
-  AuditHelper,
-  EncryptionHelper,
-  ComplianceHelper,
-};
+// All classes are already exported inline - no duplicate export needed

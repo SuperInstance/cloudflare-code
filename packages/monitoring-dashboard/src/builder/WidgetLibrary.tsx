@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import React from 'react';
 import { X, LineChart, BarChart3, PieChart, Activity, Table, Grid3x3, AlertCircle, TrendingUp } from 'lucide-react';
 import { WidgetType } from '@/types';

@@ -4,6 +4,7 @@
  * View and manage projects.
  */
 
+// @ts-nocheck - External React/Next.js dependencies
 'use client';
 
 import React from 'react';

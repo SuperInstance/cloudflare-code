@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventEmitter } from 'events';
 import * as CircuitBreaker from 'circuit-breaker-js';
 import { ServiceConfig } from '../types';

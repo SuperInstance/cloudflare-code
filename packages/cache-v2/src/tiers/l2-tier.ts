@@ -5,11 +5,13 @@
 
 import {
   CacheTier,
-  CacheEntry,
-  CacheMetadata,
-  TierConfig,
   CacheError,
   CacheCapacityError,
+} from '../types';
+
+import type {
+  CacheMetadata,
+  TierConfig,
 } from '../types';
 import { KVNamespace } from '@cloudflare/workers-types';
 import { serialize, deserialize, calculateSize, validateKey } from '../utils/serializer';
@@ -422,7 +424,7 @@ export class L2Cache {
 
       return {
         keys: result.keys.map(k => this.stripCacheKey(k.name)),
-        cursor: result.cursor,
+        cursor: (result as any).cursor ?? '',
         list_complete: result.list_complete,
       };
     } catch (error) {

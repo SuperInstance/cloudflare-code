@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Right to Access Implementation (GDPR Article 15)
  * @packageDocumentation

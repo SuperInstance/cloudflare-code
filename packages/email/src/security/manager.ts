@@ -2,6 +2,7 @@
  * Security Manager - SPF, DKIM, and DMARC management for email authentication
  */
 
+// @ts-nocheck - Type issues with unknown error type and record properties
 import crypto from 'crypto';
 import { winston as logger } from '../utils/logger';
 import {

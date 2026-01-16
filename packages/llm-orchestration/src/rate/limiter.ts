@@ -3,15 +3,69 @@
  */
 
 import { EventEmitter } from 'eventemitter3';
-import PQueue from 'p-queue';
 import {
   RateLimitConfig,
   RateLimitQuota,
   RateLimitState,
   ThrottleConfig,
   RateLimitExceededError,
-  LLMProvider,
 } from '../types/index.js';
+
+// Simple queue implementation to replace p-queue
+class SimpleQueue {
+  private queue: Array<{ task: () => Promise<unknown>; resolve: (value: unknown) => void; reject: (error: Error) => void }> = [];
+  private active = false;
+  private concurrency: number;
+  private pendingCount = 0;
+
+  constructor(concurrency = 1) {
+    this.concurrency = concurrency;
+  }
+
+  async add<T>(task: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.queue.push({ task, resolve: resolve as (value: unknown) => void, reject });
+      this.process();
+    });
+  }
+
+  private async process(): Promise<void> {
+    if (this.active || this.pendingCount >= this.concurrency || this.queue.length === 0) {
+      return;
+    }
+
+    this.active = true;
+    const item = this.queue.shift();
+    if (!item) {
+      this.active = false;
+      return;
+    }
+
+    this.pendingCount++;
+    try {
+      const result = await item.task();
+      item.resolve(result);
+    } catch (error) {
+      item.reject(error as Error);
+    } finally {
+      this.pendingCount--;
+      this.active = false;
+      this.process();
+    }
+  }
+
+  get size(): number {
+    return this.queue.length + this.pendingCount;
+  }
+
+  get pending(): number {
+    return this.pendingCount;
+  }
+
+  clear(): void {
+    this.queue = [];
+  }
+}
 
 // ============================================================================
 // Rate Limiter Configuration
@@ -41,8 +95,8 @@ export interface PriorityRequest {
 export class RateLimiter {
   private quotas: Map<string, RateLimitQuota>;
   private states: Map<string, RateLimitState>;
-  private queues: Map<string, PQueue>;
-  private priorityQueues: Map<number, PQueue>;
+  private queues: Map<string, SimpleQueue>;
+  private priorityQueues: Map<number, SimpleQueue>;
   private events: EventEmitter;
   private config: Required<RateLimiterConfig>;
   private cleanupTimer: NodeJS.Timeout | null;
@@ -286,11 +340,7 @@ export class RateLimiter {
     // Get or create queue for this quota
     let queue = this.queues.get(quotaId);
     if (!queue) {
-      queue = new PQueue({
-        concurrency: 1,
-        timeout: this.config.throttleConfig.queueTimeout,
-        autoStart: true,
-      });
+      queue = new SimpleQueue(1);
       this.queues.set(quotaId, queue);
     }
 
@@ -348,11 +398,7 @@ export class RateLimiter {
     // Get or create priority queue
     let queue = this.priorityQueues.get(priority);
     if (!queue) {
-      queue = new PQueue({
-        concurrency: 1,
-        timeout: this.config.throttleConfig.queueTimeout,
-        autoStart: true,
-      });
+      queue = new SimpleQueue(1);
       this.priorityQueues.set(priority, queue);
     }
 

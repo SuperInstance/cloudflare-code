@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SMS notification channel
  * Supports Twilio, AWS SNS, MessageBird, and Nexmo

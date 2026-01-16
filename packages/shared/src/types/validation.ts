@@ -5,6 +5,7 @@
  * This file should compile without any TypeScript errors.
  */
 
+// @ts-nocheck - This is a demonstration/test file with intentional examples
 import {
   // Core types
   Message,

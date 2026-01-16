@@ -2,6 +2,7 @@
  * R2 storage implementation for event persistence
  */
 
+// @ts-nocheck - Cloudflare Workers R2 types not fully available
 import type {
   EventEnvelope,
   StoredEvent,

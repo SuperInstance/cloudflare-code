@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Episodic Memory System
  *

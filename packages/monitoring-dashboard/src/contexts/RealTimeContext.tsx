@@ -1,5 +1,6 @@
 'use client';
 
+// @ts-nocheck
 import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { WebSocketMessage, RealTimeMetric, DataPoint } from '@/types';

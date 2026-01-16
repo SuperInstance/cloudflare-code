@@ -478,7 +478,6 @@ export class LLMRouter {
     }
 
     // Filter by context window
-    const query = this.extractQueryFeatures(request);
     models = models.filter((m) =>
       m.metadata.constraints.maxTokens >= query.estimatedTokens
     );
@@ -588,9 +587,9 @@ export class LLMRouter {
 
     switch (condition.operator) {
       case 'and':
-        return results.every((r) => r === true);
+        return results.every((r: boolean) => r === true);
       case 'or':
-        return results.some((r) => r === true);
+        return results.some((r: boolean) => r === true);
       case 'not':
         return !results[0];
       default:
@@ -865,7 +864,7 @@ export class LLMRouter {
     return {
       totalRequests: history.length,
       modelUsage: Object.fromEntries(modelUsage),
-      providerUsage: Object.fromEntries(providerUsage),
+      providerUsage: Object.fromEntries(providerUsage) as Record<LLMProvider, number>,
       strategyUsage: Object.fromEntries(strategyUsage),
       cacheSize: this.routingCache.size,
       abTestGroups: this.abTestGroups.size,
@@ -886,7 +885,7 @@ interface QueryFeatures {
   requiresStreaming: boolean;
 }
 
-interface RoutingAnalytics {
+export interface RoutingAnalytics {
   totalRequests: number;
   modelUsage: Record<string, number>;
   providerUsage: Record<LLMProvider, number>;

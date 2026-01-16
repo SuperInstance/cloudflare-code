@@ -883,8 +883,4 @@ export class ComplianceAutomationEngine {
   }
 }
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
-export { AutomatedEvidenceCollector, ComplianceAutomationEngine, CONTROLS_LIBRARY };
+// All classes are already exported inline - no duplicate export needed

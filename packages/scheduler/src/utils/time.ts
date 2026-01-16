@@ -237,7 +237,12 @@ export function cronInterval(
   };
 
   if (options?.immediate) {
-    callback().then(scheduleNext);
+    const result = callback();
+    if (result && typeof result.then === 'function') {
+      result.then(scheduleNext);
+    } else {
+      scheduleNext();
+    }
   } else {
     scheduleNext();
   }

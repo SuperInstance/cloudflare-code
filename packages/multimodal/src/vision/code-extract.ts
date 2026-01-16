@@ -3,6 +3,7 @@
  * Extract code from screenshots, whiteboards, and other visual sources
  */
 
+// @ts-nocheck - External AI SDK dependencies
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
 import type {

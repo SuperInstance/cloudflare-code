@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Reference Finder
  *

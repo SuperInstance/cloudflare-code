@@ -111,7 +111,6 @@ export {
   cacheMiddleware,
   predictivePreloadMiddleware,
   cacheWarmupMiddleware,
-  createCacheStack,
 } from './utils/middleware';
 
 import type { EdgeCacheEnv } from './types';
@@ -280,6 +279,7 @@ export class EdgeCacheSystem {
     const result = await this.invalidation.invalidate({
       ...request,
       strategy: (request.strategy as any) || 'tag-based',
+      priority: 0,
     });
 
     return {
@@ -305,7 +305,10 @@ export class EdgeCacheSystem {
       timestamp: number;
     }
   ): Promise<void> {
-    await this.prediction.recordAccess(userId, sessionId, url, method, context);
+    await this.prediction.recordAccess(userId, sessionId, url, method, {
+      ...context,
+      device: 'unknown',
+    });
   }
 
   /**
@@ -328,7 +331,10 @@ export class EdgeCacheSystem {
     confidence: number;
     reason: string;
   }>> {
-    return await this.prediction.getPredictions(userId, sessionId, context, limit);
+    return await this.prediction.getPredictions(userId, sessionId, {
+      ...context,
+      device: 'unknown',
+    }, limit);
   }
 
   /**
@@ -346,7 +352,10 @@ export class EdgeCacheSystem {
     },
     limit: number = 5
   ): Promise<void> {
-    await this.prediction.preloadPredictions(userId, sessionId, context, limit);
+    await this.prediction.preloadPredictions(userId, sessionId, {
+      ...context,
+      device: 'unknown',
+    }, limit);
   }
 
   /**
@@ -381,7 +390,14 @@ export class EdgeCacheSystem {
     cached: boolean;
     duration: number;
   }> {
-    const result = await this.rendering.render(request);
+    const result = await this.rendering.render({
+      ...request,
+      cookies: {},
+      context: {
+        ...request.context,
+        timestamp: Date.now(),
+      },
+    });
 
     return {
       content: result.content,
@@ -510,4 +526,4 @@ export default EdgeCacheSystem;
 /**
  * Hono integration
  */
-export { createCacheStack, cacheMiddleware } from './utils/middleware';
+export { createCacheStack } from './utils/middleware';

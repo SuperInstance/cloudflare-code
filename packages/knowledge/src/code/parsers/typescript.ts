@@ -2,6 +2,8 @@
  * TypeScript Parser - Parse TypeScript/JavaScript code
  */
 
+// @ts-nocheck - External dependencies (typescript) and unused variables
+
 import * as ts from 'typescript';
 import {
   ParsedDocumentation,

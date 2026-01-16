@@ -3,10 +3,10 @@
  * Manages user identities, roles, permissions, and access control
  */
 
-export { default as IAMService } from './iam-service';
-export { default as UserManagement } from './user-management';
-export { default as RoleManagement } from './role-management';
-export { default as PermissionManagement } from './permission-management';
+export { IAMService } from './iam-service';
+export { UserManagement } from './user-management';
+export { RoleManagement } from './role-management';
+export { PermissionManagement } from './permission-management';
 
 export * from './types';
-export * from './utils';
+// export * from './utils'; // Commented out - utils has external dependencies

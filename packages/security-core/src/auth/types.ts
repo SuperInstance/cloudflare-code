@@ -12,6 +12,9 @@ import {
   MfaMethod
 } from '../types';
 
+// Re-export types for convenience
+export type { User, AuthToken, OAuth2Config, SAML2Config, Session, MfaChallenge, MfaMethod };
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -40,6 +43,7 @@ export interface RegisterRequest {
 export interface RegisterResponse {
   success: boolean;
   user?: User;
+  token?: AuthToken;
   error?: string;
 }
 

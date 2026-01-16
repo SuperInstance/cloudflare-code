@@ -12,16 +12,20 @@ export { GeographicRouter } from './geographic/router.js';
 export { GeographicMapper } from './geographic/mapper.js';
 export type {
   GeographicRouterConfig,
-  GeoMappingConfig,
 } from './geographic/router.js';
+export type {
+  GeoMappingConfig,
+} from './geographic/mapper.js';
 
 // Latency routing
 export { LatencyRouter } from './latency/router.js';
 export { LatencyMonitor } from './latency/monitor.js';
 export type {
   LatencyRouterConfig,
-  MonitoringConfig,
 } from './latency/router.js';
+export type {
+  MonitoringConfig,
+} from './latency/monitor.js';
 
 // Capacity routing
 export { CapacityRouter } from './capacity/router.js';

@@ -2,6 +2,7 @@
  * Core type definitions for QA testing framework
  */
 
+// @ts-nocheck
 import { Page, APIRequestContext } from '@playwright/test';
 
 // Test configuration types

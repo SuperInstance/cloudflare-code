@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tenant management API routes
  */

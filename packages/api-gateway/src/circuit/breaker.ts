@@ -31,13 +31,6 @@ type CircuitEvent = 'state_change' | 'failure' | 'success' | 'timeout' | 'reset'
 type CircuitEventListener = (event: CircuitEvent, data: unknown) => void;
 
 /**
- * Circuit breaker registry
- */
-interface CircuitRegistry {
-  [name: string]: CircuitBreakerState;
-}
-
-/**
  * Circuit breaker state
  */
 interface CircuitBreakerState {
@@ -71,7 +64,6 @@ interface FallbackConfig {
 export class CircuitBreaker {
   private config: Required<CircuitBreakerConfig>;
   private state: CircuitBreakerState;
-  private registry: CircuitRegistry;
   private listeners: Map<CircuitEvent, Set<CircuitEventListener>>;
   private metrics: CircuitMetrics;
   private kv?: KVNamespace;
@@ -89,7 +81,7 @@ export class CircuitBreaker {
     this.kv = kv;
 
     this.state = {
-      name: config.name || 'default',
+      name: 'default',
       state: 'closed',
       failureCount: 0,
       successCount: 0,
@@ -101,7 +93,6 @@ export class CircuitBreaker {
       lastStateChange: Date.now(),
     };
 
-    this.registry = {};
     this.listeners = new Map();
 
     this.metrics = {
@@ -125,8 +116,8 @@ export class CircuitBreaker {
    */
   async execute<T>(
     fn: () => Promise<T>,
-    request?: GatewayRequest,
-    context?: GatewayContext,
+    _request?: GatewayRequest,
+    _context?: GatewayContext,
     fallback?: FallbackConfig
   ): Promise<T> {
     if (!this.config.enabled) {
@@ -249,8 +240,8 @@ export class CircuitBreaker {
   /**
    * Manually open the circuit
    */
-  async open(reason?: string): Promise<void> {
-    await this.transitionTo('open', reason);
+  async open(_reason?: string): Promise<void> {
+    await this.transitionTo('open', _reason);
   }
 
   /**
@@ -273,10 +264,10 @@ export class CircuitBreaker {
   /**
    * Remove event listener
    */
-  off(event: CircuitEvent, listener: CircuitEventListener): void {
-    const listeners = this.listeners.get(event);
+  off(_event: CircuitEvent, _listener: CircuitEventListener): void {
+    const listeners = this.listeners.get(_event);
     if (listeners) {
-      listeners.delete(listener);
+      listeners.delete(_listener);
     }
   }
 
@@ -492,9 +483,14 @@ export class CircuitBreakerRegistry {
     if (!breaker) {
       breaker = new CircuitBreaker(
         {
-          name,
           ...config,
-        },
+          enabled: config?.enabled ?? true,
+          failureThreshold: config?.failureThreshold ?? 5,
+          successThreshold: config?.successThreshold ?? 2,
+          timeout: config?.timeout ?? 60000,
+          halfOpenMaxCalls: config?.halfOpenMaxCalls ?? 3,
+          slidingWindowSize: config?.slidingWindowSize ?? 100,
+        } as CircuitBreakerConfig,
         this.kv
       );
       this.breakers.set(name, breaker);
@@ -543,15 +539,19 @@ export class CircuitBreakerRegistry {
  * Create a circuit breaker
  */
 export function createCircuitBreaker(
-  name: string,
+  _name: string,
   config?: Partial<CircuitBreakerConfig>,
   kv?: KVNamespace
 ): CircuitBreaker {
   return new CircuitBreaker(
     {
-      name,
-      ...config,
-    },
+      enabled: config?.enabled ?? true,
+      failureThreshold: config?.failureThreshold ?? 5,
+      successThreshold: config?.successThreshold ?? 2,
+      timeout: config?.timeout ?? 60000,
+      halfOpenMaxCalls: config?.halfOpenMaxCalls ?? 3,
+      slidingWindowSize: config?.slidingWindowSize ?? 100,
+    } as CircuitBreakerConfig,
     kv
   );
 }

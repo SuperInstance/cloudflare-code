@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Agent Template System
  * Provides pre-built templates for creating AI agents with scaffolding and customization

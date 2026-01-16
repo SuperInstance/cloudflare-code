@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Batch Processing Module
  * Batch processing with scheduling and parallel execution

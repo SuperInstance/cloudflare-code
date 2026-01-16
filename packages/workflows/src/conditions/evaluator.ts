@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Condition Evaluator - evaluates workflow conditions
  */

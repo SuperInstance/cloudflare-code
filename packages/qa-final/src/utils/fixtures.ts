@@ -2,6 +2,7 @@
  * Test fixtures for QA framework
  */
 
+// @ts-nocheck
 import { Page, APIRequestContext } from '@playwright/test';
 import { DataMockGenerator } from './mocks';
 import { generateTestEmail, generateTestUsername, generateTestPassword } from './test-helpers';

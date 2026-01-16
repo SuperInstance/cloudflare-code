@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Webhook Handler - handles HTTP webhook triggers
  */

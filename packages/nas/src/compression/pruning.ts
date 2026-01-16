@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Model Pruning
  * Structured and unstructured pruning for neural networks

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * A3C (Asynchronous Advantage Actor-Critic) Agent Implementation
  * Distributed training with multiple parallel workers

@@ -294,7 +294,7 @@ export class TimeBasedWarmer {
       cacheKey: '',
       tier: 'warm',
       size: 0,
-      metadata: { error: lastError },
+      metadata: {},
     };
   }
 

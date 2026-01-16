@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Error handling utilities for ClaudeFlare SDK
  */

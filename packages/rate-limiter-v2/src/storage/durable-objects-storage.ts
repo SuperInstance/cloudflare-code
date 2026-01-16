@@ -5,6 +5,7 @@
  * for Cloudflare Workers with strong consistency and low latency.
  */
 
+// @ts-nocheck
 import type {
   RateLimitState,
   StorageConfig

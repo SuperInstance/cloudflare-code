@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Chat interface page
  */

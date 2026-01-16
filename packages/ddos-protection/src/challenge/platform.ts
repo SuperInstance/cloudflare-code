@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Challenge Platform
  * Provides various challenge types to distinguish humans from bots

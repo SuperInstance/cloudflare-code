@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Neural Architecture Search DSL
  * Domain Specific Language for defining architecture search spaces

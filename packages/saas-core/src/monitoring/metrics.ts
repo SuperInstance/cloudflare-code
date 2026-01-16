@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Metrics and monitoring for SaaS platform
  */

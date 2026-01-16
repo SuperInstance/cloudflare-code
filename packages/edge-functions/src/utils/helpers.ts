@@ -266,7 +266,7 @@ export async function parallelProcess<T, R>(
   const executing: Promise<void>[] = [];
 
   for (const item of items) {
-    const promise = processor(item).then(result => {
+    const promise = Promise.resolve(processor(item)).then((result: R) => {
       results.push(result);
     });
 
@@ -381,7 +381,7 @@ export function deepMerge<T extends Record<string, any>>(target: T, ...sources: 
     for (const key in source) {
       if (isObject(source[key])) {
         if (!target[key]) Object.assign(target, { [key]: {} });
-        deepMerge(target[key], source[key]);
+        deepMerge(target[key] as any, source[key] as any);
       } else {
         Object.assign(target, { [key]: source[key] });
       }
@@ -523,7 +523,7 @@ export function createPerformanceTracker() {
     mark(name: string): void {
       marks.set(name, performance.now());
     },
-    measure(name: string, startMark: string, endMark?: string): number {
+    measure(_name: string, startMark: string, endMark?: string): number {
       const start = marks.get(startMark);
       if (start === undefined) {
         throw new Error(`Mark not found: ${startMark}`);

@@ -9,11 +9,8 @@ export { CacheWarmer } from './warmer.js';
 export type {
   ICacheMetricsConfig,
   ICacheMetricsSnapshot,
-  ICacheMetricsReport
-} from './metrics.js';
-
-export type {
+  ICacheMetricsReport,
   ICacheWarmerConfig,
   ICacheWarmerResult,
   IWarmupStrategy
-} from './warmer.js';
+} from '../types/index.js';

@@ -2,7 +2,8 @@
  * Validation utilities
  */
 
-import { CronExpression, CronParser } from '../cron/parser';
+import { CronParser } from '../cron/parser';
+import type { CronExpression } from '../types';
 
 /**
  * Validate job ID

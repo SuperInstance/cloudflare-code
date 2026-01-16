@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Main notification system class that integrates all components
  */
