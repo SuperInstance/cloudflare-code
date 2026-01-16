@@ -106,13 +106,20 @@ max_wait_time = 5
 # Production environment
 [env.production]
 name = "claudeflare"
-route = { pattern = "claudeflare.workers.dev", zone_name = "workers.dev" }
+# Custom domains for cocapn
+routes = [
+  { pattern = "cocapn.com/*", zone_name = "cocapn.com" },
+  { pattern = "cocapn.ai/*", zone_name = "cocapn.ai" }
+]
 
 [env.production.vars]
 ENVIRONMENT = "production"
+# Domain configuration
+PRIMARY_DOMAIN = "cocapn.com"
+AI_DOMAIN = "cocapn.ai"
 # API Endpoints
-API_ENDPOINT = "https://api.claudeflare.workers.dev"
-GRAPHQL_ENDPOINT = "https://graphql.claudeflare.workers.dev"
+API_ENDPOINT = "https://api.cocapn.com"
+GRAPHQL_ENDPOINT = "https://api.cocapn.com"
 
 # Feature flags
 ENABLE_CACHE = "true"
@@ -127,7 +134,7 @@ MAX_CONCURRENT_REQUESTS = "1000"
 # KV Namespaces (production)
 [[env.production.kv_namespaces]]
 binding = "CACHE_KV"
-id = ""  # Set via CLOUDFLARE KV namespace ID
+id = "0e44edbf77c94a2a8d5c5c0163481661"
 preview_id = ""
 
 # Durable Objects (production)
@@ -142,23 +149,25 @@ class_name = "VectorIndex"
 # R2 Buckets (production)
 [[env.production.r2_buckets]]
 binding = "STORAGE_BUCKET"
-bucket_name = "claudeflare-production-storage"
+bucket_name = "cocapn-storage"
 
 # D1 Databases (production)
 [[env.production.d1_databases]]
 binding = "DB"
-database_name = "claudeflare-production-db"
-database_id = ""  # Set via CLOUDFLARE D1 database ID
+database_name = "cocapn-db"
+database_id = "65d5dc9a-5084-4416-bdd8-0841f066d738"
 
 # Queues (production)
-[[env.production.queues.producers]]
-binding = "TASK_QUEUE"
-queue = "claudeflare-production-tasks"
-
-[[env.production.queues.consumers]]
-queue = "claudeflare-production-tasks"
-max_batch_size = 25
-max_wait_time = 10
+# Note: Queues require a Workers Paid plan
+# Uncomment when ready to upgrade:
+# [[env.production.queues.producers]]
+# binding = "TASK_QUEUE"
+# queue = "claudeflare-production-tasks"
+#
+# [[env.production.queues.consumers]]
+# queue = "claudeflare-production-tasks"
+# max_batch_size = 25
+# max_wait_time = 10
 
 # Analytics will be enabled after deployment
 

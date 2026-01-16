@@ -12,6 +12,7 @@ import { TestingService } from './services/testing-service';
 import { createAuthRoutes } from './routes/auth-routes';
 import { createAuthMiddleware } from './middleware/auth-middleware';
 import { createTestingRoutes } from './routes/testing-routes';
+import { devRoutes } from './routes/dev-routes';
 
 type Bindings = {
   // KV Storage
@@ -92,6 +93,9 @@ app.get('/metrics', (c) => {
     latency: 0,
   });
 });
+
+// Development portal routes (authenticated)
+app.route('/dev', devRoutes);
 
 // Authentication routes
 app.route('/api/v1/auth', createAuthRoutes(authService));
