@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Adventure Game</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .title {
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .problem {
+            font-size: 3em;
+            color: #2b6cb0;
+            margin: 30px 0;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .answer-input {
+            font-size: 1.5em;
+            padding: 15px;
+            border: 3px solid #cbd5e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            width: 100px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .correct {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .stars {
+            font-size: 2em;
+            color: #f6ad55;
+            margin: 10px 0;
+        }
+        
+        .new-game-btn {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="title">🎮 Math Adventure</h1>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">Score</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Level</div>
+                <div class="score-value" id="level">1</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Streak</div>
+                <div class="score-value" id="streak">0</div>
+            </div>
+        </div>
+        
+        <div class="problem" id="problem">5 + 3 = ?</div>
+        
+        <input type="number" class="answer-input" id="answer" placeholder="?" autofocus>
+        
+        <div>
+            <button class="submit-btn" onclick="checkAnswer()">Submit Answer</button>
+            <button class="submit-btn" onclick="nextProblem()">Skip</button>
+        </div>
+        
+        <div class="feedback" id="feedback">Good luck! 🍀</div>
+        
+        <div class="stars" id="stars">⭐ ⭐ ⭐</div>
+        
+        <button class="new-game-btn" onclick="resetGame()">New Game</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let level = 1;
+        let streak = 0;
+        let currentAnswer = 0;
+        
+        function generateProblem() {
+            const maxNum = Math.min(5 + level * 2, 20);
+            const num1 = Math.floor(Math.random() * maxNum) + 1;
+            const num2 = Math.floor(Math.random() * maxNum) + 1;
+            
+            document.getElementById('problem').textContent = `${num1} + ${num2} = ?`;
+            currentAnswer = num1 + num2;
+            
+            // Clear input and feedback
+            document.getElementById('answer').value = '';
+            document.getElementById('answer').focus();
+            document.getElementById('feedback').textContent = 'Your turn! 🎯';
+            document.getElementById('feedback').className = 'feedback';
+        }
+        
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answer').value);
+            const feedback = document.getElementById('feedback');
+            
+            if (userAnswer === currentAnswer) {
+                // Correct answer
+                score += 10 * level;
+                streak++;
+                
+                // Level up every 5 correct answers
+                if (streak % 5 === 0) {
+                    level++;
+                    feedback.innerHTML = `🎉 Level Up! Welcome to Level ${level}! 🚀`;
+                    feedback.className = 'feedback correct';
+                    updateStars();
+                } else {
+                    feedback.innerHTML = `✅ Correct! ${streak} in a row! 🔥`;
+                    feedback.className = 'feedback correct';
+                }
+            } else {
+                // Wrong answer
+                streak = 0;
+                feedback.innerHTML = `❌ Oops! The answer was ${currentAnswer}. Try again! 💪`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            updateDisplay();
+            setTimeout(nextProblem, 2000);
+        }
+        
+        function nextProblem() {
+            generateProblem();
+        }
+        
+        function resetGame() {
+            score = 0;
+            level = 1;
+            streak = 0;
+            updateDisplay();
+            updateStars();
+            generateProblem();
+            document.getElementById('feedback').textContent = 'Game reset! Good luck! 🍀';
+            document.getElementById('feedback').className = 'feedback';
+        }
+        
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            document.getElementById('streak').textContent = streak;
+        }
+        
+        function updateStars() {
+            const stars = document.getElementById('stars');
+            const starCount = Math.min(level, 5);
+            stars.textContent = '⭐'.repeat(starCount) + '☆'.repeat(5 - starCount);
+        }
+        
+        // Allow Enter key to submit answer
+        document.getElementById('answer').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        // Start the game
+        generateProblem();
+    </script>
+</body>
+</html>
