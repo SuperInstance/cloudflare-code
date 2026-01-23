@@ -1033,11 +1033,11 @@ ${pluralName} as any; // TypeScript workaround`;
         sampleData[field.name] = 'auto';
       } else if (field.type === 'text') {
         if (field.name.includes('email')) {
-          sampleData[field.name] = \`test@example.com\`;
+          sampleData[field.name] = 'test@example.com';
         } else if (field.name.includes('name')) {
-          sampleData[field.name] = \`Sample ${field.name}\`;
+          sampleData[field.name] = `Sample ${field.name}`;
         } else {
-          sampleData[field.name] = \`Sample ${field.name} content\`;
+          sampleData[field.name] = `Sample ${field.name} content`;
         }
       } else if (field.type === 'integer') {
         sampleData[field.name] = 1;

@@ -1268,8 +1268,8 @@ ${request.endpoints && request.endpoints.length > 0 ? 'app.use(\'/custom\', cust
 export default app;
 
 // WebSocket manager initialization
-${request.websockets && request.websockets.length > 0 ? 'const wsManager = new WebSocketManager();
-export { wsManager };' : ''}`,
+${request.websockets && request.websockets.length > 0 ? 'const wsManager = new WebSocketManager();\nexport { wsManager };' : ''}
+    `,
       language: 'typescript',
       hash: this.generateHash(this.generateMainRouterContent(request)),
     };

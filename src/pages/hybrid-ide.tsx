@@ -603,10 +603,10 @@ export default app;`,
           const totalCount = testResults.length;
 
           if (successCount === totalCount) {
-            alert(`✅ All tests passed! (${successCount}/${totalCount} components working)`);
+            alert(`All tests passed! (${successCount}/${totalCount} components working)`);
           } else {
             const failures = totalCount - successCount;
-            alert(`⚠️ ${failures} tests failed out of ${totalCount}. Check console for details.`);
+            alert(`Warning: ${failures} tests failed out of ${totalCount}. Check console for details.`);
           }
 
           console.log('Test Results:', testResults);
