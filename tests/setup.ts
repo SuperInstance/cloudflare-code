@@ -24,6 +24,36 @@ global.console = {
   error: vi.fn(),
 };
 
+// Mock KV namespace
+class MockKVNamespace {
+  private store = new Map<string, any>();
+
+  async get(key: string, options?: { type?: 'json' | 'text' | 'arrayBuffer' }): Promise<any> {
+    const value = this.store.get(key);
+    if (options?.type === 'json') {
+      return value ? JSON.parse(value) : null;
+    }
+    return value || null;
+  }
+
+  async put(key: string, value: string): Promise<void> {
+    this.store.set(key, value);
+  }
+
+  async delete(key: string): Promise<void> {
+    this.store.delete(key);
+  }
+
+  list(): any {
+    return {
+      keys: Array.from(this.store.keys()).map(key => ({ name: key }))
+    };
+  }
+}
+
+// Make MockKV available globally
+(global as any).MockKVNamespace = MockKVNamespace;
+
 // Cleanup after each test
 afterEach(() => {
   vi.clearAllMocks();

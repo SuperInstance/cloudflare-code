@@ -6,7 +6,13 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
-    exclude: ['node_modules', 'dist', '.wrangler'],
+    exclude: ['node_modules', 'dist', '.wrangler', 'packages/archived'],
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
@@ -18,6 +24,7 @@ export default defineConfig({
         'dist/',
         '.wrangler/',
         'scripts/',
+        'packages/archived/',
       ],
       thresholds: {
         lines: 80,
@@ -30,6 +37,5 @@ export default defineConfig({
     testTimeout: 30000,
     hookTimeout: 30000,
     teardownTimeout: 30000,
-    maxWorkers: 1,
   },
 });
