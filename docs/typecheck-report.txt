@@ -1,0 +1,1276 @@
+
+> cocapn@2.0.0 typecheck
+> tsc --incremental --noEmit
+
+src/agents/accessibility-agent.ts(571,38): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(575,7): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(575,8): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(618,5): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(618,12): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/agents/accessibility-agent.ts(624,5): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/agents/accessibility-agent.ts(625,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(630,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(630,11): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(630,39): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(630,53): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(630,59): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(631,11): error TS1005: ':' expected.
+src/agents/accessibility-agent.ts(631,18): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(631,40): error TS1005: '(' expected.
+src/agents/accessibility-agent.ts(631,42): error TS1136: Property assignment expected.
+src/agents/accessibility-agent.ts(665,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(670,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(670,45): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(670,51): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(671,11): error TS1005: ':' expected.
+src/agents/accessibility-agent.ts(671,21): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(671,43): error TS1005: '(' expected.
+src/agents/accessibility-agent.ts(671,45): error TS1136: Property assignment expected.
+src/agents/accessibility-agent.ts(691,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(696,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(696,46): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(696,55): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(696,57): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(709,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(709,56): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(709,78): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(709,80): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(718,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(718,39): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(718,48): error TS1011: An element access expression should take an argument.
+src/agents/accessibility-agent.ts(718,50): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(727,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(727,37): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(727,43): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(727,52): error TS1011: An element access expression should take an argument.
+src/agents/accessibility-agent.ts(727,54): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(752,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(752,42): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(752,48): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(752,57): error TS1011: An element access expression should take an argument.
+src/agents/accessibility-agent.ts(752,59): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(777,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(777,46): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(777,52): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(777,54): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(789,3): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(789,37): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(789,57): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(789,66): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(791,11): error TS1005: ':' expected.
+src/agents/accessibility-agent.ts(791,73): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(792,9): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(792,38): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(792,46): error TS1005: ':' expected.
+src/agents/accessibility-agent.ts(793,9): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(793,53): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(793,63): error TS1005: ':' expected.
+src/agents/accessibility-agent.ts(795,18): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(795,22): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(798,7): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(812,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(817,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(817,40): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(817,56): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(817,65): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(817,67): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(831,40): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(831,57): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(831,66): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(832,11): error TS1005: ':' expected.
+src/agents/accessibility-agent.ts(832,21): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(832,46): error TS1005: '(' expected.
+src/agents/accessibility-agent.ts(832,48): error TS1136: Property assignment expected.
+src/agents/accessibility-agent.ts(863,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(868,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(868,38): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(868,47): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(868,49): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(882,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(882,37): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(882,46): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(882,48): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(896,3): error TS1128: Declaration or statement expected.
+src/agents/accessibility-agent.ts(896,35): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(896,44): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(896,46): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(909,36): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(909,45): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(909,75): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(916,32): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(916,55): error TS1011: An element access expression should take an argument.
+src/agents/accessibility-agent.ts(916,57): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(923,22): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(923,24): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(930,25): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(930,27): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(937,27): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(937,29): error TS1434: Unexpected keyword or identifier.
+src/agents/accessibility-agent.ts(944,38): error TS1005: ',' expected.
+src/agents/accessibility-agent.ts(944,47): error TS1005: ';' expected.
+src/agents/accessibility-agent.ts(946,29): error TS1011: An element access expression should take an argument.
+src/agents/accessibility-agent.ts(948,22): error TS1011: An element access expression should take an argument.
+src/agents/accessibility-agent.ts(972,1): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(840,3): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(840,11): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(840,46): error TS1005: ',' expected.
+src/agents/agent-manager.ts(840,59): error TS1005: ',' expected.
+src/agents/agent-manager.ts(840,75): error TS1005: ',' expected.
+src/agents/agent-manager.ts(840,81): error TS1005: ';' expected.
+src/agents/agent-manager.ts(842,7): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(842,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(842,32): error TS1005: ',' expected.
+src/agents/agent-manager.ts(843,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(843,68): error TS1005: ',' expected.
+src/agents/agent-manager.ts(844,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(844,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(845,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(845,45): error TS1005: ',' expected.
+src/agents/agent-manager.ts(846,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(846,34): error TS1005: ',' expected.
+src/agents/agent-manager.ts(847,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(847,60): error TS1005: ',' expected.
+src/agents/agent-manager.ts(848,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(848,25): error TS1005: ',' expected.
+src/agents/agent-manager.ts(849,14): error TS1005: ',' expected.
+src/agents/agent-manager.ts(849,27): error TS1005: ',' expected.
+src/agents/agent-manager.ts(850,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(850,33): error TS1005: ',' expected.
+src/agents/agent-manager.ts(852,9): error TS1109: Expression expected.
+src/agents/agent-manager.ts(852,15): error TS1005: ':' expected.
+src/agents/agent-manager.ts(852,65): error TS1005: ',' expected.
+src/agents/agent-manager.ts(854,3): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(857,3): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(857,11): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(857,57): error TS1005: ',' expected.
+src/agents/agent-manager.ts(857,70): error TS1005: ',' expected.
+src/agents/agent-manager.ts(857,86): error TS1005: ',' expected.
+src/agents/agent-manager.ts(857,92): error TS1005: ';' expected.
+src/agents/agent-manager.ts(859,7): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(859,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(859,25): error TS1005: ',' expected.
+src/agents/agent-manager.ts(860,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(860,66): error TS1005: ',' expected.
+src/agents/agent-manager.ts(861,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(861,23): error TS1005: ',' expected.
+src/agents/agent-manager.ts(862,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(862,86): error TS1005: ',' expected.
+src/agents/agent-manager.ts(863,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(863,24): error TS1005: ',' expected.
+src/agents/agent-manager.ts(864,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(864,67): error TS1005: ',' expected.
+src/agents/agent-manager.ts(865,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(865,29): error TS1005: ',' expected.
+src/agents/agent-manager.ts(866,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(866,111): error TS1005: ',' expected.
+src/agents/agent-manager.ts(867,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(867,38): error TS1005: ',' expected.
+src/agents/agent-manager.ts(868,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(868,102): error TS1005: ',' expected.
+src/agents/agent-manager.ts(869,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(869,32): error TS1005: ',' expected.
+src/agents/agent-manager.ts(870,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(870,108): error TS1005: ',' expected.
+src/agents/agent-manager.ts(871,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(871,29): error TS1005: ',' expected.
+src/agents/agent-manager.ts(872,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(872,87): error TS1005: ',' expected.
+src/agents/agent-manager.ts(873,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(873,26): error TS1005: ',' expected.
+src/agents/agent-manager.ts(874,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(874,109): error TS1005: ',' expected.
+src/agents/agent-manager.ts(875,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(875,32): error TS1005: ',' expected.
+src/agents/agent-manager.ts(876,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(876,59): error TS1005: ',' expected.
+src/agents/agent-manager.ts(877,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(877,30): error TS1005: ',' expected.
+src/agents/agent-manager.ts(878,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(878,38): error TS1005: ',' expected.
+src/agents/agent-manager.ts(880,9): error TS1109: Expression expected.
+src/agents/agent-manager.ts(880,15): error TS1005: ':' expected.
+src/agents/agent-manager.ts(880,76): error TS1005: ',' expected.
+src/agents/agent-manager.ts(882,3): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(885,3): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(885,11): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(885,47): error TS1005: ',' expected.
+src/agents/agent-manager.ts(885,60): error TS1005: ',' expected.
+src/agents/agent-manager.ts(885,76): error TS1005: ',' expected.
+src/agents/agent-manager.ts(885,82): error TS1005: ';' expected.
+src/agents/agent-manager.ts(887,7): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(887,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(887,26): error TS1005: ',' expected.
+src/agents/agent-manager.ts(888,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(888,79): error TS1005: ',' expected.
+src/agents/agent-manager.ts(889,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(889,26): error TS1005: ',' expected.
+src/agents/agent-manager.ts(890,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(890,71): error TS1005: ',' expected.
+src/agents/agent-manager.ts(891,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(891,32): error TS1005: ',' expected.
+src/agents/agent-manager.ts(892,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(892,86): error TS1005: ',' expected.
+src/agents/agent-manager.ts(893,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(893,23): error TS1005: ',' expected.
+src/agents/agent-manager.ts(894,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(894,46): error TS1005: ',' expected.
+src/agents/agent-manager.ts(895,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(895,31): error TS1005: ',' expected.
+src/agents/agent-manager.ts(896,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(896,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(898,9): error TS1109: Expression expected.
+src/agents/agent-manager.ts(898,15): error TS1005: ':' expected.
+src/agents/agent-manager.ts(898,66): error TS1005: ',' expected.
+src/agents/agent-manager.ts(900,3): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(903,3): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(903,11): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(903,46): error TS1005: ',' expected.
+src/agents/agent-manager.ts(903,59): error TS1005: ',' expected.
+src/agents/agent-manager.ts(903,75): error TS1005: ',' expected.
+src/agents/agent-manager.ts(903,81): error TS1005: ';' expected.
+src/agents/agent-manager.ts(905,7): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(905,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(905,34): error TS1005: ',' expected.
+src/agents/agent-manager.ts(906,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(906,109): error TS1005: ',' expected.
+src/agents/agent-manager.ts(907,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(907,31): error TS1005: ',' expected.
+src/agents/agent-manager.ts(908,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(908,99): error TS1005: ',' expected.
+src/agents/agent-manager.ts(909,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(909,31): error TS1005: ',' expected.
+src/agents/agent-manager.ts(910,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(910,70): error TS1005: ',' expected.
+src/agents/agent-manager.ts(911,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(911,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(912,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(912,78): error TS1005: ',' expected.
+src/agents/agent-manager.ts(913,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(913,31): error TS1005: ',' expected.
+src/agents/agent-manager.ts(914,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(914,80): error TS1005: ',' expected.
+src/agents/agent-manager.ts(915,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(915,34): error TS1005: ',' expected.
+src/agents/agent-manager.ts(916,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(916,61): error TS1005: ',' expected.
+src/agents/agent-manager.ts(917,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(917,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(918,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(918,69): error TS1005: ',' expected.
+src/agents/agent-manager.ts(919,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(919,38): error TS1005: ',' expected.
+src/agents/agent-manager.ts(920,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(920,87): error TS1005: ',' expected.
+src/agents/agent-manager.ts(921,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(921,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(922,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(922,87): error TS1005: ',' expected.
+src/agents/agent-manager.ts(923,12): error TS1005: ':' expected.
+src/agents/agent-manager.ts(923,31): error TS1005: ',' expected.
+src/agents/agent-manager.ts(924,16): error TS1005: ':' expected.
+src/agents/agent-manager.ts(924,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(926,9): error TS1109: Expression expected.
+src/agents/agent-manager.ts(926,15): error TS1005: ':' expected.
+src/agents/agent-manager.ts(926,64): error TS1005: ',' expected.
+src/agents/agent-manager.ts(928,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(928,21): error TS1005: ';' expected.
+src/agents/agent-manager.ts(931,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(931,29): error TS1005: ';' expected.
+src/agents/agent-manager.ts(934,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(934,25): error TS1005: ';' expected.
+src/agents/agent-manager.ts(937,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(937,29): error TS1005: ';' expected.
+src/agents/agent-manager.ts(940,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(940,27): error TS1005: ';' expected.
+src/agents/agent-manager.ts(943,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(943,36): error TS1005: ';' expected.
+src/agents/agent-manager.ts(946,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(946,31): error TS1005: ';' expected.
+src/agents/agent-manager.ts(949,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(949,35): error TS1005: ';' expected.
+src/agents/agent-manager.ts(952,5): error TS1005: 'export' expected.
+src/agents/agent-manager.ts(952,12): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(954,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(955,3): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(959,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(959,13): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(959,46): error TS1005: ',' expected.
+src/agents/agent-manager.ts(959,59): error TS1005: ',' expected.
+src/agents/agent-manager.ts(959,75): error TS1005: ',' expected.
+src/agents/agent-manager.ts(959,81): error TS1005: ';' expected.
+src/agents/agent-manager.ts(961,9): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(961,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(961,38): error TS1005: ',' expected.
+src/agents/agent-manager.ts(962,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(962,66): error TS1005: ',' expected.
+src/agents/agent-manager.ts(963,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(963,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(964,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(964,65): error TS1005: ',' expected.
+src/agents/agent-manager.ts(965,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(965,35): error TS1005: ',' expected.
+src/agents/agent-manager.ts(966,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(966,72): error TS1005: ',' expected.
+src/agents/agent-manager.ts(967,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(967,42): error TS1005: ',' expected.
+src/agents/agent-manager.ts(968,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(968,74): error TS1005: ',' expected.
+src/agents/agent-manager.ts(969,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(969,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(970,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(970,48): error TS1005: ',' expected.
+src/agents/agent-manager.ts(971,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(971,32): error TS1005: ',' expected.
+src/agents/agent-manager.ts(972,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(972,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(973,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(973,47): error TS1005: ',' expected.
+src/agents/agent-manager.ts(974,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(974,73): error TS1005: ',' expected.
+src/agents/agent-manager.ts(976,11): error TS1109: Expression expected.
+src/agents/agent-manager.ts(976,17): error TS1005: ':' expected.
+src/agents/agent-manager.ts(976,65): error TS1005: ',' expected.
+src/agents/agent-manager.ts(978,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(981,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(981,13): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(981,54): error TS1005: ',' expected.
+src/agents/agent-manager.ts(981,67): error TS1005: ',' expected.
+src/agents/agent-manager.ts(981,83): error TS1005: ',' expected.
+src/agents/agent-manager.ts(981,89): error TS1005: ';' expected.
+src/agents/agent-manager.ts(983,9): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(983,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(983,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(984,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(984,91): error TS1005: ',' expected.
+src/agents/agent-manager.ts(985,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(985,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(986,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(986,92): error TS1005: ',' expected.
+src/agents/agent-manager.ts(987,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(987,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(988,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(988,51): error TS1005: ',' expected.
+src/agents/agent-manager.ts(989,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(989,43): error TS1005: ',' expected.
+src/agents/agent-manager.ts(990,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(990,57): error TS1005: ',' expected.
+src/agents/agent-manager.ts(991,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(991,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(992,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(992,54): error TS1005: ',' expected.
+src/agents/agent-manager.ts(993,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(993,38): error TS1005: ',' expected.
+src/agents/agent-manager.ts(994,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(994,89): error TS1005: ',' expected.
+src/agents/agent-manager.ts(995,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(995,34): error TS1005: ',' expected.
+src/agents/agent-manager.ts(996,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(996,59): error TS1005: ',' expected.
+src/agents/agent-manager.ts(997,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(997,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(998,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(998,54): error TS1005: ',' expected.
+src/agents/agent-manager.ts(999,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(999,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1000,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1000,45): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1002,11): error TS1109: Expression expected.
+src/agents/agent-manager.ts(1002,17): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1002,73): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1004,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1007,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1007,13): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(1007,51): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1007,64): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1007,80): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1007,86): error TS1005: ';' expected.
+src/agents/agent-manager.ts(1009,9): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1009,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1009,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1010,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1010,83): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1011,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1011,35): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1012,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1012,85): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1013,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1013,43): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1014,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1014,85): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1015,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1015,41): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1016,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1016,65): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1017,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1017,46): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1018,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1018,53): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1019,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1019,35): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1020,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1020,43): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1021,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1021,38): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1022,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1022,46): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1023,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1023,41): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1024,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1024,48): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1025,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1025,45): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1026,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1026,67): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1028,11): error TS1109: Expression expected.
+src/agents/agent-manager.ts(1028,17): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1028,69): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1030,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1033,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1033,13): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(1033,54): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1033,67): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1033,83): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1033,89): error TS1005: ';' expected.
+src/agents/agent-manager.ts(1035,9): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1035,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1035,32): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1036,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1036,59): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1037,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1037,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1038,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1038,64): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1039,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1039,34): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1040,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1040,62): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1041,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1041,36): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1042,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1042,78): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1043,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1043,33): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1044,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1044,76): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1045,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1045,38): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1046,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1046,80): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1047,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1047,33): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1048,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1048,41): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1049,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1049,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1050,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1050,47): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1051,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1051,31): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1052,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1052,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1054,11): error TS1109: Expression expected.
+src/agents/agent-manager.ts(1054,17): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1054,73): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1056,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1059,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1059,13): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(1059,52): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1059,65): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1059,81): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1059,87): error TS1005: ';' expected.
+src/agents/agent-manager.ts(1061,9): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1061,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1061,48): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1062,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1062,62): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1063,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1063,33): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1064,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1064,41): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1065,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1065,30): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1066,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1066,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1067,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1067,30): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1068,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1068,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1069,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1069,34): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1070,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1070,42): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1072,11): error TS1109: Expression expected.
+src/agents/agent-manager.ts(1072,17): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1072,71): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1074,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1078,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1078,13): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(1078,61): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1078,74): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1078,90): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1078,96): error TS1005: ';' expected.
+src/agents/agent-manager.ts(1080,9): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1080,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1080,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1081,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1081,77): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1082,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1082,47): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1083,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1083,96): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1084,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1084,42): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1085,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1085,89): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1086,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1086,29): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1087,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1087,74): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1088,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1088,42): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1089,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1089,56): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1090,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1090,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1091,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1091,47): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1092,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1092,43): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1093,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1093,51): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1094,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1094,33): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1095,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1095,41): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1096,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1096,31): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1097,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1097,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1098,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1098,41): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1099,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1099,70): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1100,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1100,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1101,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1101,48): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1103,11): error TS1109: Expression expected.
+src/agents/agent-manager.ts(1103,17): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1103,80): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1105,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1108,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1108,13): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(1108,56): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1108,69): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1108,85): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1108,91): error TS1005: ';' expected.
+src/agents/agent-manager.ts(1110,9): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1110,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1110,34): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1111,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1111,84): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1112,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1112,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1113,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1113,91): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1114,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1114,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1115,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1115,45): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1116,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1116,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1117,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1117,45): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1118,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1118,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1119,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1119,48): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1120,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1120,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1121,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1121,81): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1122,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1122,50): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1123,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1123,63): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1124,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1124,42): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1125,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1125,49): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1126,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1126,50): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1127,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1127,78): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1128,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1128,40): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1129,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1129,48): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1131,11): error TS1109: Expression expected.
+src/agents/agent-manager.ts(1131,17): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1131,75): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1133,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1136,5): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1136,13): error TS1434: Unexpected keyword or identifier.
+src/agents/agent-manager.ts(1136,59): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1136,72): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1136,88): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1136,94): error TS1005: ';' expected.
+src/agents/agent-manager.ts(1138,9): error TS1128: Declaration or statement expected.
+src/agents/agent-manager.ts(1138,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1138,51): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1139,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1139,94): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1140,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1140,35): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1141,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1141,43): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1142,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1142,29): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1143,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1143,38): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1144,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1144,28): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1145,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1145,37): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1146,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1146,30): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1147,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1147,39): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1148,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1148,30): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1149,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1149,45): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1150,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1150,46): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1151,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1151,60): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1152,14): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1152,41): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1153,18): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1153,55): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1155,11): error TS1109: Expression expected.
+src/agents/agent-manager.ts(1155,17): error TS1005: ':' expected.
+src/agents/agent-manager.ts(1155,79): error TS1005: ',' expected.
+src/agents/agent-manager.ts(1157,5): error TS1128: Declaration or statement expected.
+src/agents/api-agent.ts(1271,99): error TS1002: Unterminated string literal.
+src/agents/api-agent.ts(1272,1): error TS1005: ':' expected.
+src/agents/api-agent.ts(1272,8): error TS1005: ':' expected.
+src/agents/api-agent.ts(1272,21): error TS1005: ',' expected.
+src/agents/api-agent.ts(1272,27): error TS1005: ':' expected.
+src/agents/api-agent.ts(1272,31): error TS1002: Unterminated string literal.
+src/agents/api-agent.ts(1273,7): error TS1005: ',' expected.
+src/agents/database-agent.ts(1036,36): error TS1127: Invalid character.
+src/agents/database-agent.ts(1063,8): error TS1005: ';' expected.
+src/agents/database-agent.ts(1063,22): error TS1005: ',' expected.
+src/agents/database-agent.ts(1063,29): error TS1005: ',' expected.
+src/agents/database-agent.ts(1063,43): error TS1005: ';' expected.
+src/agents/database-agent.ts(1063,59): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1067,10): error TS1005: ';' expected.
+src/agents/database-agent.ts(1067,39): error TS1005: ';' expected.
+src/agents/database-agent.ts(1067,49): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1067,67): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1067,76): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1073,1): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1076,2): error TS1005: ',' expected.
+src/agents/database-agent.ts(1081,17): error TS1127: Invalid character.
+src/agents/database-agent.ts(1091,3): error TS1005: ')' expected.
+src/agents/database-agent.ts(1097,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1097,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1097,17): error TS1005: ',' expected.
+src/agents/database-agent.ts(1097,46): error TS1005: ',' expected.
+src/agents/database-agent.ts(1097,63): error TS1011: An element access expression should take an argument.
+src/agents/database-agent.ts(1097,65): error TS1005: ',' expected.
+src/agents/database-agent.ts(1098,11): error TS1005: ':' expected.
+src/agents/database-agent.ts(1100,19): error TS1005: ',' expected.
+src/agents/database-agent.ts(1102,11): error TS1005: ':' expected.
+src/agents/database-agent.ts(1149,2): error TS1005: ',' expected.
+src/agents/database-agent.ts(1151,12): error TS1005: ':' expected.
+src/agents/database-agent.ts(1156,6): error TS1005: ',' expected.
+src/agents/database-agent.ts(1162,3): error TS1005: ',' expected.
+src/agents/database-agent.ts(1162,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1162,44): error TS1005: ',' expected.
+src/agents/database-agent.ts(1162,61): error TS1005: ',' expected.
+src/agents/database-agent.ts(1162,70): error TS1005: ',' expected.
+src/agents/database-agent.ts(1163,11): error TS1005: ':' expected.
+src/agents/database-agent.ts(1163,51): error TS1005: ',' expected.
+src/agents/database-agent.ts(1164,11): error TS1005: ':' expected.
+src/agents/database-agent.ts(1171,18): error TS1005: ',' expected.
+src/agents/database-agent.ts(1173,11): error TS1005: ':' expected.
+src/agents/database-agent.ts(1174,7): error TS1127: Invalid character.
+src/agents/database-agent.ts(1177,13): error TS1127: Invalid character.
+src/agents/database-agent.ts(1177,14): error TS1127: Invalid character.
+src/agents/database-agent.ts(1177,15): error TS1127: Invalid character.
+src/agents/database-agent.ts(1177,17): error TS1005: ',' expected.
+src/agents/database-agent.ts(1177,18): error TS1005: ',' expected.
+src/agents/database-agent.ts(1177,25): error TS1005: ',' expected.
+src/agents/database-agent.ts(1177,34): error TS1005: ',' expected.
+src/agents/database-agent.ts(1179,12): error TS1109: Expression expected.
+src/agents/database-agent.ts(1179,15): error TS1005: ',' expected.
+src/agents/database-agent.ts(1179,22): error TS1005: ',' expected.
+src/agents/database-agent.ts(1181,11): error TS1109: Expression expected.
+src/agents/database-agent.ts(1182,2): error TS1005: ',' expected.
+src/agents/database-agent.ts(1184,18): error TS1109: Expression expected.
+src/agents/database-agent.ts(1185,2): error TS1005: ',' expected.
+src/agents/database-agent.ts(1187,10): error TS1109: Expression expected.
+src/agents/database-agent.ts(1188,1): error TS1127: Invalid character.
+src/agents/database-agent.ts(1192,2): error TS1005: ')' expected.
+src/agents/database-agent.ts(1198,3): error TS1005: ',' expected.
+src/agents/database-agent.ts(1198,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1198,53): error TS1005: ',' expected.
+src/agents/database-agent.ts(1198,70): error TS1011: An element access expression should take an argument.
+src/agents/database-agent.ts(1198,72): error TS1005: ',' expected.
+src/agents/database-agent.ts(1198,81): error TS1005: ',' expected.
+src/agents/database-agent.ts(1199,11): error TS1005: ':' expected.
+src/agents/database-agent.ts(1201,9): error TS1127: Invalid character.
+src/agents/database-agent.ts(1215,14): error TS1005: ',' expected.
+src/agents/database-agent.ts(1215,33): error TS1005: ',' expected.
+src/agents/database-agent.ts(1215,38): error TS1005: ',' expected.
+src/agents/database-agent.ts(1215,45): error TS1005: ',' expected.
+src/agents/database-agent.ts(1215,54): error TS1005: ',' expected.
+src/agents/database-agent.ts(1215,62): error TS1005: ',' expected.
+src/agents/database-agent.ts(1216,20): error TS1005: ',' expected.
+src/agents/database-agent.ts(1216,27): error TS1005: ',' expected.
+src/agents/database-agent.ts(1216,33): error TS1005: ',' expected.
+src/agents/database-agent.ts(1217,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1217,8): error TS1005: ',' expected.
+src/agents/database-agent.ts(1217,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1217,19): error TS1005: ',' expected.
+src/agents/database-agent.ts(1218,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1218,8): error TS1005: ',' expected.
+src/agents/database-agent.ts(1218,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1218,16): error TS1005: ':' expected.
+src/agents/database-agent.ts(1220,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1220,2): error TS1005: ',' expected.
+src/agents/database-agent.ts(1220,10): error TS1005: ',' expected.
+src/agents/database-agent.ts(1222,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1222,9): error TS1005: ',' expected.
+src/agents/database-agent.ts(1223,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1223,6): error TS1005: ',' expected.
+src/agents/database-agent.ts(1223,12): error TS1005: ',' expected.
+src/agents/database-agent.ts(1223,15): error TS1005: ',' expected.
+src/agents/database-agent.ts(1223,22): error TS1005: ',' expected.
+src/agents/database-agent.ts(1223,23): error TS1005: ',' expected.
+src/agents/database-agent.ts(1223,31): error TS1005: ',' expected.
+src/agents/database-agent.ts(1223,38): error TS1005: ')' expected.
+src/agents/database-agent.ts(1223,39): error TS1136: Property assignment expected.
+src/agents/database-agent.ts(1231,14): error TS1005: ',' expected.
+src/agents/database-agent.ts(1231,33): error TS1005: ',' expected.
+src/agents/database-agent.ts(1231,38): error TS1005: ',' expected.
+src/agents/database-agent.ts(1231,45): error TS1005: ',' expected.
+src/agents/database-agent.ts(1231,53): error TS1005: ',' expected.
+src/agents/database-agent.ts(1231,61): error TS1005: ',' expected.
+src/agents/database-agent.ts(1232,20): error TS1005: ',' expected.
+src/agents/database-agent.ts(1232,26): error TS1005: ',' expected.
+src/agents/database-agent.ts(1232,32): error TS1005: ',' expected.
+src/agents/database-agent.ts(1233,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1233,8): error TS1005: ',' expected.
+src/agents/database-agent.ts(1233,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1233,19): error TS1005: ',' expected.
+src/agents/database-agent.ts(1234,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1234,8): error TS1005: ',' expected.
+src/agents/database-agent.ts(1234,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1234,16): error TS1005: ':' expected.
+src/agents/database-agent.ts(1236,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1236,7): error TS1005: ',' expected.
+src/agents/database-agent.ts(1237,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1237,2): error TS1005: ',' expected.
+src/agents/database-agent.ts(1237,10): error TS1005: ',' expected.
+src/agents/database-agent.ts(1239,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1239,9): error TS1005: ',' expected.
+src/agents/database-agent.ts(1240,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1240,2): error TS1005: ',' expected.
+src/agents/database-agent.ts(1240,10): error TS1005: ',' expected.
+src/agents/database-agent.ts(1248,14): error TS1005: ',' expected.
+src/agents/database-agent.ts(1248,33): error TS1005: ',' expected.
+src/agents/database-agent.ts(1248,38): error TS1005: ',' expected.
+src/agents/database-agent.ts(1248,45): error TS1005: ',' expected.
+src/agents/database-agent.ts(1248,52): error TS1005: ',' expected.
+src/agents/database-agent.ts(1248,60): error TS1005: ',' expected.
+src/agents/database-agent.ts(1249,20): error TS1005: ',' expected.
+src/agents/database-agent.ts(1249,25): error TS1005: ',' expected.
+src/agents/database-agent.ts(1249,31): error TS1005: ',' expected.
+src/agents/database-agent.ts(1250,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1250,8): error TS1005: ',' expected.
+src/agents/database-agent.ts(1250,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1250,19): error TS1005: ',' expected.
+src/agents/database-agent.ts(1251,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1251,8): error TS1005: ',' expected.
+src/agents/database-agent.ts(1251,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1251,16): error TS1005: ':' expected.
+src/agents/database-agent.ts(1253,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1253,7): error TS1005: ',' expected.
+src/agents/database-agent.ts(1254,1): error TS1005: ',' expected.
+src/agents/database-agent.ts(1254,6): error TS1005: ',' expected.
+src/agents/database-agent.ts(1254,12): error TS1005: ',' expected.
+src/agents/database-agent.ts(1254,15): error TS1005: ',' expected.
+src/agents/database-agent.ts(1254,22): error TS1005: ',' expected.
+src/agents/database-agent.ts(1254,23): error TS1005: ',' expected.
+src/agents/database-agent.ts(1254,31): error TS1005: ',' expected.
+src/agents/database-agent.ts(1254,38): error TS1005: ')' expected.
+src/agents/database-agent.ts(1256,9): error TS1005: ';' expected.
+src/agents/database-agent.ts(1256,29): error TS1005: ',' expected.
+src/agents/database-agent.ts(1256,35): error TS1005: ',' expected.
+src/agents/database-agent.ts(1257,1): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1265,14): error TS1005: ';' expected.
+src/agents/database-agent.ts(1265,33): error TS1005: ';' expected.
+src/agents/database-agent.ts(1265,45): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1265,67): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1266,20): error TS1005: ';' expected.
+src/agents/database-agent.ts(1267,8): error TS1005: ';' expected.
+src/agents/database-agent.ts(1267,10): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1268,8): error TS1005: ';' expected.
+src/agents/database-agent.ts(1268,10): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1270,1): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1279,48): error TS1005: ';' expected.
+src/agents/database-agent.ts(1279,58): error TS1443: Module declaration names may only use ' or " quoted strings.
+src/agents/database-agent.ts(1282,15): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1282,22): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1282,27): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1282,53): error TS1005: ',' expected.
+src/agents/database-agent.ts(1286,14): error TS1005: ';' expected.
+src/agents/database-agent.ts(1286,27): error TS1005: ';' expected.
+src/agents/database-agent.ts(1286,42): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1287,20): error TS1005: ';' expected.
+src/agents/database-agent.ts(1287,25): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1287,34): error TS1005: '(' expected.
+src/agents/database-agent.ts(1287,35): error TS1005: ';' expected.
+src/agents/database-agent.ts(1287,43): error TS1005: ',' expected.
+src/agents/database-agent.ts(1288,1): error TS1005: ';' expected.
+src/agents/database-agent.ts(1288,14): error TS1005: ')' expected.
+src/agents/database-agent.ts(1288,17): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1288,24): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1289,8): error TS1005: ';' expected.
+src/agents/database-agent.ts(1289,10): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1291,1): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1301,14): error TS1005: ';' expected.
+src/agents/database-agent.ts(1301,27): error TS1005: ';' expected.
+src/agents/database-agent.ts(1301,42): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1307,2): error TS1005: ',' expected.
+src/agents/database-agent.ts(1330,18): error TS1005: ';' expected.
+src/agents/database-agent.ts(1330,47): error TS1161: Unterminated regular expression literal.
+src/agents/database-agent.ts(1332,14): error TS1005: ';' expected.
+src/agents/database-agent.ts(1332,32): error TS1005: ';' expected.
+src/agents/database-agent.ts(1332,54): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1338,5): error TS1109: Expression expected.
+src/agents/database-agent.ts(1338,6): error TS1068: Unexpected token. A constructor, method, accessor, or property was expected.
+src/agents/database-agent.ts(1343,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1343,11): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1343,37): error TS1005: ',' expected.
+src/agents/database-agent.ts(1343,46): error TS1005: ';' expected.
+src/agents/database-agent.ts(1344,11): error TS1005: ':' expected.
+src/agents/database-agent.ts(1348,6): error TS1005: ',' expected.
+src/agents/database-agent.ts(1354,5): error TS1005: ',' expected.
+src/agents/database-agent.ts(1354,12): error TS1005: ':' expected.
+src/agents/database-agent.ts(1354,20): error TS1005: ',' expected.
+src/agents/database-agent.ts(1357,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1357,11): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1357,37): error TS1005: ',' expected.
+src/agents/database-agent.ts(1357,46): error TS1005: ';' expected.
+src/agents/database-agent.ts(1357,60): error TS1109: Expression expected.
+src/agents/database-agent.ts(1358,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1358,15): error TS1005: ':' expected.
+src/agents/database-agent.ts(1358,80): error TS1005: ',' expected.
+src/agents/database-agent.ts(1359,9): error TS1005: ':' expected.
+src/agents/database-agent.ts(1359,38): error TS1005: ',' expected.
+src/agents/database-agent.ts(1362,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1362,11): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1362,34): error TS1005: ';' expected.
+src/agents/database-agent.ts(1362,48): error TS1109: Expression expected.
+src/agents/database-agent.ts(1363,10): error TS1359: Identifier expected. 'const' is a reserved word that cannot be used here.
+src/agents/database-agent.ts(1363,16): error TS1005: ',' expected.
+src/agents/database-agent.ts(1363,25): error TS1005: ',' expected.
+src/agents/database-agent.ts(1363,28): error TS1005: ',' expected.
+src/agents/database-agent.ts(1363,32): error TS1005: ',' expected.
+src/agents/database-agent.ts(1363,44): error TS1005: ',' expected.
+src/agents/database-agent.ts(1363,46): error TS1136: Property assignment expected.
+src/agents/database-agent.ts(1366,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1370,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1370,28): error TS1005: ',' expected.
+src/agents/database-agent.ts(1370,40): error TS1005: ';' expected.
+src/agents/database-agent.ts(1370,42): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1384,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1384,35): error TS1005: ',' expected.
+src/agents/database-agent.ts(1384,47): error TS1005: ';' expected.
+src/agents/database-agent.ts(1384,49): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1398,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1398,24): error TS1005: ',' expected.
+src/agents/database-agent.ts(1398,33): error TS1005: ';' expected.
+src/agents/database-agent.ts(1398,35): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1406,3): error TS1128: Declaration or statement expected.
+src/agents/database-agent.ts(1406,31): error TS1005: ',' expected.
+src/agents/database-agent.ts(1406,40): error TS1005: ';' expected.
+src/agents/database-agent.ts(1406,42): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1419,3): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1419,19): error TS1005: ';' expected.
+src/agents/database-agent.ts(1420,12): error TS1005: ':' expected.
+src/agents/database-agent.ts(1420,29): error TS1005: ',' expected.
+src/agents/database-agent.ts(1426,3): error TS1434: Unexpected keyword or identifier.
+src/agents/database-agent.ts(1426,19): error TS1005: ';' expected.
+src/agents/database-agent.ts(1426,33): error TS1109: Expression expected.
+src/agents/database-agent.ts(1427,11): error TS1005: ',' expected.
+src/agents/database-agent.ts(1427,15): error TS1005: ':' expected.
+src/agents/database-agent.ts(1427,51): error TS1005: ',' expected.
+src/agents/database-agent.ts(1429,1): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(746,26): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(746,37): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(746,45): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(746,52): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(747,26): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(747,28): error TS1434: Unexpected keyword or identifier.
+src/agents/performance-optimization-agent.ts(749,10): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(759,13): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(760,28): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(761,7): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(761,8): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(764,19): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(765,26): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(766,26): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(767,29): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(767,33): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(768,35): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(769,26): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(770,27): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(771,37): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(774,10): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(784,13): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(785,28): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(786,8): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(789,19): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(790,27): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(791,27): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(792,25): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(793,26): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(796,10): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(806,13): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(807,28): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(809,5): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(812,3): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(817,3): error TS1434: Unexpected keyword or identifier.
+src/agents/performance-optimization-agent.ts(817,35): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(818,29): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(819,29): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(820,32): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(821,36): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(823,12): error TS1005: ':' expected.
+src/agents/performance-optimization-agent.ts(896,6): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(902,26): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(902,45): error TS1011: An element access expression should take an argument.
+src/agents/performance-optimization-agent.ts(902,47): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(904,7): error TS1128: Declaration or statement expected.
+src/agents/performance-optimization-agent.ts(910,30): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(911,12): error TS1005: ':' expected.
+src/agents/performance-optimization-agent.ts(911,48): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(917,20): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(918,12): error TS1005: ':' expected.
+src/agents/performance-optimization-agent.ts(918,38): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(924,18): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(925,12): error TS1005: ':' expected.
+src/agents/performance-optimization-agent.ts(925,36): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(931,3): error TS1434: Unexpected keyword or identifier.
+src/agents/performance-optimization-agent.ts(931,41): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(931,58): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(931,72): error TS1109: Expression expected.
+src/agents/performance-optimization-agent.ts(932,9): error TS1005: ':' expected.
+src/agents/performance-optimization-agent.ts(932,34): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(934,11): error TS1005: ':' expected.
+src/agents/performance-optimization-agent.ts(961,6): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(969,27): error TS1005: ';' expected.
+src/agents/performance-optimization-agent.ts(970,9): error TS1005: ':' expected.
+src/agents/performance-optimization-agent.ts(970,35): error TS1005: ',' expected.
+src/agents/performance-optimization-agent.ts(972,1): error TS1128: Declaration or statement expected.
+src/agents/ux-design-agent.ts(517,7): error TS1109: Expression expected.
+src/agents/ux-design-agent.ts(517,23): error TS1005: ',' expected.
+src/agents/ux-design-agent.ts(518,16): error TS1005: ',' expected.
+src/agents/ux-design-agent.ts(518,20): error TS1005: '(' expected.
+src/agents/ux-design-agent.ts(518,25): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(518,31): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(518,36): error TS1005: '(' expected.
+src/agents/ux-design-agent.ts(518,41): error TS1005: ')' expected.
+src/agents/ux-design-agent.ts(519,20): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(519,34): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(520,16): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(520,26): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(520,38): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(520,43): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(521,17): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(521,23): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(521,32): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(524,16): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(525,13): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(525,19): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(525,28): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(525,32): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(526,15): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(526,18): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(526,28): error TS1435: Unknown keyword or identifier. Did you mean 'function'?
+src/agents/ux-design-agent.ts(526,38): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(527,14): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(527,18): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(527,39): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(530,18): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(530,29): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(530,38): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(531,13): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(531,22): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(532,16): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(532,28): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(533,19): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(533,23): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(533,30): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(536,18): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(536,22): error TS1005: '(' expected.
+src/agents/ux-design-agent.ts(536,28): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(536,32): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(537,18): error TS1005: ')' expected.
+src/agents/ux-design-agent.ts(538,17): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(538,23): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(538,34): error TS1005: '(' expected.
+src/agents/ux-design-agent.ts(539,17): error TS1005: ')' expected.
+src/agents/ux-design-agent.ts(539,31): error TS1005: '(' expected.
+src/agents/ux-design-agent.ts(542,14): error TS1005: ')' expected.
+src/agents/ux-design-agent.ts(542,23): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(542,26): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(543,17): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(544,16): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(544,20): error TS1005: '(' expected.
+src/agents/ux-design-agent.ts(544,28): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(545,18): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(545,28): error TS1005: ')' expected.
+src/agents/ux-design-agent.ts(545,37): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(547,16): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(548,16): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(548,39): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(549,13): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(549,25): error TS1434: Unexpected keyword or identifier.
+src/agents/ux-design-agent.ts(550,17): error TS1005: ';' expected.
+src/agents/ux-design-agent.ts(550,33): error TS1005: '(' expected.
+src/agents/ux-design-agent.ts(551,16): error TS1005: ')' expected.
+src/agents/ux-design-agent.ts(552,5): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(669,18): error TS1005: ';' expected.
+src/components/chat-interface.tsx(670,16): error TS1005: ';' expected.
+src/components/chat-interface.tsx(676,13): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(680,18): error TS1005: ';' expected.
+src/components/chat-interface.tsx(680,23): error TS1005: '{' expected.
+src/components/chat-interface.tsx(689,13): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(696,18): error TS1005: ';' expected.
+src/components/chat-interface.tsx(696,23): error TS1005: '{' expected.
+src/components/chat-interface.tsx(705,13): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(724,18): error TS1005: ';' expected.
+src/components/chat-interface.tsx(724,23): error TS1005: '{' expected.
+src/components/chat-interface.tsx(733,13): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(795,18): error TS1005: ';' expected.
+src/components/chat-interface.tsx(795,23): error TS1005: '{' expected.
+src/components/chat-interface.tsx(796,15): error TS2657: JSX expressions must have one parent element.
+src/components/chat-interface.tsx(812,13): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(827,18): error TS1005: ';' expected.
+src/components/chat-interface.tsx(827,23): error TS1005: '{' expected.
+src/components/chat-interface.tsx(828,15): error TS2657: JSX expressions must have one parent element.
+src/components/chat-interface.tsx(830,13): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(854,3): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(854,4): error TS1128: Declaration or statement expected.
+src/components/chat-interface.tsx(855,1): error TS1128: Declaration or statement expected.
+src/components/file-tree.tsx(690,21): error TS1005: ';' expected.
+src/components/file-tree.tsx(690,45): error TS1127: Invalid character.
+src/components/file-tree.tsx(690,47): error TS1128: Declaration or statement expected.
+src/components/file-tree.tsx(694,21): error TS1005: ';' expected.
+src/components/file-tree.tsx(694,26): error TS1005: '{' expected.
+src/components/file-tree.tsx(694,52): error TS1005: ';' expected.
+src/components/file-tree.tsx(694,62): error TS1128: Declaration or statement expected.
+src/components/file-tree.tsx(698,23): error TS1005: ';' expected.
+src/components/file-tree.tsx(698,28): error TS1005: '{' expected.
+src/components/file-tree.tsx(699,35): error TS1005: ';' expected.
+src/components/file-tree.tsx(701,17): error TS1127: Invalid character.
+src/components/file-tree.tsx(702,15): error TS1128: Declaration or statement expected.
+src/components/file-tree.tsx(713,20): error TS1005: ';' expected.
+src/components/file-tree.tsx(713,25): error TS1005: '{' expected.
+src/components/file-tree.tsx(713,38): error TS1005: ';' expected.
+src/components/file-tree.tsx(713,48): error TS1005: ';' expected.
+src/components/file-tree.tsx(724,17): error TS1434: Unexpected keyword or identifier.
+src/components/file-tree.tsx(729,15): error TS1128: Declaration or statement expected.
+src/components/file-tree.tsx(972,96): error TS1005: ';' expected.
+src/components/file-tree.tsx(972,97): error TS1128: Declaration or statement expected.
+src/components/file-tree.tsx(980,11): error TS1128: Declaration or statement expected.
+src/components/file-tree.tsx(994,56): error TS1127: Invalid character.
+src/components/file-tree.tsx(1149,6): error TS1005: ')' expected.
+src/components/file-tree.tsx(1152,19): error TS1005: ',' expected.
+src/components/file-tree.tsx(1152,34): error TS1011: An element access expression should take an argument.
+src/components/file-tree.tsx(1152,36): error TS1005: ',' expected.
+src/components/file-tree.tsx(1152,45): error TS1005: ',' expected.
+src/components/file-tree.tsx(1153,9): error TS1005: ',' expected.
+src/components/file-tree.tsx(1153,18): error TS1005: ',' expected.
+src/components/file-tree.tsx(1155,14): error TS1005: ':' expected.
+src/components/file-tree.tsx(1155,32): error TS1005: ',' expected.
+src/components/file-tree.tsx(1155,47): error TS1011: An element access expression should take an argument.
+src/components/file-tree.tsx(1155,50): error TS1005: ',' expected.
+src/components/file-tree.tsx(1156,12): error TS1005: ',' expected.
+src/components/file-tree.tsx(1163,9): error TS1005: ',' expected.
+src/components/file-tree.tsx(1166,5): error TS1005: ',' expected.
+src/components/file-tree.tsx(1166,24): error TS1005: ')' expected.
+src/components/preview-panel.tsx(746,21): error TS1005: ';' expected.
+src/components/preview-panel.tsx(746,45): error TS1127: Invalid character.
+src/components/preview-panel.tsx(746,46): error TS1127: Invalid character.
+src/components/preview-panel.tsx(746,66): error TS1434: Unexpected keyword or identifier.
+src/components/preview-panel.tsx(746,68): error TS1128: Declaration or statement expected.
+src/components/preview-panel.tsx(747,15): error TS2657: JSX expressions must have one parent element.
+src/components/preview-panel.tsx(769,23): error TS1005: ';' expected.
+src/components/preview-panel.tsx(769,28): error TS1005: '{' expected.
+src/components/preview-panel.tsx(769,41): error TS1005: ';' expected.
+src/components/preview-panel.tsx(769,52): error TS1128: Declaration or statement expected.
+src/components/preview-panel.tsx(770,17): error TS2657: JSX expressions must have one parent element.
+src/components/terminal-panel.tsx(677,21): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(677,49): error TS1005: ':' expected.
+src/components/terminal-panel.tsx(677,95): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(877,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(877,4): error TS1435: Unknown keyword or identifier. Did you mean 'string'?
+src/components/terminal-panel.tsx(877,13): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(877,25): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(877,31): error TS1128: Declaration or statement expected.
+src/components/terminal-panel.tsx(878,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(878,14): error TS1351: An identifier or keyword cannot immediately follow a numeric literal.
+src/components/terminal-panel.tsx(879,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(879,4): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(879,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(880,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(880,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(880,16): error TS1005: '(' expected.
+src/components/terminal-panel.tsx(880,23): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(884,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(884,4): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(884,13): error TS1128: Declaration or statement expected.
+src/components/terminal-panel.tsx(885,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(885,14): error TS1351: An identifier or keyword cannot immediately follow a numeric literal.
+src/components/terminal-panel.tsx(886,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(886,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(886,12): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(886,15): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(887,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(887,4): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(887,13): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(891,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(891,4): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(891,15): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(891,18): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(891,23): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(891,31): error TS1128: Declaration or statement expected.
+src/components/terminal-panel.tsx(892,1): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(892,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(892,13): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(893,1): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(893,13): error TS1005: '(' expected.
+src/components/terminal-panel.tsx(893,17): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(896,27): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(899,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(899,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(899,20): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(900,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(900,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(900,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(900,28): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(901,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(901,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(901,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(902,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(902,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(903,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(903,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(903,24): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(909,23): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(915,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(915,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(915,20): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(916,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(916,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(916,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(916,28): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(917,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(917,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(917,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(918,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(918,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(919,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(919,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(919,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(920,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(920,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(920,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(921,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(921,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(921,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(922,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(922,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(922,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(923,3): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(923,14): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(923,21): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(926,14): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(927,14): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(928,1): error TS1443: Module declaration names may only use ' or " quoted strings.
+src/components/terminal-panel.tsx(931,25): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(931,33): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(931,44): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(932,1): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(932,12): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(932,16): error TS1005: '(' expected.
+src/components/terminal-panel.tsx(932,26): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(1147,15): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(1147,23): error TS1005: ')' expected.
+src/components/terminal-panel.tsx(1148,22): error TS1351: An identifier or keyword cannot immediately follow a numeric literal.
+src/components/terminal-panel.tsx(1149,24): error TS1351: An identifier or keyword cannot immediately follow a numeric literal.
+src/components/terminal-panel.tsx(1150,27): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(1150,28): error TS1121: Octal literals are not allowed. Use the syntax '0o0'.
+src/components/terminal-panel.tsx(1150,30): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(1151,22): error TS1127: Invalid character.
+src/components/terminal-panel.tsx(1151,23): error TS1121: Octal literals are not allowed. Use the syntax '0o0'.
+src/components/terminal-panel.tsx(1152,26): error TS1351: An identifier or keyword cannot immediately follow a numeric literal.
+src/components/terminal-panel.tsx(1152,26): error TS1434: Unexpected keyword or identifier.
+src/components/terminal-panel.tsx(1152,31): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(1152,31): error TS1351: An identifier or keyword cannot immediately follow a numeric literal.
+src/components/terminal-panel.tsx(1153,28): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(1153,31): error TS1351: An identifier or keyword cannot immediately follow a numeric literal.
+src/components/terminal-panel.tsx(1154,24): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(1154,28): error TS1351: An identifier or keyword cannot immediately follow a numeric literal.
+src/components/terminal-panel.tsx(1155,22): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(1175,20): error TS1005: ';' expected.
+src/components/terminal-panel.tsx(1175,25): error TS1005: '{' expected.
+src/components/terminal-panel.tsx(1176,17): error TS2657: JSX expressions must have one parent element.
+src/components/terminal-panel.tsx(1185,15): error TS1128: Declaration or statement expected.
+src/components/terminal-panel.tsx(1216,3): error TS1128: Declaration or statement expected.
+src/components/terminal-panel.tsx(1216,4): error TS1128: Declaration or statement expected.
+src/components/terminal-panel.tsx(1217,1): error TS1128: Declaration or statement expected.
+src/pages/hybrid-ide.tsx(88,4): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(90,9): error TS1005: ':' expected.
+src/pages/hybrid-ide.tsx(90,43): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(92,10): error TS1005: ':' expected.
+src/pages/hybrid-ide.tsx(597,26): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(597,27): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(597,39): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(597,44): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(597,53): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(597,59): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(597,68): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(606,20): error TS1127: Invalid character.
+src/pages/hybrid-ide.tsx(606,22): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(606,26): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(606,42): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(606,58): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(606,71): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(606,82): error TS1005: ',' expected.
+src/pages/hybrid-ide.tsx(606,90): error TS1443: Module declaration names may only use ' or " quoted strings.
+src/pages/hybrid-ide.tsx(609,20): error TS1127: Invalid character.
+src/pages/hybrid-ide.tsx(609,20): error TS1128: Declaration or statement expected.
+src/pages/hybrid-ide.tsx(609,21): error TS1127: Invalid character.
+src/pages/hybrid-ide.tsx(609,23): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(609,35): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(609,41): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(609,48): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(609,52): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(609,55): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(609,68): error TS1128: Declaration or statement expected.
+src/pages/hybrid-ide.tsx(609,70): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(609,76): error TS1434: Unexpected keyword or identifier.
+src/pages/hybrid-ide.tsx(609,88): error TS1005: '(' expected.
+src/pages/hybrid-ide.tsx(609,96): error TS1003: Identifier expected.
+src/pages/hybrid-ide.tsx(692,26): error TS1005: ';' expected.
+src/pages/hybrid-ide.tsx(692,27): error TS1005: ';' expected.
+src/pages/hybrid-ide.tsx(692,39): error TS1005: ')' expected.
+src/pages/hybrid-ide.tsx(692,60): error TS1005: ';' expected.

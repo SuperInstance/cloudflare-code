@@ -554,7 +554,7 @@ export class AccessibilityAgent {
     const results: Record<string, any> = {};
 
     // Simulate automated testing results
-    resultsaxe = {
+    results.axe = {
       violations: [
         {
           id: 'color-contrast',
@@ -568,7 +568,7 @@ export class AccessibilityAgent {
               html: '<div class="insufficient-contrast">Text with poor contrast</div>',
               selector: 'div.insufficient-contrast',
               target: ['div.insufficient-contrast'],
-              xpath: '/html/body/div']
+              xpath: '/html/body/div'
             }
           ]
         }
@@ -593,7 +593,7 @@ export class AccessibilityAgent {
       ]
     };
 
-    resultslighthouse = {
+    results.lighthouse = {
       categories: {
         accessibility: {
           score: 0.88,

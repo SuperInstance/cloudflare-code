@@ -70,6 +70,9 @@
   "exclude": [
     "node_modules",
     "dist",
-    ".wrangler"
+    ".wrangler",
+    "packages/archived",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }

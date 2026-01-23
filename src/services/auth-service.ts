@@ -3,7 +3,7 @@
  * Provides comprehensive authentication functionality
  */
 
-import { SecurityError } from '../../packages/security-core/src/types';
+import { SecurityError } from '../types/security';
 
 // Type definitions
 export interface User {

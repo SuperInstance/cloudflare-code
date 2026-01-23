@@ -3,7 +3,7 @@
  * Simplified version that works with in-memory content analysis
  */
 
-import type { AnalysisResult, Language, Issue } from '../../packages/code-review/src/types/index.js';
+import type { AnalysisResult, Language, Issue } from '../types/code-review';
 
 export interface CodeReviewConfig {
   includeQuality?: boolean;

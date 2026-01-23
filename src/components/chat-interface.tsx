@@ -82,26 +82,11 @@ export const ChatInterface = {
   render: (sessionId: string, messages: ChatMessage[], isTyping: boolean = false) => {
     return html`
       <div class="chat-container" data-session-id="${sessionId}">
-        <!-- Provider Selection Header -->
+        <!-- SIMPLIFIED: Provider Badge (No Selection - Automatic Routing) -->
         <div class="provider-header">
-          <div class="provider-selector">
-            <label for="provider-select" class="provider-label">AI Provider:</label>
-            <select id="provider-select" class="provider-select">
-              ${ChatInterface.providers.map(provider => `
-                <option value="${provider.id}" ${provider.recommended ? 'selected' : ''}>
-                  ${provider.icon} ${provider.name} ${provider.recommended ? '⭐' : ''}
-                </option>
-              `).join('')}
-            </select>
-            <div class="provider-description" id="provider-description">
-              ${ChatInterface.providers.find(p => p.recommended)?.description || 'Select a provider'}
-            </div>
-          </div>
-
-          <div class="provider-features">
-            ${ChatInterface.providers.find(p => p.recommended)?.features
-              .map(feature => `<span class="feature-tag">${feature}</span>`)
-              .join('') || ''}
+          <div class="provider-badge">
+            🤖 Powered by Cocapn AI
+            <span class="badge-note">Auto-routing to best provider</span>
           </div>
         </div>
 
@@ -140,16 +125,7 @@ export const ChatInterface = {
           </div>
         </div>
 
-        <!-- Provider Info Modal (hidden by default) -->
-        <div id="provider-modal" class="modal" style="display: none;">
-          <div class="modal-content">
-            <span class="close" onclick="closeProviderModal()">&times;</span>
-            <h2 id="modal-provider-name"></h2>
-            <p id="modal-provider-description"></p>
-            <h3>Features:</h3>
-            <ul id="modal-features-list"></ul>
-          </div>
-        </div>
+        <!-- REMOVED: Provider modal (no longer needed with automatic routing) -->
       </div>
 
       <style>
@@ -505,27 +481,136 @@ export const ChatInterface = {
             align-items: flex-start;
           }
         }
+
+        /* NEW: Simplified provider badge styles */
+        .provider-badge {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          color: #334155;
+        }
+
+        .badge-note {
+          font-size: 12px;
+          color: #64748b;
+          font-weight: 400;
+        }
+
+        /* NEW: Deployment success message styles */
+        .deployment-success-message {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          padding: 20px;
+          border-radius: 12px;
+          margin: 16px 0;
+          animation: slideIn 0.3s ease-out;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .success-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 16px;
+        }
+
+        .success-icon {
+          font-size: 32px;
+        }
+
+        .success-header h3 {
+          margin: 0;
+          font-size: 20px;
+          font-weight: 600;
+        }
+
+        .url-display {
+          background: rgba(255, 255, 255, 0.2);
+          padding: 16px;
+          border-radius: 8px;
+          margin-bottom: 12px;
+        }
+
+        .live-url {
+          display: block;
+          color: white;
+          font-size: 14px;
+          font-family: 'Courier New', monospace;
+          word-break: break-all;
+          margin-bottom: 12px;
+          padding: 8px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+
+        .url-actions {
+          display: flex;
+          gap: 8px;
+        }
+
+        .url-action-btn {
+          flex: 1;
+          padding: 10px 16px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+
+        .url-action-btn:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .success-tip {
+          margin: 0;
+          font-size: 13px;
+          opacity: 0.9;
+          text-align: center;
+        }
+
+        /* NEW: Deployment error message styles */
+        .deployment-error-message {
+          background: #fee2e2;
+          color: #991b1b;
+          padding: 16px;
+          border-radius: 8px;
+          margin: 16px 0;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          animation: slideIn 0.3s ease-out;
+          border-left: 4px solid #dc2626;
+        }
+
+        .error-icon {
+          font-size: 20px;
+        }
       </style>
 
       <script>
         // Initialize chat functionality
         let sessionId = '${sessionId}';
-        let currentProvider = '${ChatInterface.providers.find(p => p.recommended)?.id || 'manus'}';
+        // SIMPLIFIED: No provider selection - automatic routing
 
-        // Provider selection
-        document.getElementById('provider-select').addEventListener('change', function(e) {
-          currentProvider = e.target.value;
-          updateProviderInfo(currentProvider);
-        });
-
-        function updateProviderInfo(providerId) {
-          const provider = ChatInterface.providers.find(p => p.id === providerId);
-          if (provider) {
-            document.getElementById('provider-description').textContent = provider.description;
-          }
-        }
-
-        // Message handling
+        // Message handling (simplified - no provider choice)
         function sendMessage() {
           const input = document.getElementById('chat-input');
           const message = input.value.trim();
@@ -538,7 +623,7 @@ export const ChatInterface = {
             role: 'user',
             content: message,
             timestamp: Date.now(),
-            provider: currentProvider
+            // No provider selection - backend will auto-route
           });
 
           // Clear input
@@ -547,7 +632,7 @@ export const ChatInterface = {
           // Show typing indicator
           showTypingIndicator();
 
-          // Send to backend
+          // Send to backend (no provider selection)
           fetch('/api/chat', {
             method: 'POST',
             headers: {
@@ -555,8 +640,8 @@ export const ChatInterface = {
             },
             body: JSON.stringify({
               sessionId,
-              message,
-              provider: currentProvider
+              message
+              // Provider auto-routed by backend based on request type
             })
           })
           .then(response => response.json())
@@ -668,41 +753,102 @@ export const ChatInterface = {
           console.log('Open editor');
         }
 
+        // SIMPLIFIED: One-click deploy (no confirmation)
         function deployProject() {
-          if (confirm('Are you ready to deploy your project to Cloudflare Workers?')) {
-            fetch('/api/deploy', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                sessionId,
-                provider: currentProvider
-              })
+          const deployBtn = document.querySelector('.deploy-btn');
+          deployBtn.disabled = true;
+          deployBtn.textContent = '⏳ Deploying...';
+
+          fetch('/api/deploy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              sessionId
+              // No provider selection - automatic routing
             })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                alert('Deployment successful! Your app is now live at: ' + data.url);
-                window.open(data.url, '_blank');
-              } else {
-                alert('Deployment failed: ' + (data.errors || ['Unknown error'])[0]);
-              }
-            })
-            .catch(error => {
-              console.error('Error deploying:', error);
-              alert('Failed to deploy. Please try again.');
-            });
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Show inline success message with URL
+              showDeploymentSuccess(data.url);
+            } else {
+              showError('Deployment failed: ' + (data.errors || ['Unknown error'])[0]);
+            }
+          })
+          .catch(error => {
+            console.error('Error deploying:', error);
+            showError('Failed to deploy. Please try again.');
+          })
+          .finally(() => {
+            deployBtn.disabled = false;
+            deployBtn.textContent = '🚀 Deploy';
+          });
+        }
+
+        // NEW: Show deployment success with prominent URL display
+        function showDeploymentSuccess(url) {
+          const messagesContainer = document.getElementById('messages-container');
+          const successHtml = `
+            <div class="deployment-success-message">
+              <div class="success-header">
+                <span class="success-icon">🚀</span>
+                <h3>Your app is live!</h3>
+              </div>
+              <div class="url-display">
+                <code class="live-url">${url}</code>
+                <div class="url-actions">
+                  <button class="url-action-btn" onclick="copyToClipboard('${url}')" title="Copy URL">
+                    📋 Copy
+                  </button>
+                  <button class="url-action-btn" onclick="window.open('${url}', '_blank')" title="Open in new tab">
+                    🔗 Test
+                  </button>
+                </div>
+              </div>
+              <p class="success-tip">Share this URL to show off your app!</p>
+            </div>
+          `;
+          messagesContainer.insertAdjacentHTML('beforeend', successHtml);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+          // Track deployment success
+          if (typeof analytics !== 'undefined') {
+            analytics.track('deployment_success', { url, time: Date.now() });
           }
         }
 
-        // Modal functions
-        function closeProviderModal() {
-          document.getElementById('provider-modal').style.display = 'none';
+        // NEW: Show error message
+        function showError(message) {
+          const messagesContainer = document.getElementById('messages-container');
+          const errorHtml = `
+            <div class="deployment-error-message">
+              <span class="error-icon">❌</span>
+              <span>${message}</span>
+            </div>
+          `;
+          messagesContainer.insertAdjacentHTML('beforeend', errorHtml);
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Initialize provider info
-        updateProviderInfo(currentProvider);
+        // NEW: Copy URL to clipboard
+        function copyToClipboard(text) {
+          navigator.clipboard.writeText(text).then(() => {
+            // Show brief "Copied!" feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            setTimeout(() => {
+              btn.textContent = originalText;
+            }, 2000);
+          }).catch(err => {
+            console.error('Failed to copy:', err);
+          });
+        }
+
+        // REMOVED: Provider modal functions (no longer needed with automatic routing)
       </script>
     `;
   },

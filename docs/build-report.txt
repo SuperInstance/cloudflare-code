@@ -1,0 +1,137 @@
+
+> cocapn@2.0.0 build
+> esbuild src/index.ts --bundle --format=esm --outfile=dist/worker.js --minify --sourcemap
+
+✘ [ERROR] The symbol "generateInfiniteWisdom" has already been declared
+
+    src/routes/dev-routes.ts:4047:9:
+      4047 │ function generateInfiniteWisdom(query: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~
+
+  The symbol "generateInfiniteWisdom" was originally declared here:
+
+    src/routes/dev-routes.ts:3647:9:
+      3647 │ function generateInfiniteWisdom(path: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    src/routes/dev-routes.ts:9:0:
+      9 │ export const devRoutes = new Hono<{ Bindings: Bindings }>();
+        ╵ ~~~~~~
+
+✘ [ERROR] The symbol "generateUniversalHarmony" has already been declared
+
+    src/routes/dev-routes.ts:4097:9:
+      4097 │ function generateUniversalHarmony(query: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  The symbol "generateUniversalHarmony" was originally declared here:
+
+    src/routes/dev-routes.ts:3502:9:
+      3502 │ function generateUniversalHarmony(query: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    src/routes/dev-routes.ts:9:0:
+      9 │ export const devRoutes = new Hono<{ Bindings: Bindings }>();
+        ╵ ~~~~~~
+
+✘ [ERROR] The symbol "generateCosmicEvolution" has already been declared
+
+    src/routes/dev-routes.ts:4174:9:
+      4174 │ function generateCosmicEvolution(query: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~
+
+  The symbol "generateCosmicEvolution" was originally declared here:
+
+    src/routes/dev-routes.ts:3602:9:
+      3602 │ function generateCosmicEvolution(path: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    src/routes/dev-routes.ts:9:0:
+      9 │ export const devRoutes = new Hono<{ Bindings: Bindings }>();
+        ╵ ~~~~~~
+
+✘ [ERROR] The symbol "generateTranscendentalAscension" has already been declared
+
+    src/routes/dev-routes.ts:4183:9:
+      4183 │ function generateTranscendentalAscension(query: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  The symbol "generateTranscendentalAscension" was originally declared here:
+
+    src/routes/dev-routes.ts:3665:9:
+      3665 │ function generateTranscendentalAscension(path: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    src/routes/dev-routes.ts:9:0:
+      9 │ export const devRoutes = new Hono<{ Bindings: Bindings }>();
+        ╵ ~~~~~~
+
+✘ [ERROR] The symbol "generateUniversalExpansion" has already been declared
+
+    src/routes/dev-routes.ts:4192:9:
+      4192 │ function generateUniversalExpansion(query: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  The symbol "generateUniversalExpansion" was originally declared here:
+
+    src/routes/dev-routes.ts:3629:9:
+      3629 │ function generateUniversalExpansion(path: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    src/routes/dev-routes.ts:9:0:
+      9 │ export const devRoutes = new Hono<{ Bindings: Bindings }>();
+        ╵ ~~~~~~
+
+✘ [ERROR] The symbol "generateCosmicIntegration" has already been declared
+
+    src/routes/dev-routes.ts:4246:9:
+      4246 │ function generateCosmicIntegration(query: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  The symbol "generateCosmicIntegration" was originally declared here:
+
+    src/routes/dev-routes.ts:3579:9:
+      3579 │ function generateCosmicIntegration(query: string): any {
+           ╵          ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    src/routes/dev-routes.ts:9:0:
+      9 │ export const devRoutes = new Hono<{ Bindings: Bindings }>();
+        ╵ ~~~~~~
+
+6 of 7 errors shown (disable the message limit with --log-limit=0)
+node:child_process:955
+    throw err;
+    ^
+
+Error: Command failed: /home/eileen/projects/claudeflare/node_modules/.pnpm/@esbuild+linux-x64@0.19.12/node_modules/@esbuild/linux-x64/bin/esbuild src/index.ts --bundle --format=esm --outfile=dist/worker.js --minify --sourcemap
+    at genericNodeError (node:internal/errors:983:15)
+    at wrappedFn (node:internal/errors:537:14)
+    at checkExecSyncError (node:child_process:916:11)
+    at Object.execFileSync (node:child_process:952:15)
+    at Object.<anonymous> (/home/eileen/projects/claudeflare/node_modules/.pnpm/esbuild@0.19.12/node_modules/esbuild/bin/esbuild:221:28)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 511537,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v22.21.1

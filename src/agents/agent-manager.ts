@@ -831,10 +831,6 @@ export class AgentManager {
 
     return summary;
   }
-}
-
-// Export singleton instance
-export const agentManager = new AgentManager();
 
   // Handle advanced AI requests
   private async handleAdvancedAIRequest(agent: any, action: string, params: any): Promise<any> {
@@ -924,33 +920,6 @@ export const agentManager = new AgentManager();
         return agent.getSystemStatus();
       default:
         throw new Error(`Unknown blockchain action: ${action}`);
-      }
-    case 'ux_design':
-      result = await this.handleUXDesignRequest(agent, action, params);
-      break;
-    case 'responsive_design':
-      result = await this.handleResponsiveDesignRequest(agent, action, params);
-      break;
-    case 'accessibility':
-      result = await this.handleAccessibilityRequest(agent, action, params);
-      break;
-    case 'figma_integration':
-      result = await this.handleFigmaIntegrationRequest(agent, action, params);
-      break;
-    case 'professional_ui':
-      result = await this.handleProfessionalUIRequest(agent, action, params);
-      break;
-    case 'performance_optimization':
-      result = await this.handlePerformanceOptimizationRequest(agent, action, params);
-      break;
-    case 'enterprise_security':
-      result = await this.handleEnterpriseSecurityRequest(agent, action, params);
-      break;
-    case 'advanced_ai_integration':
-      result = await this.handleAdvancedAIIntegrationRequest(agent, action, params);
-      break;
-    default:
-        throw new Error(`Unknown agent type: ${request.agentType}`);
     }
   }
 
@@ -1155,3 +1124,7 @@ export const agentManager = new AgentManager();
           throw new Error(`Unknown advanced AI integration action: ${action}`);
       }
     }
+}
+
+// Export singleton instance
+export const agentManager = new AgentManager();

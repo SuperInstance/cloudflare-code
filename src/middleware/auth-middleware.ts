@@ -4,7 +4,7 @@
  */
 
 import { EnterpriseAuthService } from '../services/auth-service';
-import { SecurityError } from '../../packages/security-core/src/types';
+import { SecurityError } from '../types/security';
 
 export interface AuthContext {
   authService: EnterpriseAuthService;

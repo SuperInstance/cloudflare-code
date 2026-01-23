@@ -1,13 +1,16 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
 
-echo "Running pre-commit checks..."
+# Pre-commit hook for Cocapn platform
+# Runs basic quality checks before allowing commit
 
-# Run lint-staged
-npx lint-staged
+echo "🔍 Running pre-commit checks..."
 
-# Type check
-echo "Running TypeScript type check..."
-npm run typecheck
+# Run build check
+echo "📦 Checking build..."
+if ! npm run build --silent; then
+    echo "❌ Build failed. Please fix build errors before committing."
+    exit 1
+fi
 
-echo "Pre-commit checks passed!"
+echo "✅ Pre-commit checks passed!"

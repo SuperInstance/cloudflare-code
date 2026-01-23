@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --local",
+    "dev:watch": "esbuild src/index.ts --bundle --format=esm --outfile=dist/worker.js --watch",
+    "dev:wrangler": "wrangler dev --local --watch",
     "build": "esbuild src/index.ts --bundle --format=esm --outfile=dist/worker.js --minify --sourcemap",
     "build:analyze": "esbuild src/index.ts --bundle --format=esm --metafile=meta.json --outfile=dist/worker.js",
     "deploy": "wrangler deploy",
@@ -15,7 +17,10 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint 'src/**/*.ts' --max-warnings 0",
-    "lint:fix": "eslint 'src/**/*.ts' --fix"
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "optimize:build": "node scripts/optimize-build.js",
+    "prepare": "husky",
+    "health-check": "bash scripts/health-check.sh"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.1.0",

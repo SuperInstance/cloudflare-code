@@ -1,0 +1,572 @@
+{
+  "inputs": {
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/url.js": {
+      "bytes": 5493,
+      "imports": [],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/cookie.js": {
+      "bytes": 3722,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/url.js",
+          "kind": "import-statement",
+          "original": "./url.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/html.js": {
+      "bytes": 2418,
+      "imports": [],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/stream.js": {
+      "bytes": 1302,
+      "imports": [],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/context.js": {
+      "bytes": 10249,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/cookie.js",
+          "kind": "import-statement",
+          "original": "./utils/cookie.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/html.js",
+          "kind": "import-statement",
+          "original": "./utils/html.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/stream.js",
+          "kind": "import-statement",
+          "original": "./utils/stream.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/compose.js": {
+      "bytes": 1350,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/context.js",
+          "kind": "import-statement",
+          "original": "./context.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/http-exception.js": {
+      "bytes": 370,
+      "imports": [],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/body.js": {
+      "bytes": 1471,
+      "imports": [],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/request.js": {
+      "bytes": 4621,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/body.js",
+          "kind": "import-statement",
+          "original": "./utils/body.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/cookie.js",
+          "kind": "import-statement",
+          "original": "./utils/cookie.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/url.js",
+          "kind": "import-statement",
+          "original": "./utils/url.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router.js": {
+      "bytes": 433,
+      "imports": [],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/hono-base.js": {
+      "bytes": 8229,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/compose.js",
+          "kind": "import-statement",
+          "original": "./compose.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/context.js",
+          "kind": "import-statement",
+          "original": "./context.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/http-exception.js",
+          "kind": "import-statement",
+          "original": "./http-exception.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/request.js",
+          "kind": "import-statement",
+          "original": "./request.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router.js",
+          "kind": "import-statement",
+          "original": "./router.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/url.js",
+          "kind": "import-statement",
+          "original": "./utils/url.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/node.js": {
+      "bytes": 3189,
+      "imports": [],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/trie.js": {
+      "bytes": 1744,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/node.js",
+          "kind": "import-statement",
+          "original": "./node.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/router.js": {
+      "bytes": 6787,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router.js",
+          "kind": "import-statement",
+          "original": "../../router.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/url.js",
+          "kind": "import-statement",
+          "original": "../../utils/url.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/node.js",
+          "kind": "import-statement",
+          "original": "./node.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/trie.js",
+          "kind": "import-statement",
+          "original": "./trie.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/index.js": {
+      "bytes": 109,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/router.js",
+          "kind": "import-statement",
+          "original": "./router.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/smart-router/router.js": {
+      "bytes": 1439,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router.js",
+          "kind": "import-statement",
+          "original": "../../router.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/smart-router/index.js": {
+      "bytes": 105,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/smart-router/router.js",
+          "kind": "import-statement",
+          "original": "./router.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/trie-router/node.js": {
+      "bytes": 5055,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router.js",
+          "kind": "import-statement",
+          "original": "../../router.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/url.js",
+          "kind": "import-statement",
+          "original": "../../utils/url.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/trie-router/router.js": {
+      "bytes": 591,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/url.js",
+          "kind": "import-statement",
+          "original": "../../utils/url.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/trie-router/node.js",
+          "kind": "import-statement",
+          "original": "./node.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/trie-router/index.js": {
+      "bytes": 102,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/trie-router/router.js",
+          "kind": "import-statement",
+          "original": "./router.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/hono.js": {
+      "bytes": 473,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/hono-base.js",
+          "kind": "import-statement",
+          "original": "./hono-base.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/index.js",
+          "kind": "import-statement",
+          "original": "./router/reg-exp-router/index.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/smart-router/index.js",
+          "kind": "import-statement",
+          "original": "./router/smart-router/index.js"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/trie-router/index.js",
+          "kind": "import-statement",
+          "original": "./router/trie-router/index.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/index.js": {
+      "bytes": 69,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/hono.js",
+          "kind": "import-statement",
+          "original": "./hono.js"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/middleware/cors/index.js": {
+      "bytes": 2082,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/services/code-review-service.ts": {
+      "bytes": 20202,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/services/security-testing-service.ts": {
+      "bytes": 17319,
+      "imports": [],
+      "format": "esm"
+    },
+    "packages/security-core/src/types/index.ts": {
+      "bytes": 25773,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/services/auth-service.ts": {
+      "bytes": 16987,
+      "imports": [
+        {
+          "path": "packages/security-core/src/types/index.ts",
+          "kind": "import-statement",
+          "original": "../../packages/security-core/src/types"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/services/testing-service.ts": {
+      "bytes": 13756,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/middleware/auth-middleware.ts": {
+      "bytes": 6439,
+      "imports": [
+        {
+          "path": "src/services/auth-service.ts",
+          "kind": "import-statement",
+          "original": "../services/auth-service"
+        },
+        {
+          "path": "packages/security-core/src/types/index.ts",
+          "kind": "import-statement",
+          "original": "../../packages/security-core/src/types"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/routes/auth-routes.ts": {
+      "bytes": 13576,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/index.js",
+          "kind": "import-statement",
+          "original": "hono"
+        },
+        {
+          "path": "src/services/auth-service.ts",
+          "kind": "import-statement",
+          "original": "../services/auth-service"
+        },
+        {
+          "path": "src/middleware/auth-middleware.ts",
+          "kind": "import-statement",
+          "original": "../middleware/auth-middleware"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/routes/testing-routes.ts": {
+      "bytes": 11537,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/index.js",
+          "kind": "import-statement",
+          "original": "hono"
+        },
+        {
+          "path": "src/services/testing-service.ts",
+          "kind": "import-statement",
+          "original": "../services/testing-service"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/routes/dev-routes.ts": {
+      "bytes": 154967,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/index.js",
+          "kind": "import-statement",
+          "original": "hono"
+        }
+      ],
+      "format": "esm"
+    },
+    "src/durable/agent-orchestrator.ts": {
+      "bytes": 3401,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/durable/vector-index.ts": {
+      "bytes": 4004,
+      "imports": [],
+      "format": "esm"
+    },
+    "src/index.ts": {
+      "bytes": 17364,
+      "imports": [
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/index.js",
+          "kind": "import-statement",
+          "original": "hono"
+        },
+        {
+          "path": "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/middleware/cors/index.js",
+          "kind": "import-statement",
+          "original": "hono/cors"
+        },
+        {
+          "path": "src/services/code-review-service.ts",
+          "kind": "import-statement",
+          "original": "./services/code-review-service"
+        },
+        {
+          "path": "src/services/security-testing-service.ts",
+          "kind": "import-statement",
+          "original": "./services/security-testing-service"
+        },
+        {
+          "path": "src/services/auth-service.ts",
+          "kind": "import-statement",
+          "original": "./services/auth-service"
+        },
+        {
+          "path": "src/services/testing-service.ts",
+          "kind": "import-statement",
+          "original": "./services/testing-service"
+        },
+        {
+          "path": "src/routes/auth-routes.ts",
+          "kind": "import-statement",
+          "original": "./routes/auth-routes"
+        },
+        {
+          "path": "src/middleware/auth-middleware.ts",
+          "kind": "import-statement",
+          "original": "./middleware/auth-middleware"
+        },
+        {
+          "path": "src/routes/testing-routes.ts",
+          "kind": "import-statement",
+          "original": "./routes/testing-routes"
+        },
+        {
+          "path": "src/routes/dev-routes.ts",
+          "kind": "import-statement",
+          "original": "./routes/dev-routes"
+        },
+        {
+          "path": "src/durable/agent-orchestrator.ts",
+          "kind": "import-statement",
+          "original": "./durable/agent-orchestrator"
+        },
+        {
+          "path": "src/durable/vector-index.ts",
+          "kind": "import-statement",
+          "original": "./durable/vector-index"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "dist/worker.js": {
+      "imports": [],
+      "exports": [
+        "AgentOrchestrator",
+        "VectorIndex",
+        "default"
+      ],
+      "entryPoint": "src/index.ts",
+      "inputs": {
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/url.js": {
+          "bytesInOutput": 5269
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/cookie.js": {
+          "bytesInOutput": 1684
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/html.js": {
+          "bytesInOutput": 861
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/stream.js": {
+          "bytesInOutput": 1252
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/context.js": {
+          "bytesInOutput": 10139
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/compose.js": {
+          "bytesInOutput": 1270
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/http-exception.js": {
+          "bytesInOutput": 317
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/utils/body.js": {
+          "bytesInOutput": 1426
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/request.js": {
+          "bytesInOutput": 4465
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router.js": {
+          "bytesInOutput": 286
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/hono-base.js": {
+          "bytesInOutput": 7845
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/node.js": {
+          "bytesInOutput": 3119
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/trie.js": {
+          "bytesInOutput": 1654
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/reg-exp-router/router.js": {
+          "bytesInOutput": 6462
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/smart-router/router.js": {
+          "bytesInOutput": 1286
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/trie-router/node.js": {
+          "bytesInOutput": 4875
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/router/trie-router/router.js": {
+          "bytesInOutput": 436
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/hono.js": {
+          "bytesInOutput": 206
+        },
+        "node_modules/.pnpm/hono@3.12.12/node_modules/hono/dist/middleware/cors/index.js": {
+          "bytesInOutput": 2031
+        },
+        "src/services/code-review-service.ts": {
+          "bytesInOutput": 18299
+        },
+        "src/services/security-testing-service.ts": {
+          "bytesInOutput": 14585
+        },
+        "packages/security-core/src/types/index.ts": {
+          "bytesInOutput": 244
+        },
+        "src/services/auth-service.ts": {
+          "bytesInOutput": 12694
+        },
+        "src/services/testing-service.ts": {
+          "bytesInOutput": 10667
+        },
+        "src/middleware/auth-middleware.ts": {
+          "bytesInOutput": 3304
+        },
+        "src/routes/auth-routes.ts": {
+          "bytesInOutput": 10823
+        },
+        "src/routes/testing-routes.ts": {
+          "bytesInOutput": 10084
+        },
+        "src/routes/dev-routes.ts": {
+          "bytesInOutput": 118477
+        },
+        "src/durable/agent-orchestrator.ts": {
+          "bytesInOutput": 2933
+        },
+        "src/index.ts": {
+          "bytesInOutput": 13792
+        },
+        "src/durable/vector-index.ts": {
+          "bytesInOutput": 3509
+        }
+      },
+      "bytes": 276262
+    }
+  }
+}

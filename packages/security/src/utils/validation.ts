@@ -13,13 +13,13 @@ import type { ValidationResult, ValidationError, ValidationRule } from '../types
 const SQL_INJECTION_PATTERNS = [
   /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|EXEC|EXECUTE|UNION|INTERSECT|EXCEPT)\b)/i,
   /(;(\s+)?(SELECT|INSERT|UPDATE|DELETE|DROP|EXEC))/i,
-  /(--)|(#)|(\/*\*\/)/,
+  /(--)|(#)|(\/\*\*\/)/,
   /(\bor\b|\band\b).*?=/i,
   /('.*?(\bor\b|\band\b).*?')/i,
   /(\bxp_cmdshell\b)|(\bsp_executesql\b)/i,
   /(\bWAITFOR\b.*?\bDELAY\b)/i,
   /;\s*(?:EXEC|EXECUTE)\s/i,
-  /(?:')|(?:--)|(/\\*)|(\\*/)|(\bOR\b)|(\bAND\b).*?=/i,
+  /(?:')|(?:--)|(\/\*)|(\*\/)|(\bOR\b)|(\bAND\b).*?=/i,
   /(\bunion\b.*?\bselect\b)/i,
   /(\b1\s*=\s*1\b)|(\b1\s*!=\s*0\b)/i
 ];
