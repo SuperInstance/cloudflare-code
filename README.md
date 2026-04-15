@@ -240,3 +240,190 @@ MIT License - see LICENSE file for details
 **Version**: 2.0.0 (Streamlined)
 **Status**: Week 1 Complete - 40% Improvement Achieved
 **Last Updated**: 2026-01-21
+
+---
+
+## 📐 Detailed Architecture
+
+### Monorepo Structure (Post-Streamlining)
+
+```
+cocapn/
+├── src/
+│   ├── worker.ts              # Cloudflare Worker entry point
+│   ├── index.ts               # App bootstrap
+│   ├── auth.ts                # Authentication service
+│   ├── stem-router.ts         # STEM learning assistant router
+│   ├── stem-service.ts        # STEM AI service
+│   ├── types.ts               # Shared TypeScript types
+│   ├── durable/
+│   │   ├── coordinator-agent.ts   # Durable Object: agent coordination
+│   │   ├── agent-orchestrator.ts  # Durable Object: task orchestration
+│   │   └── vector-index.ts        # Durable Object: vector search index
+│   ├── agents/
+│   │   ├── agent-manager.ts       # Agent registry & lifecycle
+│   │   ├── deploy-agent.ts        # Deployment automation agent
+│   │   ├── api-agent.ts           # API generation agent
+│   │   ├── ui-agent.ts            # UI generation agent
+│   │   ├── database-agent.ts      # Database schema agent
+│   │   ├── security-agent.ts      # Security hardening agent
+│   │   └── ... (20+ specialized agents)
+│   ├── services/
+│   │   ├── chat-to-deploy-service.ts  # Core chat-to-deploy pipeline
+│   │   ├── code-review-service.ts     # AI-powered code review
+│   │   ├── auth-service.ts            # JWT auth with D1
+│   │   ├── cache-service.ts           # KV caching layer
+│   │   ├── security-testing-service.ts # Automated security scans
+│   │   └── testing-service.ts         # Test generation & execution
+│   ├── routes/
+│   │   ├── auth-routes.ts        # /api/auth/*
+│   │   ├── dev-routes.ts         # /api/dev/*
+│   │   └── testing-routes.ts     # /api/testing/*
+│   ├── components/              # Hybrid IDE React components
+│   │   ├── hybrid-ide.tsx        # Main IDE layout
+│   │   ├── editor-panel.tsx      # Code editor panel
+│   │   ├── terminal-panel.tsx    # Integrated terminal
+│   │   ├── file-tree.tsx         # File browser
+│   │   ├── chat-interface.tsx    # AI chat panel
+│   │   ├── preview-panel.tsx     # Live preview iframe
+│   │   ├── stem-panel.tsx        # STEM learning assistant
+│   │   └── stem-learning-assistant.tsx
+│   └── middleware/
+│       ├── auth-middleware.ts    # JWT verification
+│       └── compression.ts       # Response compression
+├── packages/                  # Internal packages
+│   ├── codegen/               # AI code generation engine
+│   │   ├── src/llm/            # LLM provider abstraction
+│   │   ├── src/templates/      # Code templates
+│   │   ├── src/schema/         # Schema generation
+│   │   ├── src/boilerplate/     # Project scaffolding
+│   │   └── src/synthesis/      # Code synthesis & merging
+│   ├── api-gateway-v3/        # API gateway with caching
+│   ├── agent-framework/       # Agent orchestration framework
+│   ├── deployment/            # Zero-downtime deployment
+│   ├── state-machine/         # Durable Objects state machine
+│   ├── db/                    # D1 database abstraction
+│   ├── security/              # Security headers & scanning
+│   ├── shared/                # Shared types & utilities
+│   └── cli/                   # Developer CLI tool
+├── tests/
+│   ├── unit/                  # Unit tests
+│   ├── integration/           # Integration tests
+│   ├── e2e/                   # End-to-end tests
+│   ├── sessions/              # Session management tests
+│   ├── metrics/               # Metrics & monitoring tests
+│   ├── router/                # Smart router tests
+│   ├── performance/           # Performance benchmarks
+│   └── smoke/                 # Smoke tests
+├── wrangler.toml              # Cloudflare Workers config
+└── dashboards/                # Grafana monitoring dashboards
+```
+
+### Processing Pipeline
+
+```
+User Prompt ("Build me a REST API")
+    │
+    ▼
+┌───────────────────────────────────────────────────────────┐
+│                    Chat-to-Deploy Pipeline                 │
+│                                                           │
+│  ┌────────────┐    ┌──────────────┐    ┌───────────────┐ │
+│  │  Intent     │───▶│  Agent       │───▶│  Code         │ │
+│  │  Analysis   │    │  Selection   │    │  Generation   │ │
+│  └────────────┘    └──────────────┘    └───────┬───────┘ │
+│                                                │          │
+│  ┌────────────┐    ┌──────────────┐    ┌───────▼───────┐ │
+│  │  Deploy     │◀───│  Security    │◀───│  Code Review  │ │
+│  │  to Workers │    │  Scan        │    │  & Testing    │ │
+│  └──────┬─────┘    └──────────────┘    └───────────────┘ │
+│         │                                                  │
+│         ▼                                                  │
+│  🚀 https://my-api.cocapn.workers.dev                     │
+│     (Live in <60 seconds)                                  │
+└───────────────────────────────────────────────────────────┘
+```
+
+### Agent System
+
+Cocapn uses a multi-agent architecture where specialized AI agents collaborate:
+
+| Agent | Role | LLM Provider |
+|-------|------|-------------|
+| **api-agent** | REST/GraphQL API generation | Manus, Grok |
+| **ui-agent** | React component & page generation | Manus, Minimax |
+| **database-agent** | Schema design & migration generation | Manus, Z.ai |
+| **deploy-agent** | Wrangler config & deployment automation | Z.ai |
+| **security-agent** | Security headers, input validation, auth | Grok |
+| **code-review-agent** | Linting, type checking, best practices | Manus |
+| **testing-agent** | Unit & integration test generation | Minimax |
+| **performance-agent** | Optimization & performance profiling | Grok |
+
+### Multi-Provider AI Routing
+
+```typescript
+// Smart router selects optimal LLM per task type
+const providers = {
+  fast: ['grok', 'z.ai'],        // Quick responses, simple tasks
+  creative: ['manus', 'minimax'], // Code generation, complex tasks
+  reasoning: ['grok', 'manus'],   // Architecture, debugging
+};
+```
+
+---
+
+## 🚀 Deployment Guide
+
+### Prerequisites
+
+- Node.js 20+
+- Cloudflare account (free tier works)
+- API keys for at least one LLM provider
+
+### Quick Deploy
+
+```bash
+# Clone and install
+git clone https://github.com/your-org/cocapn.git
+cd cocapn
+npm install
+
+# Setup Wrangler
+npx wrangler login
+
+# Configure environment
+cp wrangler.toml.example wrangler.toml
+# Edit wrangler.toml with your settings
+
+# Deploy
+npm run deploy
+```
+
+### Environment Configuration
+
+```bash
+# wrangler.toml - key variables
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_EMAIL = "your@email.com"
+
+# Secrets (set via CLI)
+npx wrangler secret put MANUS_API_KEY
+npx wrangler secret put GROK_API_KEY
+npx wrangler secret put JWT_SECRET
+```
+
+### Deployment Strategies
+
+The `packages/deployment` package provides:
+
+| Strategy | Description | Use Case |
+|----------|-------------|----------|
+| **Blue-Green** | Two parallel deployments with instant switch | Zero-downtime updates |
+| **Canary** | Gradual traffic shifting (1% → 10% → 100%) | Risk mitigation |
+| **Rollback** | Instant rollback to previous version | Failed deployment recovery |
+| **Verification** | Automated smoke tests before traffic shift | Quality assurance |
+
+---
+
+<img src="callsign1.jpg" width="128" alt="callsign">
