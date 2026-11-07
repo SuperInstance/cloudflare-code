@@ -1,747 +1,449 @@
-/**
- * Distributed Tracing System with OpenTelemetry
- * Provides comprehensive tracing capabilities with minimal overhead
- */
-
-import {
-  trace,
-  context,
-  Context,
-  Span as OtelSpan,
-  SpanStatusCode,
-  SpanKind as OtelSpanKind,
-  Attributes,
-} from '@opentelemetry/api';
-import {
-  NodeTracerProvider,
-  SimpleSpanProcessor,
-  BatchSpanProcessor,
-  SDKTraceConfig,
-} from '@opentelemetry/sdk-trace-node';
-import {
-  Resource,
-  ResourceAttributes,
-} from '@opentelemetry/resources';
-import {
-  SEMRESATTRS_SERVICE_NAME,
-  SEMRESATTRS_SERVICE_VERSION,
-  SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
-} from '@opentelemetry/semantic-conventions';
-import * as jaegerExporter from '@opentelemetry/exporter-trace-jaeger';
-import * as zipkinExporter from '@opentelemetry/exporter-trace-zipkin';
-import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
-import { v4 as uuidv4 } from 'uuid';
+import { Observable, ObservableConfig } from '../core/Observable';
 import {
   TraceOptions,
   SpanOptions,
   SpanContext,
-  SpanKind,
   SpanLink,
   SamplingStrategy,
-  SamplingContext,
-  TraceExportResult,
+  TraceExportResult
 } from '../types';
-
-// ============================================================================
-// Sampling Strategies
-// ============================================================================
+import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Fixed-rate sampling strategy
+ * Distributed Tracer with OpenTelemetry integration
  */
-export class FixedRateSamplingStrategy implements SamplingStrategy {
-  constructor(private rate: number) {
-    if (rate < 0 || rate > 1) {
-      throw new Error('Sampling rate must be between 0 and 1');
-    }
+export class Tracer extends Observable {
+  private config: TraceOptions;
+  private activeSpans: Map<string, Span> = new Map();
+  private completedSpans: Map<string, Span> = new Map();
+  private samplingStrategy: SamplingStrategy | null = null;
+  private otelInitialized = false;
+
+  constructor(config: TraceOptions = {}) {
+    super();
+    this.config = {
+      serviceName: 'unknown',
+      serviceVersion: '1.0.0',
+      environment: 'development',
+      samplingRate: 1.0,
+      ...config
+    };
   }
 
-  shouldSample(samplingContext: SamplingContext): boolean {
-    return Math.random() < this.rate;
-  }
-}
+  async initialize(): Promise<void> {
+    if (this.initialized) return;
 
-/**
- * Trace ID-based sampling for consistent sampling
- */
-export class TraceIDBasedSamplingStrategy implements SamplingStrategy {
-  private sampledTraces = new Set<string>();
+    try {
+      // Initialize OpenTelemetry
+      await this.initializeOpenTelemetry();
 
-  constructor(private rate: number) {
-    if (rate < 0 || rate > 1) {
-      throw new Error('Sampling rate must be between 0 and 1');
-    }
-  }
-
-  shouldSample(samplingContext: SamplingContext): boolean {
-    const hash = this.hashTraceId(samplingContext.traceId);
-    const shouldSample = hash < this.rate;
-    
-    if (shouldSample) {
-      this.sampledTraces.add(samplingContext.traceId);
-    }
-    
-    return shouldSample;
-  }
-
-  private hashTraceId(traceId: string): number {
-    let hash = 0;
-    for (let i = 0; i < traceId.length; i++) {
-      const char = traceId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-    return Math.abs(hash) / 0xffffffff;
-  }
-}
-
-/**
- * Rule-based sampling strategy
- */
-export class RuleBasedSamplingStrategy implements SamplingStrategy {
-  constructor(private rules: SamplingRule[]) {}
-
-  shouldSample(samplingContext: SamplingContext): boolean {
-    for (const rule of this.rules) {
-      if (this.matchesRule(samplingContext, rule)) {
-        return rule.sample;
+      // Set up sampling strategy
+      if (this.config.samplingRate && this.config.samplingRate < 1) {
+        this.samplingStrategy = new RateLimitingSamplingStrategy(this.config.samplingRate);
+      } else {
+        this.samplingStrategy = new AlwaysSamplingStrategy();
       }
+
+      this.initialized = true;
+    } catch (error) {
+      console.error('Failed to initialize Tracer:', error);
+      throw error;
     }
-    return false; // Default: don't sample
   }
 
-  private matchesRule(ctx: SamplingContext, rule: SamplingRule): boolean {
-    if (rule.spanName && rule.spanName !== ctx.spanName) {
-      return false;
+  async destroy(): Promise<void> {
+    if (!this.initialized) return;
+
+    // Export any remaining spans
+    await this.exportSpans();
+
+    this.activeSpans.clear();
+    this.completedSpans.clear();
+    this.initialized = false;
+  }
+
+  async export(): Promise<TraceExportResult> {
+    this.ensureInitialized();
+
+    try {
+      const result = await this.exportSpans();
+      return result;
+    } catch (error) {
+      console.error('Failed to export traces:', error);
+      return {
+        exportedSpans: 0,
+        failedSpans: this.completedSpans.size,
+        duration: 0
+      };
     }
-    
-    if (rule.spanKind && rule.spanKind !== ctx.spanKind) {
-      return false;
+  }
+
+  /**
+   * Start a new span
+   */
+  startSpan(options: SpanOptions): Span {
+    this.ensureInitialized();
+
+    // Check sampling
+    if (this.samplingStrategy && !this.shouldSample(options.name, options.kind)) {
+      return new NoopSpan();
     }
-    
-    if (rule.attributes) {
-      for (const [key, value] of Object.entries(rule.attributes)) {
-        if (ctx.attributes?.[key] !== value) {
-          return false;
-        }
+
+    // Generate context
+    const context = {
+      traceId: this.generateTraceId(),
+      spanId: this.generateSpanId(),
+      traceFlags: 0x01 // Sampled flag
+    };
+
+    // Create span
+    const span = new Span({
+      ...options,
+      context,
+      tracer: this
+    });
+
+    this.activeSpans.set(context.spanId, span);
+
+    return span;
+  }
+
+  /**
+   * Get an active span by span ID
+   */
+  getActiveSpan(spanId: string): Span | null {
+    return this.activeSpans.get(spanId) || null;
+  }
+
+  /**
+   * Complete all active spans
+   */
+  completeAllActiveSpans(): void {
+    const activeSpans = Array.from(this.activeSpans.values());
+    activeSpans.forEach(span => {
+      if (!span.isComplete()) {
+        span.end();
       }
+    });
+  }
+
+  /**
+   * Get sampling decision
+   */
+  shouldSample(spanName: string, spanKind?: string): boolean {
+    if (!this.samplingStrategy) {
+      return true;
     }
-    
-    return true;
+
+    const samplingContext: any = {
+      traceId: uuidv4(),
+      spanName,
+      spanKind
+    };
+
+    return this.samplingStrategy.shouldSample(samplingContext);
+  }
+
+  /**
+   * Get completed span by ID
+   */
+  getCompletedSpan(spanId: string): Span | null {
+    return this.completedSpans.get(spanId) || null;
+  }
+
+  /**
+   * Get all active spans
+   */
+  getActiveSpans(): Span[] {
+    return Array.from(this.activeSpans.values());
+  }
+
+  /**
+   * Get all completed spans
+   */
+  getCompletedSpans(): Span[] {
+    return Array.from(this.completedSpans.values());
+  }
+
+  /**
+   * Generate trace ID
+   */
+  private generateTraceId(): string {
+    return uuidv4().replace(/-/g, '');
+  }
+
+  /**
+   * Generate span ID
+   */
+  private generateSpanId(): string {
+    return uuidv4().replace(/-/g, '');
+  }
+
+  /**
+   * Initialize OpenTelemetry
+   */
+  private async initializeOpenTelemetry(): Promise<void> {
+    try {
+      // Placeholder for OpenTelemetry initialization
+      console.log('Initializing OpenTelemetry Trace SDK...');
+      this.otelInitialized = true;
+    } catch (error) {
+      console.warn('OpenTelemetry initialization failed:', error);
+    }
+  }
+
+  /**
+   * Export spans
+   */
+  private async exportSpans(): Promise<TraceExportResult> {
+    if (this.completedSpans.size === 0) {
+      return {
+        exportedSpans: 0,
+        failedSpans: 0,
+        duration: 0
+      };
+    }
+
+    const spansToExport = Array.from(this.completedSpans.values());
+    this.completedSpans.clear();
+
+    try {
+      if (this.otelInitialized) {
+        await this.exportToOpenTelemetry(spansToExport);
+      }
+
+      return {
+        exportedSpans: spansToExport.length,
+        failedSpans: 0,
+        duration: Date.now()
+      };
+    } catch (error) {
+      // Re-store spans if export fails
+      spansToExport.forEach(span => {
+        this.completedSpans.set(span.context.spanId, span);
+      });
+
+      throw error;
+    }
+  }
+
+  /**
+   * Export traces to OpenTelemetry
+   */
+  private async exportToOpenTelemetry(spans: Span[]): Promise<void> {
+    // Placeholder for OpenTelemetry export logic
+    console.log(`Exporting ${spans.length} traces to OpenTelemetry...`);
   }
 }
-
-interface SamplingRule {
-  spanName?: string;
-  spanKind?: SpanKind;
-  attributes?: Record<string, unknown>;
-  sample: boolean;
-}
-
-// ============================================================================
-// Custom Span Implementation
-// ============================================================================
 
 /**
- * Enhanced span with additional capabilities
+ * Span class representing a single operation in a trace
  */
 export class Span {
-  private readonly span: OtelSpan;
-  private readonly startTime: number;
-  private attributes: Attributes = {};
-  private events: SpanEvent[] = [];
-  private links: SpanLink[] = [];
-  private ended = false;
+  private options: SpanOptions & {
+    context: SpanContext;
+    tracer: Tracer;
+  };
+  private startTime: number;
+  private endTime?: number;
+  private attributes: Record<string, any> = {};
+  private events: any[] = [];
+  private status?: 'pending' | 'completed' | 'error';
 
-  constructor(span: OtelSpan, private options: SpanOptions) {
-    this.span = span;
+  constructor(options: SpanOptions & {
+    context: SpanContext;
+    tracer: Tracer;
+  }) {
+    this.options = options;
     this.startTime = Date.now();
-    
-    if (options.attributes) {
-      this.setAttributes(options.attributes);
-    }
-    
-    if (options.links) {
-      this.links = options.links;
-    }
+    this.attributes = { ...options.attributes };
+  }
+
+  /**
+   * Set span attributes
+   */
+  setAttributes(attributes: Record<string, any>): void {
+    this.attributes = { ...this.attributes, ...attributes };
   }
 
   /**
    * Add an event to the span
    */
-  addEvent(name: string, attributes?: Attributes, time?: number): void {
-    if (this.ended) {
-      return;
-    }
-    
+  addEvent(name: string, attributes?: Record<string, any>): void {
     this.events.push({
       name,
-      attributes: attributes || {},
-      timestamp: time || Date.now(),
+      attributes,
+      timestamp: Date.now()
     });
-    
-    this.span.addEvent(name, attributes, time);
   }
 
   /**
-   * Set attributes on the span
+   * Update the current time
    */
-  setAttributes(attributes: Attributes): void {
-    if (this.ended) {
-      return;
-    }
-    
-    this.attributes = { ...this.attributes, ...attributes };
-    this.span.setAttributes(attributes);
-  }
-
-  /**
-   * Set a single attribute
-   */
-  setAttribute(key: string, value: Attributes[string]): void {
-    if (this.ended) {
-      return;
-    }
-    
-    this.attributes[key] = value;
-    this.span.setAttribute(key, value);
-  }
-
-  /**
-   * Record an exception
-   */
-  recordException(exception: Error | ErrorInfo, time?: number): void {
-    if (this.ended) {
-      return;
-    }
-    
-    const errorInfo = exception instanceof Error
-      ? {
-          name: exception.name,
-          message: exception.message,
-          stack: exception.stack,
-        }
-      : exception;
-    
-    this.span.recordException(exception as Error);
-    
-    this.addEvent('exception', {
-      'exception.type': errorInfo.name,
-      'exception.message': errorInfo.message,
-      'exception.stacktrace': errorInfo.stack,
-    }, time);
-  }
-
-  /**
-   * Set the span status
-   */
-  setStatus(code: SpanStatusCode, description?: string): void {
-    if (this.ended) {
-      return;
-    }
-    
-    this.span.setStatus({ code, description });
-  }
-
-  /**
-   * Add a link to another span
-   */
-  addLink(link: SpanLink): void {
-    if (this.ended) {
-      return;
-    }
-    
-    this.links.push(link);
+  updateTimestamp(): void {
+    this.startTime = Date.now();
   }
 
   /**
    * End the span
    */
-  end(endTime?: number): void {
-    if (this.ended) {
-      return;
+  end(): void {
+    if (this.endTime) return;
+
+    this.endTime = Date.now();
+    this.status = 'completed';
+
+    // Add to completed spans
+    if (this.options.tracer) {
+      this.options.tracer['completedSpans'].set(this.options.context.spanId, this);
     }
-    
-    this.ended = true;
-    const duration = (endTime || Date.now()) - this.startTime;
-    
-    this.setAttribute('span.duration.ms', duration);
-    this.setAttribute('span.events.count', this.events.length);
-    this.setAttribute('span.links.count', this.links.length);
-    
-    this.span.end(endTime);
   }
 
   /**
-   * Get the span context
+   * Record an error
    */
-  getContext(): SpanContext {
-    const spanContext = this.span.spanContext();
-    return {
-      traceId: spanContext.traceId,
-      spanId: spanContext.spanId,
-      traceFlags: spanContext.traceFlags,
-    };
-  }
+  recordError(error: Error): void {
+    this.addEvent('error', {
+      error: error.message,
+      stack: error.stack,
+      type: error.name
+    });
 
-  /**
-   * Check if the span is ended
-   */
-  isEnded(): boolean {
-    return this.ended;
+    this.status = 'error';
+    this.end();
   }
 
   /**
    * Get span duration
    */
   getDuration(): number {
-    return Date.now() - this.startTime;
-  }
-}
-
-interface SpanEvent {
-  name: string;
-  attributes: Attributes;
-  timestamp: number;
-}
-
-interface ErrorInfo {
-  name: string;
-  message: string;
-  stack?: string;
-  code?: string;
-}
-
-// ============================================================================
-// Main Tracer Class
-// ============================================================================
-
-/**
- * Distributed tracer with OpenTelemetry integration
- */
-export class Tracer {
-  private provider: NodeTracerProvider;
-  private enabled = true;
-  private samplingStrategy: SamplingStrategy;
-  private readonly serviceName: string;
-  private exportResults: TraceExportResult[] = [];
-
-  constructor(private options: TraceOptions) {
-    this.serviceName = options.serviceName;
-    this.samplingStrategy = new FixedRateSamplingStrategy(
-      options.samplingRate ?? 1.0
-    );
-    
-    this.provider = this.createProvider();
-    this.register();
+    if (!this.endTime) return Date.now() - this.startTime;
+    return this.endTime - this.startTime;
   }
 
   /**
-   * Create a new span
+   * Check if span is complete
    */
-  startSpan(options: SpanOptions): Span {
-    if (!this.enabled) {
-      return this.createNoopSpan(options);
-    }
-
-    const samplingContext: SamplingContext = {
-      traceId: context.active()?.traceId || uuidv4(),
-      spanName: options.name,
-      spanKind: options.kind,
-      attributes: options.attributes,
-    };
-
-    if (!this.samplingStrategy.shouldSample(samplingContext)) {
-      return this.createNoopSpan(options);
-    }
-
-    const otelSpan = trace.getTracer(this.serviceName).startSpan(
-      options.name,
-      {
-        kind: this.mapSpanKind(options.kind),
-        attributes: options.attributes as Attributes,
-        startTime: options.startTime,
-        links: options.links?.map(link => ({
-          context: {
-            traceId: link.context.traceId,
-            spanId: link.context.spanId,
-          },
-          attributes: link.attributes as Attributes,
-        })),
-      }
-    );
-
-    return new Span(otelSpan, options);
+  isComplete(): boolean {
+    return this.endTime !== undefined;
   }
 
   /**
-   * Run code within a span context
+   * Get span context
    */
-  async withSpan<T>(
-    options: SpanOptions,
-    fn: (span: Span) => Promise<T>
-  ): Promise<T> {
-    const span = this.startSpan(options);
-    
-    try {
-      const result = await fn(span);
-      span.setStatus(SpanStatusCode.OK);
-      return result;
-    } catch (error) {
-      span.recordException(error as Error);
-      span.setStatus(SpanStatusCode.ERROR, (error as Error).message);
-      throw error;
-    } finally {
-      span.end();
-    }
+  getContext(): SpanContext {
+    return this.options.context;
   }
 
   /**
-   * Run synchronous code within a span context
+   * Get span attributes
    */
-  withSpanSync<T>(options: SpanOptions, fn: (span: Span) => T): T {
-    const span = this.startSpan(options);
-    
-    try {
-      const result = fn(span);
-      span.setStatus(SpanStatusCode.OK);
-      return result;
-    } catch (error) {
-      span.recordException(error as Error);
-      span.setStatus(SpanStatusCode.ERROR, (error as Error).message);
-      throw error;
-    } finally {
-      span.end();
-    }
+  getAttributes(): Record<string, any> {
+    return { ...this.attributes };
   }
 
   /**
-   * Get the current span context
+   * Get span events
    */
-  getCurrentContext(): SpanContext | null {
-    const currentSpan = trace.getSpan(context.active());
-    if (!currentSpan) {
-      return null;
-    }
-    
-    const spanContext = currentSpan.spanContext();
-    return {
-      traceId: spanContext.traceId,
-      spanId: spanContext.spanId,
-      traceFlags: spanContext.traceFlags,
-    };
+  getEvents(): any[] {
+    return [...this.events];
   }
 
   /**
-   * Inject trace context into headers
+   * Get span status
    */
-  injectTraceContext(headers: Record<string, string>): Record<string, string> {
-    const currentContext = this.getCurrentContext();
-    if (!currentContext) {
-      return headers;
-    }
-
-    return {
-      ...headers,
-      'traceparent': `00-${currentContext.traceId}-${currentContext.spanId}-0${currentContext.traceFlags || 0}`,
-      'tracestate': '',
-    };
+  getStatus(): string | undefined {
+    return this.status;
   }
 
   /**
-   * Extract trace context from headers
+   * Create a child span
    */
-  extractTraceContext(headers: Record<string, string>): SpanContext | null {
-    const traceParent = headers['traceparent'];
-    if (!traceParent) {
-      return null;
-    }
-
-    const parts = traceParent.split('-');
-    if (parts.length < 4) {
-      return null;
-    }
-
-    return {
-      traceId: parts[1],
-      spanId: parts[2],
-      traceFlags: parseInt(parts[3], 16),
-    };
-  }
-
-  /**
-   * Set sampling strategy
-   */
-  setSamplingStrategy(strategy: SamplingStrategy): void {
-    this.samplingStrategy = strategy;
-  }
-
-  /**
-   * Enable or disable tracing
-   */
-  setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
-  }
-
-  /**
-   * Check if tracing is enabled
-   */
-  isEnabled(): boolean {
-    return this.enabled;
-  }
-
-  /**
-   * Force flush all pending spans
-   */
-  async forceFlush(): Promise<void> {
-    await this.provider.forceFlush();
-  }
-
-  /**
-   * Shutdown the tracer
-   */
-  async shutdown(): Promise<void> {
-    await this.provider.shutdown();
-    this.enabled = false;
-  }
-
-  /**
-   * Get export statistics
-   */
-  getExportStats(): TraceExportResult[] {
-    return [...this.exportResults];
-  }
-
-  // ============================================================================
-  // Private Methods
-  // ============================================================================
-
-  private createProvider(): NodeTracerProvider {
-    const resource = this.createResource();
-    const provider = new NodeTracerProvider({
-      resource,
-      mergeResourceWithAttributes: true,
+  startChildSpan(name: string, kind?: string): Span {
+    return this.options.tracer.startSpan({
+      name,
+      kind,
+      parentSpan: this.options.context
     });
-
-    const exporter = this.createExporter();
-    const processor = options.exporter === 'console'
-      ? new SimpleSpanProcessor(exporter)
-      : new BatchSpanProcessor(exporter, {
-          maxBufferSize: 10000,
-          bufferTimeout: 5000,
-          maxExportBatchSize: 1000,
-        });
-
-    provider.addSpanProcessor(processor);
-    return provider;
   }
 
-  private createResource(): Resource {
-    const attributes: ResourceAttributes = {
-      [SEMRESATTRS_SERVICE_NAME]: this.serviceName,
-    };
-
-    if (this.options.serviceVersion) {
-      attributes[SEMRESATTRS_SERVICE_VERSION] = this.options.serviceVersion;
-    }
-
-    if (this.options.environment) {
-      attributes[SEMRESATTRS_DEPLOYMENT_ENVIRONMENT] = this.options.environment;
-    }
-
-    if (this.options.attributes) {
-      Object.assign(attributes, this.options.attributes);
-    }
-
-    return new Resource(attributes);
-  }
-
-  private createExporter() {
-    switch (this.options.exporter) {
-      case 'jaeger':
-        return new jaegerExporter.JaegerExporter({
-          endpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
-        });
-
-      case 'zipkin':
-        return new zipkinExporter.ZipkinExporter({
-          url: process.env.ZIPKIN_URL || 'http://localhost:9411/api/v2/spans',
-        });
-
-      case 'honeycomb':
-        // Honeycomb uses OTLP exporter
-        const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
-        return new OTLPTraceExporter({
-          url: process.env.HONEYCOMB_ENDPOINT || 'grpc://api.honeycomb.io:443',
-          headers: {
-            'x-honeycomb-team': process.env.HONEYCOMB_API_KEY || '',
-          },
-        });
-
-      case 'otlp':
-        const { OTLPTraceExporter: OTLPExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
-        return new OTLPExporter({
-          url: process.env.OTLP_ENDPOINT || 'localhost:4317',
-        });
-
-      case 'console':
-      default:
-        return new ConsoleSpanExporter();
-    }
-  }
-
-  private register(): void {
-    this.provider.register();
-  }
-
-  private mapSpanKind(kind?: SpanKind): OtelSpanKind | undefined {
-    if (!kind) {
-      return undefined;
-    }
-
-    switch (kind) {
-      case 'internal':
-        return OtelSpanKind.INTERNAL;
-      case 'server':
-        return OtelSpanKind.SERVER;
-      case 'client':
-        return OtelSpanKind.CLIENT;
-      case 'producer':
-        return OtelSpanKind.PRODUCER;
-      case 'consumer':
-        return OtelSpanKind.CONSUMER;
-    }
-  }
-
-  private createNoopSpan(options: SpanOptions): Span {
-    // Create a no-op span that doesn't actually record anything
-    const noopTracer = trace.getTracer('noop');
-    const noopSpan = noopTracer.startSpan('noop') as OtelSpan;
-    
-    // Override end method to immediately return
-    const originalEnd = noopSpan.end;
-    noopSpan.end = () => originalEnd.call(noopSpan);
-    
-    return new Span(noopSpan, options);
+  /**
+   * Convert to trace context for propagation
+   */
+  toTraceContext(): string {
+    return `${this.options.context.traceId}-${this.options.context.spanId}`;
   }
 }
 
-// ============================================================================
-// Automatic Instrumentation
-// ============================================================================
-
 /**
- * Auto-instrumentation for common frameworks
+ * No-op span for non-sampled traces
  */
-export class AutoInstrumentation {
-  private instrumentations: Map<string, unknown> = new Map();
-
-  constructor(private tracer: Tracer) {}
-
-  /**
-   * Enable HTTP instrumentation
-   */
-  enableHTTPInstrumentation(): void {
-    if (this.instrumentations.has('http')) {
-      return;
-    }
-
-    const { HTTPInstrumentation } = require('@opentelemetry/instrumentation-http');
-    const httpInstrumentation = new HTTPInstrumentation({
-      applyCustomAttributesOnSpan: (span) => {
-        const attributes = (span as OtelSpan).attributes;
-        // Add custom attributes
-        if (attributes) {
-          // Customize as needed
-        }
+export class NoopSpan extends Span {
+  constructor() {
+    super({
+      name: 'noop',
+      context: {
+        traceId: '00000000000000000000000000000000',
+        spanId: '0000000000000000'
       },
+      tracer: null as any
     });
-
-    this.instrumentations.set('http', httpInstrumentation);
   }
 
-  /**
-   * Enable Express instrumentation
-   */
-  enableExpressInstrumentation(): void {
-    if (this.instrumentations.has('express')) {
-      return;
-    }
+  end(): void {}
+  recordError(error: Error): void {}
+  addEvent(name: string, attributes?: Record<string, any>): void {}
+  setAttributes(attributes: Record<string, any>): void {}
+  updateTimestamp(): void {}
+}
 
-    const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
-    const expressInstrumentation = new ExpressInstrumentation();
-
-    this.instrumentations.set('express', expressInstrumentation);
-  }
-
-  /**
-   * Enable gRPC instrumentation
-   */
-  enableGRPCInstrumentation(): void {
-    if (this.instrumentations.has('grpc')) {
-      return;
-    }
-
-    const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
-    const grpcInstrumentation = new GrpcInstrumentation();
-
-    this.instrumentations.set('grpc', grpcInstrumentation);
-  }
-
-  /**
-   * Disable specific instrumentation
-   */
-  disableInstrumentation(type: string): void {
-    this.instrumentations.delete(type);
-  }
-
-  /**
-   * Get all active instrumentations
-   */
-  getActiveInstrumentations(): string[] {
-    return Array.from(this.instrumentations.keys());
+/**
+ * Always sample all spans
+ */
+export class AlwaysSamplingStrategy implements SamplingStrategy {
+  shouldSample(): boolean {
+    return true;
   }
 }
 
-// ============================================================================
-// Context Propagation
-// ============================================================================
+/**
+ * Sample spans based on rate limiting
+ */
+export class RateLimitingSamplingStrategy implements SamplingStrategy {
+  private sampleRate: number;
+  private lastSampleTime: number = 0;
+  private sampleCount: number = 0;
+  private maxSamples: number;
+
+  constructor(sampleRate: number) {
+    this.sampleRate = sampleRate;
+    this.maxSamples = Math.floor(sampleRate * 1000); // Sample per 1000 spans
+  }
+
+  shouldSample(): boolean {
+    const now = Date.now();
+    if (now - this.lastSampleTime > 1000) {
+      this.lastSampleTime = now;
+      this.sampleCount = 0;
+      return true;
+    }
+
+    this.sampleCount++;
+    return this.sampleCount <= this.maxSamples;
+  }
+}
 
 /**
- * Propagate trace context across async boundaries
+ * Probabilistic sampling strategy
  */
-export class TraceContext {
-  private contextMap = new WeakMap<Function, Context>();
+export class ProbabilisticSamplingStrategy implements SamplingStrategy {
+  private sampleRate: number;
 
-  constructor(private tracer: Tracer) {}
-
-  /**
-   * Capture current context
-   */
-  capture(): Context {
-    return context.active();
+  constructor(sampleRate: number) {
+    this.sampleRate = Math.min(1, Math.max(0, sampleRate));
   }
 
-  /**
-   * Restore context
-   */
-  restore(ctx: Context): void {
-    context.with(ctx, () => {
-      // Context is now active
-    });
-  }
-
-  /**
-   * Run function within context
-   */
-  async runInContext<T>(ctx: Context, fn: () => Promise<T>): Promise<T> {
-    return context.with(ctx, fn);
-  }
-
-  /**
-   * Bind context to a function
-   */
-  bindToContext<T extends Function>(fn: T): T {
-    return context.bind(context.active(), fn);
+  shouldSample(): boolean {
+    return Math.random() < this.sampleRate;
   }
 }

@@ -1,416 +1,538 @@
+import { Observable, ObservableConfig } from '../core/Observable';
+import {
+  LoggerOptions,
+  LogFormat,
+  LogLevel,
+  LogEntry,
+  LogContext,
+  LogCorrelationOptions,
+  LogSamplingOptions,
+  RedactionPattern
+} from '../types';
+
 /**
- * Structured logger with correlation support
+ * Enhanced Logger with search, filtering, and correlation capabilities
  */
+export class Logger extends Observable {
+  private config: LoggerOptions;
+  private logs: LogEntry[] = [];
+  private logBuffer: LogEntry[] = [];
+  private bufferInterval: NodeJS.Timeout | null = null;
+  private maxLogCount = 10000;
+  private sampling: LogSamplingOptions;
+  private correlation: LogCorrelationOptions;
+  private redaction: LogRedactionOptions;
+  private currentContext: LogContext = {};
+  private filterCache: Map<string, boolean> = new Map();
 
-import { v4 as uuidv4 } from 'uuid';
-import { LogLevel, LogEntry, LogFilter, LogAggregation, Attributes } from '../types';
+  constructor(config: LoggerOptions = {}) {
+    super();
+    this.config = {
+      level: 'info',
+      format: 'json',
+      output: 'console',
+      correlation: {
+        enableTraceCorrelation: true,
+        traceIdField: 'traceId',
+        spanIdField: 'spanId'
+      },
+      redaction: {
+        enabled: true,
+        fields: ['password', 'token', 'secret', 'key']
+      },
+      sampling: {
+        enabled: false,
+        rate: 0.1
+      },
+      ...config
+    };
 
-export interface LoggerOptions {
-  level?: LogLevel;
-  context?: string;
-  enableCorrelation?: boolean;
-  metadata?: Attributes;
-}
-
-export class StructuredLogger {
-  private entries: LogEntry[] = [];
-  private maxEntries: number = 10000;
-  private traceContextStore: Map<string, string> = new Map();
-
-  constructor(
-    private serviceName: string,
-    private options: LoggerOptions = {}
-  ) {}
-
-  /**
-   * Log a trace level message
-   */
-  trace(message: string, attributes: Attributes = {}): void {
-    this.log(LogLevel.TRACE, message, attributes);
+    this.sampling = this.config.sampling!;
+    this.correlation = this.config.correlation!;
+    this.redaction = this.config.redaction!;
   }
 
-  /**
-   * Log a debug level message
-   */
-  debug(message: string, attributes: Attributes = {}): void {
-    this.log(LogLevel.DEBUG, message, attributes);
+  async initialize(): Promise<void> {
+    if (this.initialized) return;
+
+    try {
+      // Set up log buffer for periodic flushing
+      this.bufferInterval = setInterval(() => {
+        this.flushLogs();
+      }, 5000); // Flush every 5 seconds
+
+      this.initialized = true;
+    } catch (error) {
+      console.error('Failed to initialize Logger:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Log an info level message
-   */
-  info(message: string, attributes: Attributes = {}): void {
-    this.log(LogLevel.INFO, message, attributes);
+  async destroy(): Promise<void> {
+    if (!this.initialized) return;
+
+    // Clear buffer interval
+    if (this.bufferInterval) {
+      clearInterval(this.bufferInterval);
+      this.bufferInterval = null;
+    }
+
+    // Flush any remaining logs
+    await this.flushLogs();
+
+    this.initialized = false;
   }
 
-  /**
-   * Log a warning level message
-   */
-  warn(message: string, attributes: Attributes = {}): void {
-    this.log(LogLevel.WARN, message, attributes);
-  }
+  async export(): Promise<any> {
+    this.ensureInitialized();
 
-  /**
-   * Log an error level message
-   */
-  error(message: string, error?: Error | Attributes, attributes: Attributes = {}): void {
-    let errorAttributes: Attributes = { ...attributes };
+    try {
+      const logsToExport = [...this.logs, ...this.logBuffer];
+      this.logs = [];
+      this.logBuffer = [];
 
-    if (error instanceof Error) {
-      errorAttributes = {
-        ...errorAttributes,
-        error: {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        },
+      return {
+        success: true,
+        exported: logsToExport.length,
+        duration: 0,
+        logs: {
+          total: logsToExport.length,
+          byLevel: this.groupLogsByLevel(logsToExport),
+          filtered: this.filterLogs(logsToExport, { level: this.config.level })
+        }
       };
-    } else if (error) {
-      errorAttributes = { ...errorAttributes, ...error };
+    } catch (error) {
+      return this.handleExportError(error as Error);
     }
-
-    this.log(LogLevel.ERROR, message, errorAttributes);
   }
 
   /**
-   * Log a fatal level message
+   * Log a message
    */
-  fatal(message: string, error?: Error | Attributes, attributes: Attributes = {}): void {
-    let errorAttributes: Attributes = { ...attributes };
+  log(level: LogLevel, message: string, context?: LogContext, error?: Error): void {
+    if (!this.shouldLog(level)) return;
+    if (this.sampling.enabled && !this.shouldSample()) return;
 
-    if (error instanceof Error) {
-      errorAttributes = {
-        ...errorAttributes,
-        error: {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        },
-      };
-    } else if (error) {
-      errorAttributes = { ...errorAttributes, ...error };
-    }
-
-    this.log(LogLevel.FATAL, message, errorAttributes);
+    const logEntry = this.createLogEntry(level, message, context, error);
+    this.addLogEntry(logEntry);
   }
 
   /**
-   * Core logging method
+   * Log at trace level
    */
-  private log(level: LogLevel, message: string, attributes: Attributes): void {
-    if (!this.shouldLog(level)) {
-      return;
-    }
+  trace(message: string, context?: LogContext, error?: Error): void {
+    this.log('trace', message, context, error);
+  }
 
+  /**
+   * Log at debug level
+   */
+  debug(message: string, context?: LogContext, error?: Error): void {
+    this.log('debug', message, context, error);
+  }
+
+  /**
+   * Log at info level
+   */
+  info(message: string, context?: LogContext, error?: Error): void {
+    this.log('info', message, context, error);
+  }
+
+  /**
+   * Log at warn level
+   */
+  warn(message: string, context?: LogContext, error?: Error): void {
+    this.log('warn', message, context, error);
+  }
+
+  /**
+   * Log at error level
+   */
+  error(message: string, context?: LogContext, error?: Error): void {
+    this.log('error', message, context, error);
+  }
+
+  /**
+   * Log at fatal level
+   */
+  fatal(message: string, context?: LogContext, error?: Error): void {
+    this.log('fatal', message, context, error);
+  }
+
+  /**
+   * Set context for subsequent log entries
+   */
+  setContext(context: Partial<LogContext>): void {
+    this.currentContext = { ...this.currentContext, ...context };
+  }
+
+  /**
+   * Get current context
+   */
+  getContext(): LogContext {
+    return { ...this.currentContext };
+  }
+
+  /**
+   * Clear current context
+   */
+  clearContext(): void {
+    this.currentContext = {};
+  }
+
+  /**
+   * Get logs with filtering
+   */
+  getLogs(filters: LogFilters = {}): LogEntry[] {
+    return this.filterLogs(this.logs, filters);
+  }
+
+  /**
+   * Search logs by pattern
+   */
+  searchLogs(query: string | RegExp, filters: LogFilters = {}): LogEntry[] {
+    const allLogs = this.filterLogs(this.logs, filters);
+
+    const searchResults = allLogs.filter(log => {
+      const message = log.message.toLowerCase();
+      const queryLower = typeof query === 'string' ? query.toLowerCase() : '';
+
+      if (typeof query === 'string') {
+        return message.includes(queryLower);
+      } else {
+        return query.test(log.message);
+      }
+    });
+
+    return searchResults;
+  }
+
+  /**
+   * Get logs by level
+   */
+  getLogsByLevel(level: LogLevel): LogEntry[] {
+    return this.logs.filter(log => log.level === level);
+  }
+
+  /**
+   * Get logs by time range
+   */
+  getLogsByTimeRange(start: number, end: number): LogEntry[] {
+    return this.logs.filter(log =>
+      log.timestamp >= start && log.timestamp <= end
+    );
+  }
+
+  /**
+   * Get logs by trace ID
+   */
+  getLogsByTraceId(traceId: string): LogEntry[] {
+    return this.logs.filter(log => log.traceId === traceId);
+  }
+
+  /**
+   * Get logs by user ID
+   */
+  getLogsByUserId(userId: string): LogEntry[] {
+    return this.logs.filter(log => log.context?.userId === userId);
+  }
+
+  /**
+   * Get statistics about logs
+   */
+  getLogStatistics(): LogStatistics {
+    const stats: LogStatistics = {
+      total: this.logs.length,
+      byLevel: this.groupLogsByLevel(this.logs),
+      timeRange: {
+        earliest: Math.min(...this.logs.map(log => log.timestamp)),
+        latest: Math.max(...this.logs.map(log => log.timestamp))
+      },
+      uniqueTraceIds: new Set(this.logs.map(log => log.traceId)).size
+    };
+
+    return stats;
+  }
+
+  /**
+   * Clear logs
+   */
+  clearLogs(): void {
+    this.logs = [];
+    this.logBuffer = [];
+    this.filterCache.clear();
+  }
+
+  /**
+   * Check if a log should be recorded
+   */
+  private shouldLog(level: LogLevel): boolean {
+    const levels: Record<LogLevel, number> = {
+      trace: 0,
+      debug: 1,
+      info: 2,
+      warn: 3,
+      error: 4,
+      fatal: 5
+    };
+
+    const configLevel = this.config.level || 'info';
+    const configLevelValue = levels[configLevel];
+    const logLevelValue = levels[level];
+
+    return logLevelValue >= configLevelValue;
+  }
+
+  /**
+   * Check if log should be sampled
+   */
+  private shouldSample(): boolean {
+    return Math.random() < this.sampling.rate;
+  }
+
+  /**
+   * Create a log entry
+   */
+  private createLogEntry(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ): LogEntry {
     const entry: LogEntry = {
       level,
       message,
       timestamp: Date.now(),
-      context: this.options.context || this.serviceName,
-      traceId: this.getCurrentTraceId(),
-      spanId: this.getCurrentSpanId(),
-      attributes: {
-        ...this.options.metadata,
-        ...attributes,
-        'service.name': this.serviceName,
-      },
+      context: { ...this.currentContext, ...context },
+      traceId: this.currentContext?.requestId,
+      spanId: this.currentContext?.sessionId
     };
 
-    this.entries.push(entry);
-
-    // Enforce max entries limit (FIFO)
-    if (this.entries.length > this.maxEntries) {
-      this.entries.shift();
+    if (error) {
+      entry.error = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        code: (error as any).code
+      };
     }
 
-    // Console output with pretty formatting
-    this.outputToConsole(entry);
+    // Apply redaction
+    if (this.redaction.enabled) {
+      this.redactLogEntry(entry);
+    }
+
+    // Apply correlation if enabled
+    if (this.correlation.enableTraceCorrelation) {
+      this.addCorrelation(entry);
+    }
+
+    return entry;
   }
 
   /**
-   * Check if a log level should be logged
+   * Add redaction to sensitive fields
    */
-  private shouldLog(level: LogLevel): boolean {
-    const currentLevel = this.options.level || LogLevel.INFO;
-    const levels = [
-      LogLevel.TRACE,
-      LogLevel.DEBUG,
-      LogLevel.INFO,
-      LogLevel.WARN,
-      LogLevel.ERROR,
-      LogLevel.FATAL,
-    ];
-    return levels.indexOf(level) >= levels.indexOf(currentLevel);
-  }
+  private redactLogEntry(entry: LogEntry): void {
+    entry.message = this.redactText(entry.message);
 
-  /**
-   * Output to console with formatting
-   */
-  private outputToConsole(entry: LogEntry): void {
-    const timestamp = new Date(entry.timestamp).toISOString();
-    const traceInfo = entry.traceId ? ` [trace:${entry.traceId.slice(0, 8)}]` : '';
-    const context = entry.context ? ` [${entry.context}]` : '';
-
-    const message = `${timestamp} ${entry.level.toUpperCase()}${context}${traceInfo} ${entry.message}`;
-
-    switch (entry.level) {
-      case LogLevel.TRACE:
-      case LogLevel.DEBUG:
-        console.debug(message, entry.attributes);
-        break;
-      case LogLevel.INFO:
-        console.info(message, entry.attributes);
-        break;
-      case LogLevel.WARN:
-        console.warn(message, entry.attributes);
-        break;
-      case LogLevel.ERROR:
-      case LogLevel.FATAL:
-        console.error(message, entry.attributes);
-        break;
+    if (entry.context) {
+      Object.keys(entry.context).forEach(key => {
+        if (this.redaction.fields?.includes(key)) {
+          entry.context![key] = '[REDACTED]';
+        }
+      });
     }
   }
 
   /**
-   * Set trace context for correlation
+   * Redact sensitive information from text
    */
-  setTraceContext(traceId: string, spanId?: string): void {
-    this.traceContextStore.set('currentTraceId', traceId);
-    if (spanId) {
-      this.traceContextStore.set('currentSpanId', spanId);
+  private redactText(text: string): string {
+    let result = text;
+
+    if (this.redaction.patterns) {
+      this.redaction.patterns.forEach(pattern => {
+        result = result.replace(pattern.pattern, pattern.replacement);
+      });
+    }
+
+    return result;
+  }
+
+  /**
+   * Add correlation information
+   */
+  private addCorrelation(entry: LogEntry): void {
+    if (!entry.context) return;
+
+    // Add correlation ID if not present
+    if (!entry.context.requestId) {
+      entry.context.requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
   }
 
   /**
-   * Clear trace context
+   * Add log entry to buffer or logs
    */
-  clearTraceContext(): void {
-    this.traceContextStore.delete('currentTraceId');
-    this.traceContextStore.delete('currentSpanId');
+  private addLogEntry(entry: LogEntry): void {
+    const formattedEntry = this.formatLogEntry(entry);
+
+    // Add to buffer first
+    this.logBuffer.push(formattedEntry);
+
+    // If buffer is full, flush immediately
+    if (this.logBuffer.length >= 1000) {
+      this.flushLogs();
+    }
   }
 
   /**
-   * Get current trace ID
+   * Format log entry based on configuration
    */
-  private getCurrentTraceId(): string | undefined {
-    return this.traceContextStore.get('currentTraceId');
+  private formatLogEntry(entry: LogEntry): LogEntry {
+    if (this.config.format === 'json') {
+      entry.metadata = {
+        ...entry.metadata,
+        timestamp: new Date(entry.timestamp).toISOString()
+      };
+    }
+
+    return entry;
   }
 
   /**
-   * Get current span ID
+   * Flush buffered logs to main log storage
    */
-  private getCurrentSpanId(): string | undefined {
-    return this.traceContextStore.get('currentSpanId');
+  private async flushLogs(): Promise<void> {
+    if (this.logBuffer.length === 0) return;
+
+    const bufferToFlush = [...this.logBuffer];
+    this.logBuffer = [];
+
+    // Add to main logs
+    this.logs.push(...bufferToFlush);
+
+    // Maintain log limit
+    if (this.logs.length > this.maxLogCount) {
+      this.logs = this.logs.slice(-this.maxLogCount);
+    }
+
+    // Clear filter cache
+    this.filterCache.clear();
+
+    // Output to configured destination
+    await this.outputLogs(bufferToFlush);
   }
 
   /**
-   * Create a child logger with inherited context
+   * Output logs to configured destination
    */
-  child(context: string, additionalMetadata?: Attributes): StructuredLogger {
-    return new StructuredLogger(this.serviceName, {
-      ...this.options,
-      context: this.options.context ? `${this.options.context}/${context}` : context,
-      metadata: {
-        ...this.options.metadata,
-        ...additionalMetadata,
-      },
+  private async outputLogs(logs: LogEntry[]): Promise<void> {
+    switch (this.config.output) {
+      case 'console':
+        logs.forEach(log => console.log(log.message));
+        break;
+      case 'file':
+        // Placeholder for file output
+        break;
+      case 'stream':
+        // Placeholder for stream output
+        break;
+      case 'remote':
+        // Placeholder for remote output
+        break;
+    }
+  }
+
+  /**
+   * Filter logs based on criteria
+   */
+  private filterLogs(logs: LogEntry[], filters: LogFilters): LogEntry[] {
+    const cacheKey = JSON.stringify(filters);
+    const cached = this.filterCache.get(cacheKey);
+    if (cached !== undefined) {
+      return cached ? logs.filter((_, index) => cached) : [];
+    }
+
+    let filteredLogs = [...logs];
+
+    // Filter by level
+    if (filters.level) {
+      filteredLogs = filteredLogs.filter(log => log.level === filters.level);
+    }
+
+    // Filter by trace ID
+    if (filters.traceId) {
+      filteredLogs = filteredLogs.filter(log => log.traceId === filters.traceId);
+    }
+
+    // Filter by time range
+    if (filters.startTime || filters.endTime) {
+      filteredLogs = filteredLogs.filter(log => {
+        const timestamp = log.timestamp;
+        return (!filters.startTime || timestamp >= filters.startTime) &&
+               (!filters.endTime || timestamp <= filters.endTime);
+      });
+    }
+
+    // Filter by context
+    if (filters.context) {
+      filteredLogs = filteredLogs.filter(log => {
+        if (!log.context) return false;
+        return Object.entries(filters.context!).every(([key, value]) =>
+          log.context![key] === value
+        );
+      });
+    }
+
+    // Cache the result (simplified: just remember we filtered)
+    this.filterCache.set(cacheKey, true);
+
+    return filteredLogs;
+  }
+
+  /**
+   * Group logs by level
+   */
+  private groupLogsByLevel(logs: LogEntry[]): Record<LogLevel, number> {
+    const grouped: Record<LogLevel, number> = {
+      trace: 0,
+      debug: 0,
+      info: 0,
+      warn: 0,
+      error: 0,
+      fatal: 0
+    };
+
+    logs.forEach(log => {
+      grouped[log.level]++;
     });
+
+    return grouped;
   }
+}
 
-  /**
-   * Get all log entries
-   */
-  getEntries(): LogEntry[] {
-    return [...this.entries];
-  }
+/**
+ * Log filters for search operations
+ */
+export interface LogFilters {
+  level?: LogLevel;
+  traceId?: string;
+  startTime?: number;
+  endTime?: number;
+  context?: Record<string, any>;
+}
 
-  /**
-   * Get filtered log entries
-   */
-  filter(filter: LogFilter): LogEntry[] {
-    return this.entries.filter((entry) => {
-      if (filter.levels && !filter.levels.includes(entry.level)) {
-        return false;
-      }
-      if (filter.startTime && entry.timestamp < filter.startTime) {
-        return false;
-      }
-      if (filter.endTime && entry.timestamp > filter.endTime) {
-        return false;
-      }
-      if (filter.traceId && entry.traceId !== filter.traceId) {
-        return false;
-      }
-      if (filter.userId && entry.attributes['user.id'] !== filter.userId) {
-        return false;
-      }
-      if (filter.requestId && entry.requestId !== filter.requestId) {
-        return false;
-      }
-      if (filter.minLevel) {
-        const levels = [
-          LogLevel.TRACE,
-          LogLevel.DEBUG,
-          LogLevel.INFO,
-          LogLevel.WARN,
-          LogLevel.ERROR,
-          LogLevel.FATAL,
-        ];
-        if (levels.indexOf(entry.level) < levels.indexOf(filter.minLevel)) {
-          return false;
-        }
-      }
-      if (filter.searchQuery) {
-        const query = filter.searchQuery.toLowerCase();
-        const text = JSON.stringify(entry).toLowerCase();
-        if (!text.includes(query)) {
-          return false;
-        }
-      }
-      if (filter.attributes) {
-        for (const [key, value] of Object.entries(filter.attributes)) {
-          if (entry.attributes[key] !== value) {
-            return false;
-          }
-        }
-      }
-      return true;
-    });
-  }
-
-  /**
-   * Aggregate logs by various dimensions
-   */
-  aggregate(): LogAggregation {
-    const countByLevel: Record<LogLevel, number> = {
-      [LogLevel.TRACE]: 0,
-      [LogLevel.DEBUG]: 0,
-      [LogLevel.INFO]: 0,
-      [LogLevel.WARN]: 0,
-      [LogLevel.ERROR]: 0,
-      [LogLevel.FATAL]: 0,
-    };
-
-    const errorCounts = new Map<string, number>();
-    const logsByTrace = new Map<string, LogEntry[]>();
-    const timeSeriesData: Array<{ timestamp: number; value: number }> = [];
-    let errorCount = 0;
-
-    for (const entry of this.entries) {
-      // Count by level
-      countByLevel[entry.level]++;
-
-      // Track errors
-      if (entry.level === LogLevel.ERROR || entry.level === LogLevel.FATAL) {
-        errorCount++;
-        const errorKey = entry.message;
-        errorCounts.set(errorKey, (errorCounts.get(errorKey) || 0) + 1);
-      }
-
-      // Group by trace
-      if (entry.traceId) {
-        if (!logsByTrace.has(entry.traceId)) {
-          logsByTrace.set(entry.traceId, []);
-        }
-        logsByTrace.get(entry.traceId)!.push(entry);
-      }
-
-      // Time series data (by minute)
-      const minuteBucket = Math.floor(entry.timestamp / 60000) * 60000;
-      const existingPoint = timeSeriesData.find((p) => p.timestamp === minuteBucket);
-      if (existingPoint) {
-        existingPoint.value++;
-      } else {
-        timeSeriesData.push({ timestamp: minuteBucket, value: 1 });
-      }
-    }
-
-    // Top errors
-    const topErrors = Array.from(errorCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([error, count]) => ({ error, count }));
-
-    // Calculate average log level (numeric)
-    const levels = [
-      LogLevel.TRACE,
-      LogLevel.DEBUG,
-      LogLevel.INFO,
-      LogLevel.WARN,
-      LogLevel.ERROR,
-      LogLevel.FATAL,
-    ];
-    let totalLevelValue = 0;
-    for (const entry of this.entries) {
-      totalLevelValue += levels.indexOf(entry.level);
-    }
-    const avgLevel = this.entries.length > 0 ? totalLevelValue / this.entries.length : 0;
-
-    return {
-      countByLevel,
-      topErrors,
-      logsByTrace: Object.fromEntries(logsByTrace),
-      timeSeriesData: timeSeriesData.sort((a, b) => a.timestamp - b.timestamp),
-      errorRate: this.entries.length > 0 ? errorCount / this.entries.length : 0,
-      avgLevel,
-    };
-  }
-
-  /**
-   * Search logs by content
-   */
-  search(query: string, limit: number = 100): LogEntry[] {
-    const lowerQuery = query.toLowerCase();
-    return this.entries
-      .filter((entry) => {
-        const text = JSON.stringify(entry).toLowerCase();
-        return text.includes(lowerQuery);
-      })
-      .slice(0, limit);
-  }
-
-  /**
-   * Get logs for a specific trace
-   */
-  getLogsForTrace(traceId: string): LogEntry[] {
-    return this.entries.filter((entry) => entry.traceId === traceId);
-  }
-
-  /**
-   * Clear all log entries
-   */
-  clear(): void {
-    this.entries = [];
-    this.traceContextStore.clear();
-  }
-
-  /**
-   * Get statistics
-   */
-  getStatistics(): {
-    totalEntries: number;
-    entriesByLevel: Record<LogLevel, number>;
-    oldestEntry?: number;
-    newestEntry?: number;
-  } {
-    const entriesByLevel: Record<LogLevel, number> = {
-      [LogLevel.TRACE]: 0,
-      [LogLevel.DEBUG]: 0,
-      [LogLevel.INFO]: 0,
-      [LogLevel.WARN]: 0,
-      [LogLevel.ERROR]: 0,
-      [LogLevel.FATAL]: 0,
-    };
-
-    for (const entry of this.entries) {
-      entriesByLevel[entry.level]++;
-    }
-
-    return {
-      totalEntries: this.entries.length,
-      entriesByLevel,
-      oldestEntry: this.entries[0]?.timestamp,
-      newestEntry: this.entries[this.entries.length - 1]?.timestamp,
-    };
-  }
+/**
+ * Log statistics
+ */
+export interface LogStatistics {
+  total: number;
+  byLevel: Record<LogLevel, number>;
+  timeRange: {
+    earliest: number;
+    latest: number;
+  };
+  uniqueTraceIds: number;
 }
